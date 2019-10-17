@@ -437,10 +437,10 @@ void max_pool2d_upsample_stream(
           <<<num_blocks,
              num_threads,
              0,
-             at::cuda::getStreamFromPool()>>>(
+             at::cuda::getStreamFromPool(true)>>>(
              num_kernels, rheight, rwidth, align_corners, idata, odata);
       MaxPoolForward<scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads_max_pool), num_threads_max_pool, 0, at::cuda::getStreamFromPool()>>>(
+        <<<cuda::ATenCeilDiv(count, num_threads_max_pool), num_threads_max_pool, 0, at::cuda::getStreamFromPool(true)>>>(
           count, input_data,
           nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);

@@ -446,7 +446,7 @@ __global__ void im2col_normalization_kernel_fused(
 
 
 template<typename scalar_t_batch_norm, typename index_t_batch_norm>
-std::tuple<Tensor, Tensor, Tensor> im2col_batch_norm_stream(
+std::tuple<Tensor, Tensor> im2col_batch_norm_stream(
     const Tensor& input_,
     IntArrayRef kernel_size,
     IntArrayRef dilation,
@@ -578,11 +578,11 @@ std::tuple<Tensor, Tensor, Tensor> im2col_batch_norm_stream(
     (input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
   cudaDeviceSynchronize();
   THCudaCheck(cudaGetLastError());
-  return std::make_tuple(output, mean_, invstd_);
+  return std::make_tuple(output, mean_);
 }
 
 template<typename scalar_t_batch_norm, typename index_t_batch_norm>
-std::tuple<Tensor, Tensor, Tensor> im2col_batch_norm_fused(
+std::tuple<Tensor, Tensor> im2col_batch_norm_fused(
     const Tensor& input_,
     IntArrayRef kernel_size,
     IntArrayRef dilation,
@@ -708,7 +708,7 @@ std::tuple<Tensor, Tensor, Tensor> im2col_batch_norm_fused(
     output.resize_({n_output_plane, output_length});
   }
   THCudaCheck(cudaGetLastError());
-  return std::make_tuple(output, mean_, invstd_);
+  return std::make_tuple(output, mean_);
 }
 } // namespace native
 } // namespace at

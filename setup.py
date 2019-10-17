@@ -5,6 +5,7 @@ setup(
     name='fusion_cuda',
     ext_modules=[
         CUDAExtension('fusion_cuda', [
+            'fused/Im2ColMaxPool.cu',
             'fused/Im2ColUpSample.cu',
             'fused/MaxPoolBatchNorm.cu',
             'wrappers/wrapper.cpp',

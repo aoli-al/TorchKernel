@@ -1,248 +1,210 @@
 #pragma once
 
+#include <THC/THCGeneral.h>
+#include <THC/THCDeviceUtils.cuh>
+
 #include <ATen/ATen.h>
 #include <ATen/TensorUtils.h>
-#include <ATen/cuda/CUDAApplyUtils.cuh>
+#include <ATen/Utils.h>
 
-#include <math.h>
+#include <ATen/cuda/CUDAContext.h>
+#include <ATen/cuda/detail/KernelUtils.h>
+#include <ATen/cuda/CUDAApplyUtils.cuh>
+#include <ATen/cuda/detail/IndexUtils.cuh>
+#include <ATen/cuda/detail/TensorInfo.cuh>
+
+#include <c10/macros/Macros.h>
 
 namespace at {
 namespace native {
 
-/* TODO: move this to a common place */
-template <typename scalar_t>
-__device__ inline scalar_t min(scalar_t a, scalar_t b) {
-  return a < b ? a : b;
+using namespace at::cuda::detail;
+
+__device__ inline int min(int a, int b) {
+  return a <= b ? a : b;
 }
 
-template <typename scalar_t>
-__device__ inline scalar_t max(scalar_t a, scalar_t b) {
-  return a > b ? a : b;
-}
-
-static inline void upsample_1d_shape_check(
-    const Tensor& input,
-    const Tensor& grad_output,
-    int nbatch,
-    int nchannels,
-    int input_width,
-    int output_width) {
-  TORCH_CHECK(
-      input_width > 0 && output_width > 0,
-      "input and output sizes should be greater than 0, but got input (W: ",
-      input_width,
-      ") and output (W: ",
-      output_width,
-      ")");
-
-  if (input.defined()) {
-    TORCH_CHECK(
-        input.numel() != 0 && input.dim() == 3,
-        "non-empty 3D input tensor expected but got a tensor with sizes ",
-        input.sizes());
-  } else if (grad_output.defined()) {
-    check_dim_size(grad_output, 3, 0, nbatch);
-    check_dim_size(grad_output, 3, 1, nchannels);
-    check_dim_size(grad_output, 3, 2, output_width);
-  }
-}
-
-static inline void upsample_2d_shape_check(
-    const Tensor& input,
-    const Tensor& grad_output,
-    int nbatch,
-    int nchannels,
-    int input_height,
-    int input_width,
-    int output_height,
-    int output_width) {
-  TORCH_CHECK(
-      input_height > 0 && input_width > 0 && output_height > 0 &&
-          output_width > 0,
-      "input and output sizes should be greater than 0,"
-      " but got input (H: ",
-      input_height,
-      ", W: ",
-      input_width,
-      ") output (H: ",
-      output_height,
-      ", W: ",
-      output_width,
-      ")");
-
-  if (input.defined()) {
-    TORCH_CHECK(
-        input.numel() != 0 && input.dim() == 4,
-        "non-empty 4D input tensor expected but got a tensor with sizes ",
-        input.sizes());
-  } else if (grad_output.defined()) {
-    check_dim_size(grad_output, 4, 0, nbatch);
-    check_dim_size(grad_output, 4, 1, nchannels);
-    check_dim_size(grad_output, 4, 2, output_height);
-    check_dim_size(grad_output, 4, 3, output_width);
-  }
-}
-
-static inline void upsample_3d_shape_check(
-    const Tensor& input,
-    const Tensor& grad_output,
-    int nbatch,
-    int nchannels,
-    int input_depth,
-    int input_height,
-    int input_width,
-    int output_depth,
-    int output_height,
-    int output_width) {
-  TORCH_CHECK(
-      input_depth > 0 && input_height > 0 && input_width > 0 &&
-          output_depth > 0 && output_height > 0 && output_width > 0,
-      "Input and output sizes should be greater than 0, but got input (D: ",
-      input_depth,
-      ", H: ",
-      input_height,
-      ", W: ",
-      input_width,
-      ") output (D: ",
-      output_depth,
-      ", H: ",
-      output_height,
-      ", W: ",
-      output_width,
-      ")");
-
-  if (input.defined()) {
-    TORCH_CHECK(
-        input.numel() != 0 && input.dim() == 5,
-        "Non-empty 5D data tensor expected but got a tensor with sizes ",
-        input.sizes());
-  } else if (grad_output.defined()) {
-    check_dim_size(grad_output, 5, 0, nbatch);
-    check_dim_size(grad_output, 5, 1, nchannels);
-    check_dim_size(grad_output, 5, 2, output_depth);
-    check_dim_size(grad_output, 5, 3, output_height);
-    check_dim_size(grad_output, 5, 4, output_width);
-  }
-}
-
-template <typename accscalar_t>
-__host__ __forceinline__ static accscalar_t area_pixel_compute_scale(
-    int input_size,
-    int output_size,
-    bool align_corners) {
-  if (output_size > 1) {
-    return align_corners ? (accscalar_t)(input_size - 1) / (output_size - 1)
-                         : (accscalar_t)input_size / output_size;
-  } else {
-    return static_cast<accscalar_t>(0);
-  }
-}
-
-template <typename accscalar_t>
-__device__ __forceinline__ static accscalar_t area_pixel_compute_source_index(
-    accscalar_t scale,
-    int dst_index,
-    bool align_corners,
-    bool cubic) {
-  if (align_corners) {
-    return scale * dst_index;
-  } else {
-    accscalar_t src_idx = scale * (dst_index + static_cast<accscalar_t>(0.5)) -
-        static_cast<accscalar_t>(0.5);
-    // See Note[Follow Opencv resize logic]
-    return (!cubic && src_idx < static_cast<accscalar_t>(0))
-        ? static_cast<accscalar_t>(0)
-        : src_idx;
-  }
-}
-
-__device__ __forceinline__ static int nearest_neighbor_compute_source_index(
-    const float scale,
-    int dst_index,
-    int input_size) {
-  const int src_index =
-      min(static_cast<int>(floorf(dst_index * scale)), input_size - 1);
-  return src_index;
-}
-
-/* Used by UpSampleBicubic2d.cu */
-template <typename scalar_t>
-__device__ __forceinline__ static scalar_t upsample_get_value_bounded(
-    const PackedTensorAccessor<scalar_t, 4>& data,
-    int batch,
-    int channel,
-    int height,
-    int width,
-    int y,
-    int x) {
-  int access_y = max(min(y, height - 1), 0);
-  int access_x = max(min(x, width - 1), 0);
-  return data[batch][channel][access_y][access_x];
-}
-
-/* Used by UpSampleBicubic2d.cu */
+// kernels borrowed from Caffe
 template <typename scalar_t, typename accscalar_t>
-__device__ __forceinline__ static void upsample_increment_value_bounded(
-    PackedTensorAccessor<scalar_t, 4>& data,
-    int batch,
-    int channel,
-    int height,
-    int width,
-    int y,
-    int x,
-    accscalar_t value) {
-  int access_y = max(min(y, height - 1), 0);
-  int access_x = max(min(x, width - 1), 0);
-  /* TODO: result here is trucated to scalar_t,
-     check: https://github.com/pytorch/pytorch/pull/19630#discussion_r281426912
-   */
-  atomicAdd(
-      &data[batch][channel][access_y][access_x], static_cast<scalar_t>(value));
+__global__ void MaxPoolForward(const int nthreads, const scalar_t* bottom_data,
+    const int num, const int channels, const int height,
+    const int width, const int pooled_height, const int pooled_width,
+    const int kernel_h, const int kernel_w, const int stride_h,
+    const int stride_w, const int pad_h, const int pad_w,
+    const int dilation_h, const int dilation_w, scalar_t* top_data,
+    int64_t* top_mask) {
+  CUDA_KERNEL_LOOP(index, nthreads) {
+    int pw = index % pooled_width;
+    int ph = (index / pooled_width) % pooled_height;
+    int c = (index / pooled_width / pooled_height) % channels;
+    int n = index / pooled_width / pooled_height / channels;
+    int hstart = ph * stride_h - pad_h;
+    int wstart = pw * stride_w - pad_w;
+    int hend = min(hstart + (kernel_h - 1) * dilation_h + 1, height);
+    int wend = min(wstart + (kernel_w - 1) * dilation_w + 1, width);
+    while(hstart < 0)
+      hstart += dilation_h;
+    while(wstart < 0)
+      wstart += dilation_w;
+    accscalar_t maxval = at::numeric_limits<accscalar_t>::lower_bound(); // -Infinity
+    int maxidx = hstart * width + wstart;
+    bottom_data += (n * channels + c) * height * width;
+    for (int h = hstart; h < hend; h += dilation_h) {
+      for (int w = wstart; w < wend; w += dilation_w) {
+        scalar_t val = bottom_data[h * width + w];
+        if ((ScalarConvert<scalar_t, accscalar_t>::to(val) > maxval) || THCNumerics<scalar_t>::isnan(val)) {
+          maxidx = h * width + w;
+          maxval = ScalarConvert<scalar_t, accscalar_t>::to(val);
+        }
+      }
+    }
+    top_data[index] = ScalarConvert<scalar_t, accscalar_t>::to(maxval);
+    top_mask[index] = maxidx;
+  }
 }
 
-// Based on
-// https://en.wikipedia.org/wiki/Bicubic_interpolation#Bicubic_convolution_algorithm
-template <typename accscalar_t>
-__device__ __forceinline__ static accscalar_t cubic_convolution1(
-    accscalar_t x,
-    accscalar_t A) {
-  return ((A + 2) * x - (A + 3)) * x * x + 1;
+static const int BACKWARD_THREADS = 256;
+
+
+// Kernel for fast unfold+copy
+// (borrowed from Caffe:
+// https://github.com/BVLC/caffe/blob/master/src/caffe/layers/conv_layer.cu)
+// CUDA_NUM_THREADS = 1024
+
+template <typename dt>
+C10_LAUNCH_BOUNDS_1(1024)
+__global__ void im2col_kernel(
+    const int64_t n,
+    const dt* data_im,
+    const int64_t height,
+    const int64_t width,
+    const int64_t kernel_height,
+    const int64_t kernel_width,
+    const int64_t pad_height,
+    const int64_t pad_width,
+    const int64_t stride_height,
+    const int64_t stride_width,
+    const int64_t dilation_height,
+    const int64_t dilation_width,
+    const int64_t height_col,
+    const int64_t width_col,
+    dt* data_col) {
+  CUDA_KERNEL_LOOP(index, n) {
+    int64_t w_out = index % width_col;
+
+    index /= width_col;
+
+    int64_t h_out = index % height_col;
+    int64_t channel_in = index / height_col;
+    int64_t channel_out = channel_in * kernel_height * kernel_width;
+    int64_t h_in = h_out * stride_height - pad_height;
+    int64_t w_in = w_out * stride_width - pad_width;
+
+    data_col += (channel_out * height_col + h_out) * width_col + w_out;
+    data_im += (channel_in * height + h_in) * width + w_in;
+
+    for (int64_t i = 0; i < kernel_height; ++i) {
+      for (int64_t j = 0; j < kernel_width; ++j) {
+        int64_t h = h_in + i * dilation_height;
+        int64_t w = w_in + j * dilation_width;
+        *data_col = (h >= 0 && w >= 0 && h < height && w < width)
+            ? data_im[i * dilation_height * width + j * dilation_width]
+            : ScalarConvert<int, dt>::to(0);
+        data_col += height_col * width_col;
+      }
+    }
+  }
 }
 
-template <typename accscalar_t>
-__device__ __forceinline__ static accscalar_t cubic_convolution2(
-    accscalar_t x,
-    accscalar_t A) {
-  return ((A * x - 5 * A) * x + 8 * A) * x - 4 * A;
-}
 
-template <typename accscalar_t>
-__device__ __forceinline__ static void get_cubic_upsampling_coefficients(
-    accscalar_t coeffs[4],
-    accscalar_t t) {
-  accscalar_t A = -0.75;
+#define CUDA_KERNEL_LOOP_C(i, n) \
+  int64_t _i_n_d_e_x = blockIdx.x * 512 + threadIdx.x;                                \
+  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=512 * 10000, i=_i_n_d_e_x)
 
-  accscalar_t x1 = t;
-  coeffs[0] = cubic_convolution2<accscalar_t>(x1 + 1.0, A);
-  coeffs[1] = cubic_convolution1<accscalar_t>(x1, A);
+#define CUDA_KERNEL_LOOP_M(i, n) \
+  int64_t _i_n_d_e_x = blockIdx.x * 256 + threadIdx.x - 512;                                \
+  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=256 * gridDim.x, i=_i_n_d_e_x)
+template <typename dt, typename scalar_t, typename accscalar_t>
+C10_LAUNCH_BOUNDS_1(1024)
+__global__ void im2col_maxpool(
+    const int64_t n,
+    const dt* data_im,
+    const int64_t height,
+    const int64_t width,
+    const int64_t kernel_height,
+    const int64_t kernel_width,
+    const int64_t pad_height,
+    const int64_t pad_width,
+    const int64_t stride_height,
+    const int64_t stride_width,
+    const int64_t dilation_height,
+    const int64_t dilation_width,
+    const int64_t height_col,
+    const int64_t width_col,
+    dt* data_col,
+    const int nthreads, const scalar_t* bottom_data,
+    const int num, const int channels, const int height_maxp,
+    const int width_maxp, const int pooled_height_maxp, const int pooled_width_maxp,
+    const int kernel_h, const int kernel_w, const int stride_h,
+    const int stride_w, const int pad_h, const int pad_w,
+    const int dilation_h, const int dilation_w, scalar_t* top_data,
+    int64_t* top_mask) {
+  if (threadIdx.x < 512) {
+    CUDA_KERNEL_LOOP_C(index, n) {
+      int64_t w_out = index % width_col;
 
-  // opposite coefficients
-  accscalar_t x2 = 1.0 - t;
-  coeffs[2] = cubic_convolution1<accscalar_t>(x2, A);
-  coeffs[3] = cubic_convolution2<accscalar_t>(x2 + 1.0, A);
-}
+      index /= width_col;
 
-template <typename scalar_t, typename accscalar_t>
-__device__ __forceinline__ static accscalar_t cubic_interp1d(
-    scalar_t x0,
-    scalar_t x1,
-    scalar_t x2,
-    scalar_t x3,
-    accscalar_t t) {
-  accscalar_t coeffs[4];
-  get_cubic_upsampling_coefficients<accscalar_t>(coeffs, t);
+      int64_t h_out = index % height_col;
+      int64_t channel_in = index / height_col;
+      int64_t channel_out = channel_in * kernel_height * kernel_width;
+      int64_t h_in = h_out * stride_height - pad_height;
+      int64_t w_in = w_out * stride_width - pad_width;
 
-  return x0 * coeffs[0] + x1 * coeffs[1] + x2 * coeffs[2] + x3 * coeffs[3];
+      data_col += (channel_out * height_col + h_out) * width_col + w_out;
+      data_im += (channel_in * height + h_in) * width + w_in;
+
+      for (int64_t i = 0; i < kernel_height; ++i) {
+        for (int64_t j = 0; j < kernel_width; ++j) {
+          int64_t h = h_in + i * dilation_height;
+          int64_t w = w_in + j * dilation_width;
+          *data_col = (h >= 0 && w >= 0 && h < height && w < width)
+              ? data_im[i * dilation_height * width + j * dilation_width]
+              : ScalarConvert<int, dt>::to(0);
+          data_col += height_col * width_col;
+        }
+      }
+    }
+  } else {
+    CUDA_KERNEL_LOOP_M(index, nthreads) {
+      int pw = index % pooled_width_maxp;
+      int ph = (index / pooled_width_maxp) % pooled_height_maxp;
+      int c = (index / pooled_width_maxp / pooled_height_maxp) % channels;
+      int n = index / pooled_width_maxp / pooled_height_maxp / channels;
+      int hstart = ph * stride_h - pad_h;
+      int wstart = pw * stride_w - pad_w;
+      int hend = min(hstart + (kernel_h - 1) * dilation_h + 1, height_maxp);
+      int wend = min(wstart + (kernel_w - 1) * dilation_w + 1, width_maxp);
+      while(hstart < 0)
+        hstart += dilation_h;
+      while(wstart < 0)
+        wstart += dilation_w;
+      accscalar_t maxval = at::numeric_limits<accscalar_t>::lower_bound(); // -Infinity
+      int maxidx = hstart * width_maxp + wstart;
+      bottom_data += (n * channels + c) * height_maxp * width_maxp;
+      for (int h = hstart; h < hend; h += dilation_h) {
+        for (int w = wstart; w < wend; w += dilation_w) {
+          scalar_t val = bottom_data[h * width_maxp + w];
+          if ((ScalarConvert<scalar_t, accscalar_t>::to(val) > maxval) || THCNumerics<scalar_t>::isnan(val)) {
+            maxidx = h * width_maxp + w;
+            maxval = ScalarConvert<scalar_t, accscalar_t>::to(val);
+          }
+        }
+      }
+      top_data[index] = ScalarConvert<scalar_t, accscalar_t>::to(maxval);
+      top_mask[index] = maxidx;
+    }
+  }
 }
 
 } // namespace native

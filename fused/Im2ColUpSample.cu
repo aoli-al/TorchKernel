@@ -150,7 +150,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
         at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 1024);
 
     printf("%d %d\n", num_kernels, num_threads);
-    cudaStream_t stream = at::cuda::getCurrentCUDAStream();
+    cudaStream_t stream = at::cuda::getStreamFromPool(true);
 
     AT_DISPATCH_FLOATING_TYPES_AND_HALF(
         input.scalar_type(), "upsample_bilinear2d_out_frame", [&] {
@@ -164,9 +164,6 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
           int64_t num_kernels_im2col = n_input_im2col_plane * output_im2col_height * output_im2col_width;
           // Launch CUDA_NUM_THREADS = 1024
           printf("num_kernels %ld, %ld, %ld\n", num_kernels_im2col, n_input_im2col_plane, output_im2col_height);
-          if (!batched_input_im2col) {
-            output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
-          }
           using accscalar_t = at::acc_type<scalar_t, true>;
 
           auto idata = input.packed_accessor<scalar_t, 4>();
@@ -186,7 +183,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
                 0,
                 stream>>>(
                   num_kernels, rheight, rwidth, align_corners, idata, odata);
-          im2col_kernel<scalar_t><<<GET_BLOCKS(num_kernels_im2col), 1024, 0, at::cuda::getCurrentCUDAStream()>>>(
+          im2col_kernel<scalar_t><<<GET_BLOCKS(num_kernels_im2col), 1024, 0, at::cuda::getStreamFromPool(true)>>>(
               num_kernels_im2col,
               input_im2col_n.data<scalar_t>(),
               input_im2col_height,
@@ -202,6 +199,9 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
               output_im2col_height,
               output_im2col_width,
               output_im2col_n.data<scalar_t>());
+          if (!batched_input_im2col) {
+            output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
+          }
           AT_CUDA_CHECK(cudaGetLastError());
         });
 
