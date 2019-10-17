@@ -18,9 +18,12 @@ kwargs = {'dtype': dtype,
           'requires_grad': True}
 
 
-# print(fusion_cuda.call_max_pool_upsample_fused())
+print(fusion_cuda.im2col_upsample()[0][0])
 
-input = torch.randn(1, 1, 2750, 2048, **kwargs)
-r = fusion_cuda.im2col(input, _pair((251, 1)))
-print(r)
-# print(torch.all(torch.eq(r[0][0], r[1][0])))
+# input = torch.randn(1, 1, 2750, 2048, **kwargs)
+# r = fusion_cuda.im2col(input, _pair((251, 1)))
+# r = fusion_cuda.max_pool_batch_norm()
+# print(r)
+# print(torch.all(torch.eq(r[0], r[3])))
+# print(torch.all(torch.eq(r[1], r[4])))
+# print(torch.all(torch.eq(r[2], r[5])))

@@ -20,7 +20,7 @@ namespace at {
 namespace native {
 namespace {
 
-#define CUDA_KERNEL_LOOP(i, n) \
+#define CUDA_KERNEL_LOOP_C(i, n) \
   int64_t _i_n_d_e_x = blockIdx.x * 256 + threadIdx.x;                                \
   for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=256 * gridDim.x, i=_i_n_d_e_x)
 static const int BACKWARD_THREADS = 256;
@@ -147,7 +147,7 @@ __global__ void max_pool_upsample_kernel(const int nthreads, const scalar_t* bot
     const int max_pool_threads)
 {
   if (threadIdx.x < max_pool_threads) {
-    CUDA_KERNEL_LOOP(index, nthreads) {
+    CUDA_KERNEL_LOOP_C(index, nthreads) {
       int pw = index % pooled_width;
       int ph = (index / pooled_width) % pooled_height;
       int c = (index / pooled_width / pooled_height) % channels;
@@ -297,7 +297,7 @@ void max_pool2d_upsample_fused(
 
   const int num_kernels = output_upsample_height * output_upsample_width;
   const int num_threads = std::min(
-      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 768);
+      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 512);
 
   printf("%d %d\n", num_kernels, num_threads);
 
@@ -403,7 +403,7 @@ void max_pool2d_upsample_stream(
 
   const int num_kernels = output_upsample_height * output_upsample_width;
   const int num_threads = std::min(
-      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 768);
+      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 1024);
 
   printf("%d %d\n", num_kernels, num_threads);
 
