@@ -1,31 +1,15 @@
 #pragma once
 
-#include <THC/THCGeneral.h>
 #include <THC/THCDeviceUtils.cuh>
-
+#include <THC/THCGeneral.h>
 #include <ATen/ATen.h>
-#include <ATen/TensorUtils.h>
-#include <ATen/Utils.h>
-
-#include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/detail/KernelUtils.h>
-#include <ATen/cuda/CUDAApplyUtils.cuh>
-#include <ATen/cuda/detail/IndexUtils.cuh>
-#include <ATen/cuda/detail/TensorInfo.cuh>
-
-#include <c10/macros/Macros.h>
-
-#include <ATen/native/im2col_shape_check.h>
 #include <ATen/AccumulateType.h>
+#include <ATen/cuda/CUDAContext.h>
+#include <ATen/cuda/CUDAApplyUtils.cuh>
 #include "../cuda/DeviceSqrt.cuh"
 #include "../cuda/LaunchUtils.h"
 
-namespace at {
-namespace native {
-
-#define CUDA_KERNEL_LOOP_C(i, n) \
-  int64_t _i_n_d_e_x = blockIdx.x * 512 + threadIdx.x;                                \
-  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=512 * 10000, i=_i_n_d_e_x)
+namespace at { namespace native {
 
 #if defined(__HIP_PLATFORM_HCC__)
 constexpr int WARP_SIZE = 64;
@@ -246,75 +230,87 @@ static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_o
   return t.packed_accessor<scalar_t, dim, PtrTraits, index_t>();
 }
 
-using namespace at::cuda::detail;
 
-template <typename dt>
+__device__ __forceinline__ size_t
+idx(const size_t nc,
+    const size_t height,
+    const size_t width,
+    const size_t y,
+    const size_t x) {
+  return (nc * height + y) * width + x;
+}
+
+template <typename scalar_t, typename accscalar_t>
 C10_LAUNCH_BOUNDS_1(1024)
-__global__ void im2col_kernel(
-    const int64_t n,
-    const dt* data_im,
-    const int64_t height,
-    const int64_t width,
-    const int64_t kernel_height,
-    const int64_t kernel_width,
-    const int64_t pad_height,
-    const int64_t pad_width,
-    const int64_t stride_height,
-    const int64_t stride_width,
-    const int64_t dilation_height,
-    const int64_t dilation_width,
-    const int64_t height_col,
-    const int64_t width_col,
-    dt* data_col) {
+__global__ void upsample_bilinear2d_out_frame(
+    const int n,
+    const accscalar_t rheight,
+    const accscalar_t rwidth,
+    const bool align_corners,
+    const PackedTensorAccessor<scalar_t, 4> idata,
+    PackedTensorAccessor<scalar_t, 4> odata) {
+  int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-  if (threadIdx.x < 512) {
-  CUDA_KERNEL_LOOP_C(index, n) {
-    int64_t w_out = index % width_col;
+  const int batchsize = idata.size(0);
+  const int channels = idata.size(1);
+  const int height1 = idata.size(2);
+  const int width1 = idata.size(3);
+  const int height2 = odata.size(2);
+  const int width2 = odata.size(3);
 
-    index /= width_col;
-
-    int64_t h_out = index % height_col;
-    int64_t channel_in = index / height_col;
-    int64_t channel_out = channel_in * kernel_height * kernel_width;
-    int64_t h_in = h_out * stride_height - pad_height;
-    int64_t w_in = w_out * stride_width - pad_width;
-
-    data_col += (channel_out * height_col + h_out) * width_col + w_out;
-    data_im += (channel_in * height + h_in) * width + w_in;
-
-    for (int64_t i = 0; i < kernel_height; ++i) {
-      for (int64_t j = 0; j < kernel_width; ++j) {
-        int64_t h = h_in + i * dilation_height;
-        int64_t w = w_in + j * dilation_width;
-        *data_col = (h >= 0 && w >= 0 && h < height && w < width)
-            ? data_im[i * dilation_height * width + j * dilation_width]
-            : ScalarConvert<int, dt>::to(0);
-        data_col += height_col * width_col;
+  if (index < n) {
+    const int w2 = index % width2; // 0:width2-1
+    const int h2 = index / width2; // 0:height2-1
+    // special case: just copy
+    if (height1 == height2 && width1 == width2) {
+      const int h1 = h2;
+      const int w1 = w2;
+      for (int n = 0; n < batchsize; n++) {
+        for (int c = 0; c < channels; ++c) {
+          const scalar_t val = idata[n][c][h1][w1];
+          odata[n][c][h2][w2] = val;
+        }
+      }
+      return;
+    }
+    //
+    const accscalar_t h1r = area_pixel_compute_source_index<accscalar_t>(
+        rheight, h2, align_corners, /*cubic=*/false);
+    const int h1 = h1r;
+    const int h1p = (h1 < height1 - 1) ? 1 : 0;
+    const accscalar_t h1lambda = h1r - h1;
+    const accscalar_t h0lambda = static_cast<accscalar_t>(1) - h1lambda;
+    //
+    const accscalar_t w1r = area_pixel_compute_source_index<accscalar_t>(
+        rwidth, w2, align_corners, /*cubic=*/false);
+    const int w1 = w1r;
+    const int w1p = (w1 < width1 - 1) ? 1 : 0;
+    const accscalar_t w1lambda = w1r - w1;
+    const accscalar_t w0lambda = static_cast<accscalar_t>(1) - w1lambda;
+    //
+    for (int n = 0; n < batchsize; n++) {
+      for (int c = 0; c < channels; ++c) {
+        const accscalar_t val = h0lambda *
+                (w0lambda * idata[n][c][h1][w1] +
+                 w1lambda * idata[n][c][h1][w1 + w1p]) +
+            h1lambda *
+                (w0lambda * idata[n][c][h1 + h1p][w1] +
+                 w1lambda * idata[n][c][h1 + h1p][w1 + w1p]);
+        odata[n][c][h2][w2] = static_cast<scalar_t>(val);
       }
     }
   }
-
-  }
 }
 
-template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
+template <typename scalar_t, typename accscalar_t, template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
 C10_LAUNCH_BOUNDS_1(1024)
-__global__ void im2col_normalization_kernel_fused(
-    const int64_t n,
-    const input_scalar_t* data_im,
-    const int64_t height,
-    const int64_t width,
-    const int64_t kernel_height,
-    const int64_t kernel_width,
-    const int64_t pad_height,
-    const int64_t pad_width,
-    const int64_t stride_height,
-    const int64_t stride_width,
-    const int64_t dilation_height,
-    const int64_t dilation_width,
-    const int64_t height_col,
-    const int64_t width_col,
-    input_scalar_t* data_col,
+__global__ void upsample_batchnorm_kernel(
+    const int n,
+    const accscalar_t rheight,
+    const accscalar_t rwidth,
+    const bool align_corners,
+    const PackedTensorAccessor<scalar_t, 4> idata,
+    PackedTensorAccessor<scalar_t, 4> odata,
     const PackedTensorAccessor<input_scalar_t, 3, RestrictPtrTraits, index_t> input,
     const stat_accscalar_t epsilon,
     const stat_accscalar_t momentum,
@@ -322,40 +318,66 @@ __global__ void im2col_normalization_kernel_fused(
     PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_var,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_mean,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_transformed_var) {
-  if (threadIdx.y == 0) {
-    // __syncthreads();
-    // __syncthreads();
-    CUDA_KERNEL_LOOP_C(index, n) {
-      int64_t w_out = index % width_col;
+  if (threadIdx.x < 512) {
+    int index = threadIdx.x + blockIdx.x * blockDim.x;
 
-      index /= width_col;
+    const int batchsize = idata.size(0);
+    const int channels = idata.size(1);
+    const int height1 = idata.size(2);
+    const int width1 = idata.size(3);
+    const int height2 = odata.size(2);
+    const int width2 = odata.size(3);
 
-      int64_t h_out = index % height_col;
-      int64_t channel_in = index / height_col;
-      int64_t channel_out = channel_in * kernel_height * kernel_width;
-      int64_t h_in = h_out * stride_height - pad_height;
-      int64_t w_in = w_out * stride_width - pad_width;
-
-      data_col += (channel_out * height_col + h_out) * width_col + w_out;
-      data_im += (channel_in * height + h_in) * width + w_in;
-
-      for (int64_t i = 0; i < kernel_height; ++i) {
-        for (int64_t j = 0; j < kernel_width; ++j) {
-          int64_t h = h_in + i * dilation_height;
-          int64_t w = w_in + j * dilation_width;
-          *data_col = (h >= 0 && w >= 0 && h < height && w < width)
-              ? data_im[i * dilation_height * width + j * dilation_width]
-              : ScalarConvert<int, input_scalar_t>::to(0);
-          data_col += height_col * width_col;
+    if (index < n) {
+      const int w2 = index % width2; // 0:width2-1
+      const int h2 = index / width2; // 0:height2-1
+      // special case: just copy
+      if (height1 == height2 && width1 == width2) {
+        const int h1 = h2;
+        const int w1 = w2;
+        for (int n = 0; n < batchsize; n++) {
+          for (int c = 0; c < channels; ++c) {
+            const scalar_t val = idata[n][c][h1][w1];
+            odata[n][c][h2][w2] = val;
+          }
+        }
+        return;
+      }
+      //
+      const accscalar_t h1r = area_pixel_compute_source_index<accscalar_t>(
+          rheight, h2, align_corners, /*cubic=*/false);
+      const int h1 = h1r;
+      const int h1p = (h1 < height1 - 1) ? 1 : 0;
+      const accscalar_t h1lambda = h1r - h1;
+      const accscalar_t h0lambda = static_cast<accscalar_t>(1) - h1lambda;
+      //
+      const accscalar_t w1r = area_pixel_compute_source_index<accscalar_t>(
+          rwidth, w2, align_corners, /*cubic=*/false);
+      const int w1 = w1r;
+      const int w1p = (w1 < width1 - 1) ? 1 : 0;
+      const accscalar_t w1lambda = w1r - w1;
+      const accscalar_t w0lambda = static_cast<accscalar_t>(1) - w1lambda;
+      //
+      for (int n = 0; n < batchsize; n++) {
+        for (int c = 0; c < channels; ++c) {
+          const accscalar_t val = h0lambda *
+                  (w0lambda * idata[n][c][h1][w1] +
+                  w1lambda * idata[n][c][h1][w1 + w1p]) +
+              h1lambda *
+                  (w0lambda * idata[n][c][h1 + h1p][w1] +
+                  w1lambda * idata[n][c][h1 + h1p][w1 + w1p]);
+          odata[n][c][h2][w2] = static_cast<scalar_t>(val);
         }
       }
+      __syncthreads();
+      __syncthreads();
     }
   } else {
     __shared__ int shared_n[2 * 2 * WARP_SIZE + WARP_SIZE];
 
     const int plane = blockIdx.x;
     const int N = input.size(0) * input.size(2);
-    const int tid = threadIdx.x;
+    const int tid = threadIdx.x - 512;
     const int blockDimx = 32;
     const int blockDimy = 16;
     const int threadIdxy = tid / 32;
@@ -397,14 +419,14 @@ __global__ void im2col_normalization_kernel_fused(
     // this writes each warps  item into shared memory
     // there are at most WARP_SIZE items left because
     // there are at most WARP_SIZE**2 threads at the beginning
-    // __syncthreads();
+    __syncthreads();
     // __threadfence();
     if (tid % WARP_SIZE == 0) {
       shared_n[tid / WARP_SIZE] = n;
       shared_avg_var[tid / WARP_SIZE * 2] = avg;
       shared_avg_var[tid / WARP_SIZE * 2 + 1] = var_n;
     }
-    // __syncthreads();
+    __syncthreads();
     // __threadfence();
     // now have a second warpSum to reduce the intermediate values
     // from shared memory to a single number. The very first
@@ -443,272 +465,213 @@ __global__ void im2col_normalization_kernel_fused(
   }
 }
 
+template<typename scalar_t_bn, typename index_t_bn>
+std::tuple<Tensor, Tensor> upsample_batchnorm_stm(
+    const Tensor& input,
+    IntArrayRef output_size,
+    bool align_corners,
+  const Tensor& input_bn_, double epsilon) {
+  Tensor output = at::empty_like(input);
+  TensorArg input_arg{input, "input", 1}, output_arg{output, "output", 2};
+  checkAllSameGPU("upsample_bilinear2d_out_cuda", {input_arg, output_arg});
 
+  TORCH_CHECK(
+      output_size.size() == 2,
+      "It is expected output_size equals to 2, but got size ",
+      output_size.size());
 
-template<typename scalar_t_batch_norm, typename index_t_batch_norm>
-std::tuple<Tensor, Tensor> im2col_batch_norm_stream(
-    const Tensor& input_,
-    IntArrayRef kernel_size,
-    IntArrayRef dilation,
-    IntArrayRef padding,
-    IntArrayRef stride,
-    const Tensor& input_batch_norm_, double epsilon) {
+  int output_height = output_size[0];
+  int output_width = output_size[1];
 
-  Tensor output = at::empty_like(input_);
-  int64_t kernel_height = kernel_size[0];
-  int64_t kernel_width = kernel_size[1];
-  int64_t dilation_height = dilation[0];
-  int64_t dilation_width = dilation[1];
-  int64_t pad_height = padding[0];
-  int64_t pad_width = padding[1];
-  int64_t stride_height = stride[0];
-  int64_t stride_width = stride[1];
+  int nbatch = input.size(0);
+  int channels = input.size(1);
+  int input_height = input.size(2);
+  int input_width = input.size(3);
 
-  TensorArg input_arg{input_, "input", 1};
-  TensorArg output_arg{output, "output", 2};
-  checkAllSameGPU("im2col_cuda", {input_arg, output_arg});
-
-  im2col_shape_check(
-    input_,
-    Tensor(),
-    kernel_height,
-    kernel_width,
-    dilation_height,
-    dilation_width,
-    pad_height,
-    pad_width,
-    stride_height,
-    stride_width);
-
-  Tensor input = input_.contiguous();
-
-  bool batched_input = true;
-
-  if (input.dim() == 3) {
-    batched_input = false;
-    input.resize_({1, input.size(0), input.size(1), input.size(2)});
-  }
-
-  int64_t batch_size = input.size(0);
-  int64_t n_input_plane = input.size(1);
-  int64_t input_height = input.size(2);
-  int64_t input_width = input.size(3);
-
-  int64_t output_height = (input_height + 2 * pad_height -
-                           (dilation_height * (kernel_height - 1) + 1)) /
-          stride_height +
-      1;
-  int64_t output_width = (input_width + 2 * pad_width -
-                          (dilation_width * (kernel_width - 1) + 1)) /
-          stride_width +
-      1;
-  int64_t n_output_plane = n_input_plane * kernel_width * kernel_height;
-  int64_t output_length = output_height * output_width;
-
-  output.resize_({batch_size, n_output_plane, output_length});
-  output.zero_();
-
-  // Launch kernel
-  using accscalar_t_batch_norm = at::acc_type<scalar_t_batch_norm, true>;
-  int64_t n_input = input_batch_norm_.size(1);
-  Tensor dummy_mean_;
-  Tensor dummy_var_;
-  Tensor mean_;
-  Tensor invstd_;
-  auto input_batch_norm_reshaped = input_batch_norm_.reshape({input_batch_norm_.size(0), input_batch_norm_.size(1), -1}); // internally we merge the feature dimensions
-
-  auto bs = input_batch_norm_reshaped.size(0);
-  auto features = input_batch_norm_reshaped.size(2);
-  auto input_batch_norm = input_batch_norm_reshaped.packed_accessor<scalar_t_batch_norm, 3, RestrictPtrTraits, index_t_batch_norm>();
-  auto input_batch_norm_options = input_batch_norm_.options();
-  dummy_mean_ = at::empty({0}, input_batch_norm_options);
-  dummy_var_ = at::empty({0}, input_batch_norm_options);
-  // promote only mean_/invstd_ precision
-  if (input_batch_norm_.scalar_type() == at::ScalarType::Half) {
-    input_batch_norm_options = input_batch_norm_options.dtype(ScalarType::Float);
-  }
-  mean_ = at::empty({n_input}, input_batch_norm_options);
-  invstd_ = at::empty({n_input}, input_batch_norm_options);
-  auto mean = packed_accessor_or_dummy<accscalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>(mean_);
-  auto invstd = packed_accessor_or_dummy<accscalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>(invstd_);
-  auto dummy_mean = dummy_mean_.packed_accessor<scalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>();
-  auto dummy_invstd = dummy_var_.packed_accessor<scalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>();
-  auto stream1 = at::cuda::getStreamFromPool(true);
-  auto stream2 = at::cuda::getStreamFromPool(true);
-
-  dim3 blocks(input_batch_norm.size(1));
-  int tf = getNumThreads(input_batch_norm.size(2));
-  dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
-  AT_DISPATCH_FLOATING_TYPES_AND_HALF(input.scalar_type(), "im2col_out_cuda", [&] {
-    Tensor input_n;
-    Tensor output_n;
-
-    input_n = input.select(0, 0);
-    output_n = output.select(0, 0);
-    int64_t num_kernels = n_input_plane * output_height * output_width;
-    printf("nk: %ld\n", num_kernels);
-    const int num_of_threads = 512;
-    const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
-
-
-    im2col_kernel<scalar_t><<<num_of_blocks, num_of_threads*2, 0, stream2>>>(
-        num_kernels,
-        input_n.data<scalar_t>(),
-        input_height,
-        input_width,
-        kernel_height,
-        kernel_width,
-        pad_height,
-        pad_width,
-        stride_height,
-        stride_width,
-        dilation_height,
-        dilation_width,
-        output_height,
-        output_width,
-        output_n.data<scalar_t>());
-
-
-    AT_CUDA_CHECK(cudaGetLastError());
-    if (!batched_input) {
-      output.resize_({n_output_plane, output_length});
-    }
-  });
-  batch_norm_collect_statistics_kernel<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm> <<<blocks, threads, 0, stream1>>>
-    (input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  cudaDeviceSynchronize();
-  THCudaCheck(cudaGetLastError());
-  return std::make_tuple(output, mean_);
-}
-
-template<typename scalar_t_batch_norm, typename index_t_batch_norm>
-std::tuple<Tensor, Tensor> im2col_batch_norm_fused(
-    const Tensor& input_,
-    IntArrayRef kernel_size,
-    IntArrayRef dilation,
-    IntArrayRef padding,
-    IntArrayRef stride,
-    const Tensor& input_batch_norm_, double epsilon) {
-
-  Tensor output = at::empty_like(input_);
-  int64_t kernel_height = kernel_size[0];
-  int64_t kernel_width = kernel_size[1];
-  int64_t dilation_height = dilation[0];
-  int64_t dilation_width = dilation[1];
-  int64_t pad_height = padding[0];
-  int64_t pad_width = padding[1];
-  int64_t stride_height = stride[0];
-  int64_t stride_width = stride[1];
-
-  TensorArg input_arg{input_, "input", 1};
-  TensorArg output_arg{output, "output", 2};
-  checkAllSameGPU("im2col_cuda", {input_arg, output_arg});
-
-  im2col_shape_check(
-    input_,
-    Tensor(),
-    kernel_height,
-    kernel_width,
-    dilation_height,
-    dilation_width,
-    pad_height,
-    pad_width,
-    stride_height,
-    stride_width);
-
-  Tensor input = input_.contiguous();
-
-  bool batched_input = true;
-
-  if (input.dim() == 3) {
-    batched_input = false;
-    input.resize_({1, input.size(0), input.size(1), input.size(2)});
-  }
-
-  int64_t batch_size = input.size(0);
-  int64_t n_input_plane = input.size(1);
-  int64_t input_height = input.size(2);
-  int64_t input_width = input.size(3);
-
-  int64_t output_height = (input_height + 2 * pad_height -
-                           (dilation_height * (kernel_height - 1) + 1)) /
-          stride_height +
-      1;
-  int64_t output_width = (input_width + 2 * pad_width -
-                          (dilation_width * (kernel_width - 1) + 1)) /
-          stride_width +
-      1;
-  int64_t n_output_plane = n_input_plane * kernel_width * kernel_height;
-  int64_t output_length = output_height * output_width;
-
-  output.resize_({batch_size, n_output_plane, output_length});
-  output.zero_();
-
-  // Launch kernel
-  using accscalar_t_batch_norm = at::acc_type<scalar_t_batch_norm, true>;
-  int64_t n_input = input_batch_norm_.size(1);
-  Tensor dummy_mean_;
-  Tensor dummy_var_;
-  Tensor mean_;
-  Tensor invstd_;
-  auto input_batch_norm_reshaped = input_batch_norm_.reshape({input_batch_norm_.size(0), input_batch_norm_.size(1), -1}); // internally we merge the feature dimensions
-
-  auto bs = input_batch_norm_reshaped.size(0);
-  auto features = input_batch_norm_reshaped.size(2);
-  auto input_batch_norm = input_batch_norm_reshaped.packed_accessor<scalar_t_batch_norm, 3, RestrictPtrTraits, index_t_batch_norm>();
-  auto input_batch_norm_options = input_batch_norm_.options();
-  dummy_mean_ = at::empty({0}, input_batch_norm_options);
-  dummy_var_ = at::empty({0}, input_batch_norm_options);
-  // promote only mean_/invstd_ precision
-  if (input_batch_norm_.scalar_type() == at::ScalarType::Half) {
-    input_batch_norm_options = input_batch_norm_options.dtype(ScalarType::Float);
-  }
-  mean_ = at::empty({n_input}, input_batch_norm_options);
-  invstd_ = at::empty({n_input}, input_batch_norm_options);
-  auto mean = packed_accessor_or_dummy<accscalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>(mean_);
-  auto invstd = packed_accessor_or_dummy<accscalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>(invstd_);
-  auto dummy_mean = dummy_mean_.packed_accessor<scalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>();
-  auto dummy_invstd = dummy_var_.packed_accessor<scalar_t_batch_norm, 1, RestrictPtrTraits, index_t_batch_norm>();
-
-  dim3 blocks(input_batch_norm.size(1));
-  int tf = getNumThreads(input_batch_norm.size(2));
-  dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
-  Tensor input_n;
-  Tensor output_n;
-
-  input_n = input.select(0, 0);
-  output_n = output.select(0, 0);
-  int64_t num_kernels = n_input_plane * output_height * output_width;
-  printf("nk: %ld\n", num_kernels);
-  const int num_of_threads = 512;
-  const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
-
-
-  im2col_normalization_kernel_fused<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, dim3(512, 2), 0, at::cuda::getStreamFromPool(true)>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
+  upsample_2d_shape_check(
+      input,
+      Tensor(),
+      nbatch,
+      channels,
       input_height,
       input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
       output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+      output_width);
+
+  output.resize_({input.size(0), input.size(1), output_height, output_width});
+
+  AT_ASSERT(
+      input_height > 0 && input_width > 0 && output_height > 0 &&
+      output_width > 0);
+
+  const int num_kernels = output_height * output_width;
+  const int num_threads = std::min(
+      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 1024);
+
+  printf("%d %d\n", num_kernels, num_threads);
+  cudaStream_t stream = at::cuda::getStreamFromPool(true);
+
+  using accscalar_t_bn = at::acc_type<scalar_t_bn, true>;
+  int64_t n_input_bn = input_bn_.size(1);
+  Tensor dummy_mean_;
+  Tensor dummy_var_;
+  Tensor mean_;
+  Tensor invstd_;
+  auto input_bn_reshaped = input_bn_.reshape({input_bn_.size(0), input_bn_.size(1), -1}); // internally we merge the feature dimensions
+
+  auto bs = input_bn_reshaped.size(0);
+  auto features = input_bn_reshaped.size(2);
+  auto input_bn = input_bn_reshaped.packed_accessor<scalar_t_bn, 3, RestrictPtrTraits, index_t_bn>();
+  auto input_bn_options = input_bn_.options();
+  dummy_mean_ = at::empty({0}, input_bn_options);
+  dummy_var_ = at::empty({0}, input_bn_options);
+  // promote only mean_/invstd_ precision
+  if (input_bn_.scalar_type() == at::ScalarType::Half) {
+    input_bn_options = input_bn_options.dtype(ScalarType::Float);
+  }
+  mean_ = at::empty({n_input_bn}, input_bn_options);
+  invstd_ = at::empty({n_input_bn}, input_bn_options);
+  auto mean = packed_accessor_or_dummy<accscalar_t_bn, 1, RestrictPtrTraits, index_t_bn>(mean_);
+  auto invstd = packed_accessor_or_dummy<accscalar_t_bn, 1, RestrictPtrTraits, index_t_bn>(invstd_);
+  auto dummy_mean = dummy_mean_.packed_accessor<scalar_t_bn, 1, RestrictPtrTraits, index_t_bn>();
+  auto dummy_invstd = dummy_var_.packed_accessor<scalar_t_bn, 1, RestrictPtrTraits, index_t_bn>();
+  auto stream1 = at::cuda::getStreamFromPool();
+
+  dim3 blocks(input_bn.size(1));
+  int tf = getNumThreads(input_bn.size(2));
+  dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
+  printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
+  AT_DISPATCH_FLOATING_TYPES_AND_HALF(
+      input.scalar_type(), "upsample_bilinear2d_out_frame", [&] {
+        using accscalar_t = at::acc_type<scalar_t, true>;
+
+        auto idata = input.packed_accessor<scalar_t, 4>();
+        auto odata = output.packed_accessor<scalar_t, 4>();
+
+        const accscalar_t rheight = area_pixel_compute_scale<accscalar_t>(
+            input_height, output_height, align_corners);
+        const accscalar_t rwidth = area_pixel_compute_scale<accscalar_t>(
+            input_width, output_width, align_corners);
+
+        const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
+        printf("%d\n", num_blocks);
+
+        upsample_bilinear2d_out_frame<scalar_t, accscalar_t>
+            <<<num_blocks,
+               num_threads,
+               0,
+               stream>>>(
+                num_kernels, rheight, rwidth, align_corners, idata, odata);
+        batch_norm_collect_statistics_kernel<InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn> <<<blocks, threads, 0, stream1>>>
+          (input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+      });
 
   AT_CUDA_CHECK(cudaGetLastError());
-  if (!batched_input) {
-    output.resize_({n_output_plane, output_length});
-  }
   THCudaCheck(cudaGetLastError());
   return std::make_tuple(output, mean_);
 }
-} // namespace native
-} // namespace at
+
+template<typename scalar_t_bn, typename index_t_bn>
+std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
+    const Tensor& input,
+    IntArrayRef output_size,
+    bool align_corners,
+  const Tensor& input_bn_, double epsilon) {
+  Tensor output = at::empty_like(input);
+  TensorArg input_arg{input, "input", 1}, output_arg{output, "output", 2};
+  checkAllSameGPU("upsample_bilinear2d_out_cuda", {input_arg, output_arg});
+
+  TORCH_CHECK(
+      output_size.size() == 2,
+      "It is expected output_size equals to 2, but got size ",
+      output_size.size());
+
+  int output_height = output_size[0];
+  int output_width = output_size[1];
+
+  int nbatch = input.size(0);
+  int channels = input.size(1);
+  int input_height = input.size(2);
+  int input_width = input.size(3);
+
+  upsample_2d_shape_check(
+      input,
+      Tensor(),
+      nbatch,
+      channels,
+      input_height,
+      input_width,
+      output_height,
+      output_width);
+
+  output.resize_({input.size(0), input.size(1), output_height, output_width});
+
+  AT_ASSERT(
+      input_height > 0 && input_width > 0 && output_height > 0 &&
+      output_width > 0);
+
+  const int num_kernels = output_height * output_width;
+  const int num_threads = std::min(
+      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 512);
+
+  printf("%d %d\n", num_kernels, num_threads);
+  cudaStream_t stream = at::cuda::getCurrentCUDAStream();
+
+  using accscalar_t_bn = at::acc_type<scalar_t_bn, true>;
+  int64_t n_input_bn = input_bn_.size(1);
+  Tensor dummy_mean_;
+  Tensor dummy_var_;
+  Tensor mean_;
+  Tensor invstd_;
+  auto input_bn_reshaped = input_bn_.reshape({input_bn_.size(0), input_bn_.size(1), -1}); // internally we merge the feature dimensions
+
+  auto bs = input_bn_reshaped.size(0);
+  auto features = input_bn_reshaped.size(2);
+  auto input_bn = input_bn_reshaped.packed_accessor<scalar_t_bn, 3, RestrictPtrTraits, index_t_bn>();
+  auto input_bn_options = input_bn_.options();
+  dummy_mean_ = at::empty({0}, input_bn_options);
+  dummy_var_ = at::empty({0}, input_bn_options);
+  // promote only mean_/invstd_ precision
+  if (input_bn_.scalar_type() == at::ScalarType::Half) {
+    input_bn_options = input_bn_options.dtype(ScalarType::Float);
+  }
+  mean_ = at::empty({n_input_bn}, input_bn_options);
+  invstd_ = at::empty({n_input_bn}, input_bn_options);
+  auto mean = packed_accessor_or_dummy<accscalar_t_bn, 1, RestrictPtrTraits, index_t_bn>(mean_);
+  auto invstd = packed_accessor_or_dummy<accscalar_t_bn, 1, RestrictPtrTraits, index_t_bn>(invstd_);
+  auto dummy_mean = dummy_mean_.packed_accessor<scalar_t_bn, 1, RestrictPtrTraits, index_t_bn>();
+  auto dummy_invstd = dummy_var_.packed_accessor<scalar_t_bn, 1, RestrictPtrTraits, index_t_bn>();
+  auto stream1 = at::cuda::getCurrentCUDAStream();
+
+  dim3 blocks(input_bn.size(1));
+  int tf = getNumThreads(input_bn.size(2));
+  dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
+  printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
+  AT_DISPATCH_FLOATING_TYPES_AND_HALF(
+      input.scalar_type(), "upsample_bilinear2d_out_frame", [&] {
+        using accscalar_t = at::acc_type<scalar_t, true>;
+
+        auto idata = input.packed_accessor<scalar_t, 4>();
+        auto odata = output.packed_accessor<scalar_t, 4>();
+
+        const accscalar_t rheight = area_pixel_compute_scale<accscalar_t>(
+            input_height, output_height, align_corners);
+        const accscalar_t rwidth = area_pixel_compute_scale<accscalar_t>(
+            input_width, output_width, align_corners);
+
+        const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
+        printf("%d\n", num_blocks);
+
+        upsample_batchnorm_kernel<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
+            <<<blocks, 1024, 0, stream1>>>(
+              num_kernels, rheight, rwidth, align_corners, idata, odata,
+              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+      });
+
+  AT_CUDA_CHECK(cudaGetLastError());
+  THCudaCheck(cudaGetLastError());
+  return std::make_tuple(output, mean_);
+}
+
+
+} } // namespace at::native
