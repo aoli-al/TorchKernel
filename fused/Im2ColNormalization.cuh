@@ -7,6 +7,7 @@
 #include <ATen/TensorUtils.h>
 #include <ATen/Utils.h>
 
+#include <cuda_profiler_api.h>
 #include <ATen/cuda/CUDAContext.h>
 #include <ATen/cuda/detail/KernelUtils.h>
 #include <ATen/cuda/CUDAApplyUtils.cuh>
@@ -22,10 +23,6 @@
 
 namespace at {
 namespace native {
-
-#define CUDA_KERNEL_LOOP_C(i, n) \
-  int64_t _i_n_d_e_x = blockIdx.x * 512 + threadIdx.x;                                \
-  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=512 * 10000, i=_i_n_d_e_x)
 
 #if defined(__HIP_PLATFORM_HCC__)
 constexpr int WARP_SIZE = 64;
@@ -267,8 +264,7 @@ __global__ void im2col_kernel(
     const int64_t width_col,
     dt* data_col) {
 
-  if (threadIdx.x < 512) {
-  CUDA_KERNEL_LOOP_C(index, n) {
+  CUDA_KERNEL_LOOP(index, n) {
     int64_t w_out = index % width_col;
 
     index /= width_col;
@@ -293,9 +289,12 @@ __global__ void im2col_kernel(
       }
     }
   }
-
-  }
 }
+
+#define CUDA_KERNEL_LOOP_C(i, n) \
+  int64_t _i_n_d_e_x = blockIdx.x * 512 + threadIdx.x;                                \
+  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=512 * 10000, i=_i_n_d_e_x)
+
 
 template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
 C10_LAUNCH_BOUNDS_1(1024)
@@ -323,8 +322,6 @@ __global__ void im2col_normalization_kernel_fused(
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_mean,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_transformed_var) {
   if (threadIdx.y == 0) {
-    // __syncthreads();
-    // __syncthreads();
     CUDA_KERNEL_LOOP_C(index, n) {
       int64_t w_out = index % width_col;
 
@@ -339,7 +336,7 @@ __global__ void im2col_normalization_kernel_fused(
       data_col += (channel_out * height_col + h_out) * width_col + w_out;
       data_im += (channel_in * height + h_in) * width + w_in;
 
-      for (int64_t i = 0; i < kernel_height; ++i) {
+      for (int64_t i = 0; i < kernel_height/2; ++i) {
         for (int64_t j = 0; j < kernel_width; ++j) {
           int64_t h = h_in + i * dilation_height;
           int64_t w = w_in + j * dilation_width;
@@ -349,6 +346,18 @@ __global__ void im2col_normalization_kernel_fused(
           data_col += height_col * width_col;
         }
       }
+      for (int64_t i = kernel_height/2; i < kernel_height; ++i) {
+        for (int64_t j = 0; j < kernel_width; ++j) {
+          int64_t h = h_in + i * dilation_height;
+          int64_t w = w_in + j * dilation_width;
+          *data_col = (h >= 0 && w >= 0 && h < height && w < width)
+              ? data_im[i * dilation_height * width + j * dilation_width]
+              : ScalarConvert<int, input_scalar_t>::to(0);
+          data_col += height_col * width_col;
+        }
+      }
+      __syncthreads();
+      __syncthreads();
     }
   } else {
     __shared__ int shared_n[2 * 2 * WARP_SIZE + WARP_SIZE];
@@ -397,14 +406,14 @@ __global__ void im2col_normalization_kernel_fused(
     // this writes each warps  item into shared memory
     // there are at most WARP_SIZE items left because
     // there are at most WARP_SIZE**2 threads at the beginning
-    // __syncthreads();
+    __syncthreads();
     // __threadfence();
     if (tid % WARP_SIZE == 0) {
       shared_n[tid / WARP_SIZE] = n;
       shared_avg_var[tid / WARP_SIZE * 2] = avg;
       shared_avg_var[tid / WARP_SIZE * 2 + 1] = var_n;
     }
-    // __syncthreads();
+    __syncthreads();
     // __threadfence();
     // now have a second warpSum to reduce the intermediate values
     // from shared memory to a single number. The very first
@@ -547,11 +556,12 @@ std::tuple<Tensor, Tensor> im2col_batch_norm_stream(
     output_n = output.select(0, 0);
     int64_t num_kernels = n_input_plane * output_height * output_width;
     printf("nk: %ld\n", num_kernels);
-    const int num_of_threads = 512;
+    const int num_of_threads = 1024;
     const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
 
 
-    im2col_kernel<scalar_t><<<num_of_blocks, num_of_threads*2, 0, stream2>>>(
+    cudaProfilerStart();
+    im2col_kernel<scalar_t><<<num_of_blocks, num_of_threads, 0, stream2>>>(
         num_kernels,
         input_n.data<scalar_t>(),
         input_height,
@@ -576,6 +586,7 @@ std::tuple<Tensor, Tensor> im2col_batch_norm_stream(
   });
   batch_norm_collect_statistics_kernel<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm> <<<blocks, threads, 0, stream1>>>
     (input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+  cudaProfilerStop();
   cudaDeviceSynchronize();
   THCudaCheck(cudaGetLastError());
   return std::make_tuple(output, mean_);
@@ -683,7 +694,9 @@ std::tuple<Tensor, Tensor> im2col_batch_norm_fused(
   const int num_of_threads = 512;
   const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
 
+  printf("kh: %d, kw: %d\n", kernel_height, kernel_width);
 
+  cudaProfilerStart();
   im2col_normalization_kernel_fused<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
     <<<num_of_blocks, dim3(512, 2), 0, at::cuda::getStreamFromPool(true)>>>(
       num_kernels,
@@ -702,6 +715,7 @@ std::tuple<Tensor, Tensor> im2col_batch_norm_fused(
       output_width,
       output_n.data<scalar_t_batch_norm>(),
       input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+  cudaProfilerStop();
 
   AT_CUDA_CHECK(cudaGetLastError());
   if (!batched_input) {

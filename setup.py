@@ -14,8 +14,8 @@ setup(
             'fused/Im2ColNormalization.cu',
             'fused/MaxPoolUpSample.cu',
         ],
-        # extra_compile_args={'cxx': ['-g'],
-        #                     'nvcc': ['-g']},
+        extra_compile_args={'cxx': [],
+                            'nvcc': ['-lineinfo']},
         include_dirs = ['/home/hao01/torch_extension/lib/python3.6/site-packages/torch/include', '/home/hao01/pytorch/aten/src']),
     ],
     cmdclass={
