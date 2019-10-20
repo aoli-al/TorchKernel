@@ -292,8 +292,8 @@ __global__ void im2col_kernel(
 }
 
 #define CUDA_KERNEL_LOOP_C(i, n) \
-  int64_t _i_n_d_e_x = blockIdx.x * 512 + threadIdx.x;                                \
-  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=512 * 10000, i=_i_n_d_e_x)
+  int64_t _i_n_d_e_x = blockIdx.x * 256 + threadIdx.x;                                \
+  for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=256 * 10000, i=_i_n_d_e_x)
 
 
 template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
@@ -321,7 +321,7 @@ __global__ void im2col_normalization_kernel_fused(
     PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_var,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_mean,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_transformed_var) {
-  if (threadIdx.y == 0) {
+  if (threadIdx.x < 256) {
     CUDA_KERNEL_LOOP_C(index, n) {
       int64_t w_out = index % width_col;
 
@@ -333,29 +333,28 @@ __global__ void im2col_normalization_kernel_fused(
       int64_t h_in = h_out * stride_height - pad_height;
       int64_t w_in = w_out * stride_width - pad_width;
 
-      data_col += (channel_out * height_col + h_out) * width_col + w_out;
-      data_im += (channel_in * height + h_in) * width + w_in;
-
-      for (int64_t i = 0; i < kernel_height/2; ++i) {
-        for (int64_t j = 0; j < kernel_width; ++j) {
-          int64_t h = h_in + i * dilation_height;
-          int64_t w = w_in + j * dilation_width;
-          *data_col = (h >= 0 && w >= 0 && h < height && w < width)
-              ? data_im[i * dilation_height * width + j * dilation_width]
-              : ScalarConvert<int, input_scalar_t>::to(0);
-          data_col += height_col * width_col;
-        }
-      }
-      for (int64_t i = kernel_height/2; i < kernel_height; ++i) {
-        for (int64_t j = 0; j < kernel_width; ++j) {
-          int64_t h = h_in + i * dilation_height;
-          int64_t w = w_in + j * dilation_width;
-          *data_col = (h >= 0 && w >= 0 && h < height && w < width)
-              ? data_im[i * dilation_height * width + j * dilation_width]
-              : ScalarConvert<int, input_scalar_t>::to(0);
-          data_col += height_col * width_col;
-        }
-      }
+      // data_col += (channel_out * height_col + h_out) * width_col + w_out;
+      // data_im += (channel_in * height + h_in) * width + w_in;
+      // for (int64_t i = 0; i < kernel_height/2; ++i) {
+      //   for (int64_t j = 0; j < kernel_width; ++j) {
+      //     int64_t h = h_in + i * dilation_height;
+      //     int64_t w = w_in + j * dilation_width;
+      //     *data_col = (h >= 0 && w >= 0 && h < height && w < width)
+      //         ? data_im[i * dilation_height * width + j * dilation_width]
+      //         : ScalarConvert<int, input_scalar_t>::to(0);
+      //     data_col += height_col * width_col;
+      //   }
+      // }
+      // for (int64_t i = kernel_height/2; i < kernel_height; ++i) {
+      //   for (int64_t j = 0; j < kernel_width; ++j) {
+      //     int64_t h = h_in + i * dilation_height;
+      //     int64_t w = w_in + j * dilation_width;
+      //     *data_col = (h >= 0 && w >= 0 && h < height && w < width)
+      //         ? data_im[i * dilation_height * width + j * dilation_width]
+      //         : ScalarConvert<int, input_scalar_t>::to(0);
+      //     data_col += height_col * width_col;
+      //   }
+      // }
       __syncthreads();
       __syncthreads();
     }
@@ -364,7 +363,7 @@ __global__ void im2col_normalization_kernel_fused(
 
     const int plane = blockIdx.x;
     const int N = input.size(0) * input.size(2);
-    const int tid = threadIdx.x;
+    const int tid = threadIdx.x - 256;
     const int blockDimx = 32;
     const int blockDimy = 16;
     const int threadIdxy = tid / 32;
@@ -691,14 +690,15 @@ std::tuple<Tensor, Tensor> im2col_batch_norm_fused(
   output_n = output.select(0, 0);
   int64_t num_kernels = n_input_plane * output_height * output_width;
   printf("nk: %ld\n", num_kernels);
-  const int num_of_threads = 512;
+  const int num_of_threads = 256;
   const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
 
   printf("kh: %d, kw: %d\n", kernel_height, kernel_width);
+  printf("nb: %ld\n", num_of_blocks);
 
   cudaProfilerStart();
   im2col_normalization_kernel_fused<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, dim3(512, 2), 0, at::cuda::getStreamFromPool(true)>>>(
+    <<<num_of_blocks, 512 + 256, 0, at::cuda::getStreamFromPool(true)>>>(
       num_kernels,
       input_n.data<scalar_t_batch_norm>(),
       input_height,
