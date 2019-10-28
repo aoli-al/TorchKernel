@@ -84,7 +84,7 @@ std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused()
 
 std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm()
 {
-  auto im2col_input = torch::randn({1, 1, 2850, 1024}, defaultOptions);
+  auto im2col_input = torch::randn({1, 1, 2850, 2048}, defaultOptions);
   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
   // return std::make_tuple(r, r, r, r, r, r);
   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);

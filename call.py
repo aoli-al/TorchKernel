@@ -18,7 +18,7 @@ kwargs = {'dtype': dtype,
           'requires_grad': True}
 
 
-# print(fusion_cuda.im2col_maxpool()[0][0])
+# print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
 # print(fusion_cuda.upsample_batchnorm()[0][0])
 print(fusion_cuda.im2col_batchnorm()[0][0])
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0][0])

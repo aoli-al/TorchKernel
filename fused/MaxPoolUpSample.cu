@@ -12,6 +12,7 @@
 #include <THC/THCNumerics.cuh>
 #include <c10/macros/Macros.h>
 
+#include <cuda_profiler_api.h>
 #include "../cuda/UpSample.cuh"
 #include "../cuda/KernelUtils.cuh"
 
@@ -327,11 +328,13 @@ void max_pool2d_upsample_fused(
       printf("%d\n", num_threads_max_pool + num_threads);
       printf("%d\n", at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock);
       // dim3 threads(1024, 2);
+      cudaProfilerStart();
       max_pool_upsample_kernel<<<num_blocks, num_threads_max_pool + num_threads, 0, at::cuda::getCurrentCUDAStream()>>>(
         count, input_data,
         nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
         kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
         num_kernels, rheight, rwidth, align_corners, idata, odata, num_threads_max_pool);
+      cudaProfilerStop();
     });
   AT_CUDA_CHECK(cudaGetLastError());
 }
@@ -433,6 +436,7 @@ void max_pool2d_upsample_stream(
       printf("%d\n", num_threads_max_pool + num_threads);
       printf("%d\n", at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock);
       // dim3 threads(1024, 2);
+      cudaProfilerStart();
       upsample_bilinear2d_out_frame<scalar_t, accscalar_t>
           <<<num_blocks,
              num_threads,
@@ -444,6 +448,7 @@ void max_pool2d_upsample_stream(
           count, input_data,
           nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+      cudaProfilerStop();
       cudaDeviceSynchronize();
     });
   AT_CUDA_CHECK(cudaGetLastError());
