@@ -379,6 +379,24 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
               output_im2col_width,
               output_im2col_n.data<scalar_t>(),
               num_kernels, rheight, rwidth, align_corners, idata, odata);
+          im2col_kernel_upsample_bilinear2d_out_frame_<scalar_t, scalar_t, accscalar_t>
+            <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
+              num_kernels_im2col,
+              input_im2col_n.data<scalar_t>(),
+              input_im2col_height,
+              input_im2col_width,
+              kernel_height,
+              kernel_width,
+              pad_height,
+              pad_width,
+              stride_height,
+              stride_width,
+              dilation_height,
+              dilation_width,
+              output_im2col_height,
+              output_im2col_width,
+              output_im2col_n.data<scalar_t>(),
+              num_kernels, rheight, rwidth, align_corners, idata, odata);
           AT_CUDA_CHECK(cudaGetLastError());
         });
 

@@ -173,6 +173,128 @@ __global__ void upsample_bilinear2d_out_frame(
   }
 }
 
+template <typename dt0, typename scalar_t16, typename accscalar_t17>
+void im2col_kernel_upsample_bilinear2d_out_frame_(const int64_t n1, const dt0 *data_im2, const int64_t height3, const int64_t width4, const int64_t kernel_height5, const int64_t kernel_width6, const int64_t pad_height7, const int64_t pad_width8, const int64_t stride_height9, const int64_t stride_width10, const int64_t dilation_height11, const int64_t dilation_width12, const int64_t height_col13, const int64_t width_col14, dt0 *data_col15, const int ns18, const accscalar_t17 rheight19, const accscalar_t17 rwidth20, const bool align_corners21, const PackedTensorAccessor<scalar_t16, 4> idata22, PackedTensorAccessor<scalar_t16, 4> odata23) __attribute__((launch_bounds(0xc5fdab0, 0xc5fdad0))) __attribute__((global)) {
+  if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512))  {
+      unsigned int blockDim_x_0;
+      blockDim_x_0 = 512;
+      unsigned int threadIdx_x_0;
+      threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+      unsigned int blockDim_y_0;
+      blockDim_y_0 = 1;
+      unsigned int threadIdx_y_0;
+      threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+      unsigned int blockDim_z_0;
+      blockDim_z_0 = 1;
+      unsigned int threadIdx_z_0;
+      threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+      for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (n1); index += blockDim_x_0 * gridDim.x) {
+          int64_t w_out;
+          w_out = index % width_col14;
+          index /= width_col14;
+          int64_t h_out;
+          h_out = index % height_col13;
+          int64_t channel_in;
+          channel_in = index / height_col13;
+          int64_t channel_out;
+          channel_out = channel_in * kernel_height5 * kernel_width6;
+          int64_t h_in;
+          h_in = h_out * stride_height9 - pad_height7;
+          int64_t w_in;
+          w_in = w_out * stride_width10 - pad_width8;
+          data_col15 += (channel_out * height_col13 + h_out) * width_col14 + w_out;
+          data_im2 += (channel_in * height3 + h_in) * width4 + w_in;
+          for (int64_t i = 0; i < kernel_height5; ++i) {
+              for (int64_t j = 0; j < kernel_width6; ++j) {
+                  int64_t h;
+                  h = h_in + i * dilation_height11;
+                  int64_t w;
+                  w = w_in + j * dilation_width12;
+                  * data_col15 = (h >= 0 && w >= 0 && h < height3 && w < width4) ? data_im2[i * dilation_height11 * width4 + j * dilation_width12] : ScalarConvert<int, dt0>::to(0);
+                  data_col15 += height_col13 * width_col14;
+              }
+          }
+      }
+  }
+  if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024))  {
+      unsigned int blockDim_x_1;
+      blockDim_x_1 = 512;
+      unsigned int threadIdx_x_1;
+      threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 512;
+      unsigned int blockDim_y_1;
+      blockDim_y_1 = 1;
+      unsigned int threadIdx_y_1;
+      threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
+      unsigned int blockDim_z_1;
+      blockDim_z_1 = 1;
+      unsigned int threadIdx_z_1;
+      threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
+      int index;
+      index = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
+      int batchsize;
+      batchsize = idata22.size(0);
+      int channels;
+      channels = idata22.size(1);
+      int height1;
+      height1 = idata22.size(2);
+      int width1;
+      width1 = idata22.size(3);
+      int height2;
+      height2 = odata23.size(2);
+      int width2;
+      width2 = odata23.size(3);
+      if (index < ns18) {
+          int w2;
+          w2 = index % width2;
+          int h2;
+          h2 = index / width2;
+          if (height1 == height2 && width1 == width2) {
+              int h1;
+              h1 = h2;
+              int w1;
+              w1 = w2;
+              for (int n = 0; n < batchsize; n++) {
+                  for (int c = 0; c < channels; ++c) {
+                      scalar_t16 val;
+                      val = idata22[n][c][h1][w1];
+                      odata23[n][c][h2][w2] = val;
+                  }
+              }
+              return;
+          }
+          accscalar_t17 h1r;
+          h1r = area_pixel_compute_source_index<accscalar_t17>(rheight19, h2, align_corners21, false);
+          int h1;
+          h1 = h1r;
+          int h1p;
+          h1p = (h1 < height1 - 1) ? 1 : 0;
+          accscalar_t17 h1lambda;
+          h1lambda = h1r - h1;
+          accscalar_t17 h0lambda;
+          h0lambda = static_cast<accscalar_t17>(1) - h1lambda;
+          accscalar_t17 w1r;
+          w1r = area_pixel_compute_source_index<accscalar_t17>(rwidth20, w2, align_corners21, false);
+          int w1;
+          w1 = w1r;
+          int w1p;
+          w1p = (w1 < width1 - 1) ? 1 : 0;
+          accscalar_t17 w1lambda;
+          w1lambda = w1r - w1;
+          accscalar_t17 w0lambda;
+          w0lambda = static_cast<accscalar_t17>(1) - w1lambda;
+          for (int n = 0; n < batchsize; n++) {
+              for (int c = 0; c < channels; ++c) {
+                  accscalar_t17 val;
+                  val = h0lambda * (w0lambda * idata22[n][c][h1][w1] + w1lambda * idata22[n][c][h1][w1 + w1p]) + h1lambda * (w0lambda * idata22[n][c][h1 + h1p][w1] + w1lambda * idata22[n][c][h1 + h1p][w1 + w1p]);
+                  odata23[n][c][h2][w2] = static_cast<scalar_t16>(val);
+              }
+          }
+      }
+  }
+}
+
+
+
 template <typename dt, typename scalar_t, typename accscalar_t>
 C10_LAUNCH_BOUNDS_1(1024)
 __global__ void im2col_upsample(

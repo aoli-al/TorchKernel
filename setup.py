@@ -15,7 +15,7 @@ setup(
             'fused/MaxPoolUpSample.cu',
         ],
         extra_compile_args={'cxx': [],
-                            'nvcc': ['-lineinfo']},
+                            'nvcc': ['-O3']},
         include_dirs = ['/home/hao01/torch_extension/lib/python3.6/site-packages/torch/include', '/home/hao01/pytorch/aten/src']),
     ],
     cmdclass={

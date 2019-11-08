@@ -18,10 +18,18 @@ kwargs = {'dtype': dtype,
           'requires_grad': True}
 
 
+def check(kernels):
+  half = len(kernels) // 2
+  for i in range(half):
+    print(torch.all(torch.eq(kernels[i], kernels[i+half])))
+
+
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
-# print(fusion_cuda.upsample_batchnorm()[0][0])
-print(fusion_cuda.im2col_batchnorm()[0][0])
+# check(fusion_cuda.upsample_batchnorm())
+# print(fusion_cuda.im2col_upsample()[0][0])
+# print(fusion_cuda.im2col_batchnorm()[0][0])
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0][0])
+check(fusion_cuda.max_pool_batch_norm())
 
 # input = torch.randn(1, 1, 2750, 2048, **kwargs)
 # r = fusion_cuda.im2col(input, _pair((251, 1)))

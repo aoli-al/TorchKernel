@@ -207,5 +207,103 @@ __global__ void im2col_maxpool(
   }
 }
 
+template <typename dt, typename scalar_t0, typename accscalar_t1>
+void im2col_kernel_MaxPoolForward(const int64_t n, const dt *data_im, const int64_t height, const int64_t width, const int64_t kernel_height, const int64_t kernel_width, const int64_t pad_height, const int64_t pad_width, const int64_t stride_height, const int64_t stride_width, const int64_t dilation_height, const int64_t dilation_width, const int64_t height_col, const int64_t width_col, dt *data_col, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19) __attribute__((launch_bounds(0xde53490, 0xde534b0))) __attribute__((global)) {
+  if ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)  {
+      unsigned int blockDim_x_1;
+      blockDim_x_1 = 512;
+      unsigned int threadIdx_x_1;
+      threadIdx_x_1 = (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) % 512;
+      unsigned int blockDim_y_1;
+      blockDim_y_1 = 1;
+      unsigned int threadIdx_y_1;
+      threadIdx_y_1 = (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) / 512 % 1;
+      unsigned int blockDim_z_1;
+      blockDim_z_1 = 1;
+      unsigned int threadIdx_z_1;
+      threadIdx_z_1 = (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) / 512;
+      for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (n); index += blockDim_x_1 * gridDim.x) {
+          int64_t w_out;
+          w_out = index % width_col;
+          index /= width_col;
+          int64_t h_out;
+          h_out = index % height_col;
+          int64_t channel_in;
+          channel_in = index / height_col;
+          int64_t channel_out;
+          channel_out = channel_in * kernel_height * kernel_width;
+          int64_t h_in;
+          h_in = h_out * stride_height - pad_height;
+          int64_t w_in;
+          w_in = w_out * stride_width - pad_width;
+          data_col += (channel_out * height_col + h_out) * width_col + w_out;
+          data_im += (channel_in * height + h_in) * width + w_in;
+          for (int64_t i = 0; i < kernel_height; ++i) {
+              for (int64_t j = 0; j < kernel_width; ++j) {
+                  int64_t h;
+                  h = h_in + i * dilation_height;
+                  int64_t w;
+                  w = w_in + j * dilation_width;
+                  * data_col = (h >= 0 && w >= 0 && h < height && w < width) ? data_im[i * dilation_height * width + j * dilation_width] : ScalarConvert<int, dt>::to(0);
+                  data_col += height_col * width_col;
+              }
+          }
+      }
+  }
+  if ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=256)  {
+      unsigned int blockDim_x_0;
+      blockDim_x_0 = 256;
+      unsigned int threadIdx_x_0;
+      threadIdx_x_0 = (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) % 256;
+      unsigned int blockDim_y_0;
+      blockDim_y_0 = 1;
+      unsigned int threadIdx_y_0;
+      threadIdx_y_0 = (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) / 256 % 1;
+      unsigned int blockDim_z_0;
+      blockDim_z_0 = 1;
+      unsigned int threadIdx_z_0;
+      threadIdx_z_0 = (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) / 256;
+      for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
+          int pw;
+          pw = index % pooled_width9;
+          int ph;
+          ph = (index / pooled_width9) % pooled_height8;
+          int c;
+          c = (index / pooled_width9 / pooled_height8) % channels5;
+          int n;
+          n = index / pooled_width9 / pooled_height8 / channels5;
+          int hstart;
+          hstart = ph * stride_h12 - pad_h14;
+          int wstart;
+          wstart = pw * stride_w13 - pad_w15;
+          int hend;
+          hend = min(hstart + (kernel_h10 - 1) * dilation_h16 + 1, height6);
+          int wend;
+          wend = min(wstart + (kernel_w11 - 1) * dilation_w17 + 1, width7);
+          while (hstart < 0)
+              hstart += dilation_h16;
+          while (wstart < 0)
+              wstart += dilation_w17;
+          accscalar_t1 maxval;
+          maxval = at::numeric_limits<accscalar_t1>::lower_bound();
+          int maxidx;
+          maxidx = hstart * width7 + wstart;
+          bottom_data3 += (n * channels5 + c) * height6 * width7;
+          for (int h = hstart; h < hend; h += dilation_h16) {
+              for (int w = wstart; w < wend; w += dilation_w17) {
+                  scalar_t0 val;
+                  val = bottom_data3[h * width7 + w];
+                  if ((ScalarConvert<scalar_t0, accscalar_t1>::to(val) > maxval) || THCNumerics<scalar_t0>::isnan(val)) {
+                      maxidx = h * width7 + w;
+                      maxval = ScalarConvert<scalar_t0, accscalar_t1>::to(val);
+                  }
+              }
+          }
+          top_data18[index] = ScalarConvert<scalar_t0, accscalar_t1>::to(maxval);
+          top_mask19[index] = maxidx;
+      }
+  }
+}
+
 } // namespace native
 } // namespace at
