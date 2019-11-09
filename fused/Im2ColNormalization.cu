@@ -20,7 +20,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm_cuda(
     IntArrayRef padding,
     IntArrayRef stride,
     const Tensor& input_batch_norm) {
-  AT_DISPATCH_FLOATING_TYPES_AND_HALF(input_batch_norm.scalar_type(), "batch_norm_stats_cuda", [&] {
+  auto r2 = AT_DISPATCH_FLOATING_TYPES_AND_HALF(input_batch_norm.scalar_type(), "batch_norm_stats_cuda", [&] {
     return im2col_batch_norm_fused<scalar_t, int32_t>(
       input, kernel_size, dilation, padding, stride,
       input_batch_norm, 0.1);
@@ -30,7 +30,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm_cuda(
       input, kernel_size, dilation, padding, stride,
       input_batch_norm, 0.1);
   });
-  return std::tuple_cat(r1, r1);
+  return std::tuple_cat(r1, r2);
 }
 
 

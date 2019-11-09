@@ -11,21 +11,35 @@ namespace at
 {
 namespace native
 {
-std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_upsample(
-      const Tensor& input_im2col_,
-      IntArrayRef kernel_size,
-      IntArrayRef dilation,
-      IntArrayRef padding,
-      IntArrayRef stride,
-      const Tensor& input,
-      IntArrayRef output_size,
-      bool align_corners);
-Tensor im2col_cuda(
-    const Tensor &input,
+std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream(
+    const Tensor& input,
     IntArrayRef kernel_size,
     IntArrayRef dilation,
     IntArrayRef padding,
-    IntArrayRef stride);
+    IntArrayRef stride,
+    const Tensor& input_maxpool_,
+    IntArrayRef kernel_size_maxpool,
+    IntArrayRef stride_maxpool,
+    IntArrayRef padding_maxpool,
+    IntArrayRef dilation_maxpool,
+    bool ceil_mode,
+    const Tensor& input_batch_norm) ;
+std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_upsample(
+    const Tensor &input_im2col_,
+    IntArrayRef kernel_size,
+    IntArrayRef dilation,
+    IntArrayRef padding,
+    IntArrayRef stride,
+    const Tensor &input,
+    IntArrayRef output_size,
+    bool align_corners);
+// std::tuple<Tensor, Tensor, Tensor> softmax_cuda(const Tensor &input, const int64_t dim, const bool half_to_float, const Tensor& self, double epsilon);
+// Tensor im2col_cuda(
+//     const Tensor &input,
+//     IntArrayRef kernel_size,
+//     IntArrayRef dilation,
+//     IntArrayRef padding,
+//     IntArrayRef stride);
 std::tuple<Tensor, Tensor, Tensor> max_pool_upsample_stream(
     const Tensor &input,
     IntArrayRef kernel_size,
@@ -91,6 +105,26 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm()
   return at::native::im2col_batchnorm_cuda(im2col_input, {351, 1}, {1, 1}, {0, 0}, {1, 1},
                                            batch_norm_input);
 }
+
+std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batchnorm()
+{
+  auto im2col_input = torch::randn({1, 1, 2850, 2048}, defaultOptions);
+  auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
+  // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
+  // return std::make_tuple(r, r, r, r, r, r);
+  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {351, 1}, {1, 1}, {0, 0}, {1, 1},
+                                          input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
+                                           batch_norm_input);
+}
+// std::tuple<Tensor, Tensor, Tensor> dropout_batchnorm(Tensor t)
+// {
+//   auto softmax_input = torch::randn({20, 25600000}, defaultOptions);
+//   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+//   return at::native::softmax_cuda(t, 0, false, batch_norm_input, 0.2);
+// }
+
+
 std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> max_pool_batch_norm() {
   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
   auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
@@ -129,4 +163,6 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("im2col_upsample", &im2col_upsample, "LLTM forward (CUDA)");
   m.def("im2col_maxpool", &im2col_maxpool, "LLTM forward (CUDA)");
   m.def("upsample_batchnorm", &upsample_batchnorm, "LLTM forward (CUDA)");
+  // m.def("dropout_batchnorm", &dropout_batchnorm, "LLTM forward (CUDA)");
+  m.def("im2col_maxpool_batchnorm", &im2col_maxpool_batchnorm, "LLTM forward (CUDA)");
 }
