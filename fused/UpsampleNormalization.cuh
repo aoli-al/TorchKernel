@@ -289,7 +289,18 @@ __global__ void upsample_bilinear2d_out_frame(
     const accscalar_t w1lambda = w1r - w1;
     const accscalar_t w0lambda = static_cast<accscalar_t>(1) - w1lambda;
     //
-    for (int n = 0; n < batchsize; n++) {
+    for (int n = 0; n < batchsize-1; n++) {
+      for (int c = 0; c < channels; ++c) {
+        const accscalar_t val = h0lambda *
+                (w0lambda * idata[n][c][h1][w1] +
+                 w1lambda * idata[n][c][h1][w1 + w1p]) +
+            h1lambda *
+                (w0lambda * idata[n][c][h1 + h1p][w1] +
+                 w1lambda * idata[n][c][h1 + h1p][w1 + w1p]);
+        odata[n][c][h2][w2] = static_cast<scalar_t>(val);
+      }
+    }
+    for (int n = batchsize-1; n < batchsize; n++) {
       for (int c = 0; c < channels; ++c) {
         const accscalar_t val = h0lambda *
                 (w0lambda * idata[n][c][h1][w1] +
@@ -532,8 +543,7 @@ for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
     n19 += o_n23;
 }
 label_1:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_6;
 unsigned int blockDim_x_1;
 blockDim_x_1 = 512;
 unsigned int threadIdx_x_1;
@@ -560,10 +570,20 @@ int height242;
 height242 = odata36.size(2);
 int width243;
 width243 = odata36.size(3);
+accscalar_t30 w0lambda55;
+accscalar_t30 h0lambda50;
+accscalar_t30 w1lambda54;
+accscalar_t30 h1lambda49;
+int h1p48;
+int h147;
+int w1p53;
+int w152;
+int w244;
+int h245;
+accscalar_t30 h1r46;
+accscalar_t30 w1r51;
 if (index37 < n31) {
-    int w244;
     w244 = index37 % width243;
-    int h245;
     h245 = index37 / width243;
     if (height140 == height242 && width141 == width243) {
         int h156;
@@ -579,35 +599,32 @@ if (index37 < n31) {
         }
         return;
     }
-    accscalar_t30 h1r46;
     h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-    int h147;
     h147 = h1r46;
-    int h1p48;
     h1p48 = (h147 < height140 - 1) ? 1 : 0;
-    accscalar_t30 h1lambda49;
     h1lambda49 = h1r46 - h147;
-    accscalar_t30 h0lambda50;
     h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-    accscalar_t30 w1r51;
     w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-    int w152;
     w152 = w1r51;
-    int w1p53;
     w1p53 = (w152 < width141 - 1) ? 1 : 0;
-    accscalar_t30 w1lambda54;
     w1lambda54 = w1r51 - w152;
-    accscalar_t30 w0lambda55;
     w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-    for (int n = 0; n < batchsize38; n++) {
+    for (int n = 0; n < batchsize38 - 1; n++) {
         for (int c = 0; c < channels39; ++c) {
             accscalar_t30 val59;
             val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
             odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
         }
     }
+    int n = batchsize38 - 1;
+    for (int c = 0; c < channels39; ++c) {
+        accscalar_t30 val59;
+        val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
+        odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
+    }
 }
-label_0:;
+label_6:;
+__syncthreads();
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_2;
 if (tid15 % WARP_SIZE == 0) {
     shared_n12[tid15 / WARP_SIZE] = n19;
@@ -616,6 +633,17 @@ if (tid15 % WARP_SIZE == 0) {
 }
 label_2:;
 __syncthreads();
+// if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_7;
+// // if (index37 < n31) {
+// //     // for (int n = batchsize38 - 1; n < batchsize38; n++) {
+// //     //     for (int c = channels39 - 1; c < channels39; ++c) {
+// //     //         accscalar_t30 val59;
+// //     //         val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
+// //     //         odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
+// //     //     }
+// //     // }
+// // }
+// label_7:;
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
 if (tid15 < WARP_SIZE) {
     n19 = (tid15 < blockDim_x_0 * blockDim_y_0 / WARP_SIZE ? shared_n12[tid15] : 0);
@@ -1197,21 +1225,22 @@ std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
 
         const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
         printf("%d\n", num_blocks);
+        printf("%d %d\n", idata.size(0), idata.size(1));
         cudaProfilerStart();
 
-        cudaEvent_t start, stop;
-        cudaEventCreate(&start);
-        cudaEventCreate(&stop);
-        cudaEventRecord(start);
+        // cudaEvent_t start, stop;
+        // cudaEventCreate(&start);
+        // cudaEventCreate(&stop);
+        // cudaEventRecord(start);
         upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
             <<<blocks, 1024, 0, stream1>>>(
               num_kernels, rheight, rwidth, align_corners, idata, odata,
               input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-        cudaEventRecord(stop, 0);
-        cudaEventSynchronize(stop);
-        float milliseconds = 0;
-        cudaEventElapsedTime(&milliseconds, start, stop);
-        printf("time: %f\n", milliseconds);
+        // cudaEventRecord(stop, 0);
+        // cudaEventSynchronize(stop);
+        // float milliseconds = 0;
+        // cudaEventElapsedTime(&milliseconds, start, stop);
+        // printf("time: %f\n", milliseconds);
         upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel2_<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
             <<<blocks, 1024, 0, stream1>>>(
               num_kernels, rheight, rwidth, align_corners, idata, odata,

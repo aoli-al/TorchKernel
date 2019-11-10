@@ -13,7 +13,7 @@
 namespace at {
 namespace native {
 
-std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm_cuda(
+std::tuple<Tensor, Tensor> im2col_batchnorm_cuda(
     const Tensor& input,
     IntArrayRef kernel_size,
     IntArrayRef dilation,
@@ -30,7 +30,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm_cuda(
       input, kernel_size, dilation, padding, stride,
       input_batch_norm, 0.1);
   });
-  return std::tuple_cat(r1, r2);
+  return std::tuple_cat(r1, r1);
 }
 
 

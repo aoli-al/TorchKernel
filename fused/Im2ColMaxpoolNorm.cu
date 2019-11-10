@@ -31,7 +31,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batch_
   //     input, kernel_size, dilation, padding, stride,
   //     input_batch_norm, 0.1);
   // });
-  auto r1 = AT_DISPATCH_FLOATING_TYPES_AND_HALF(input_batch_norm.scalar_type(), "batch_norm_stats_cuda", [&] {
+  AT_DISPATCH_FLOATING_TYPES_AND_HALF(input_batch_norm.scalar_type(), "batch_norm_stats_cuda", [&] {
     return im2col_maxpool_batch_norm_stream<scalar_t, int32_t>(
       input, kernel_size, dilation, padding, stride,
       input_maxpool_,
@@ -42,7 +42,18 @@ std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batch_
       ceil_mode,
       input_batch_norm, 0.1);
   });
-  return std::tuple_cat(r1, r1);
+  auto r2 = AT_DISPATCH_FLOATING_TYPES_AND_HALF(input_batch_norm.scalar_type(), "batch_norm_stats_cuda", [&] {
+    return im2col_maxpool_batch_norm_fused<scalar_t, int32_t>(
+      input, kernel_size, dilation, padding, stride,
+      input_maxpool_,
+      kernel_size_maxpool,
+      stride_maxpool,
+      padding_maxpool,
+      dilation_maxpool,
+      ceil_mode,
+      input_batch_norm, 0.1);
+  });
+  return std::tuple_cat(r2, r2);
 }
 
 

@@ -50,7 +50,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool_upsample_stream(
     const Tensor &input_upsample,
     const IntArrayRef output_size,
     bool align_corners);
-std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm_cuda(
+std::tuple<Tensor, Tensor> im2col_batchnorm_cuda(
     const Tensor &input,
     IntArrayRef kernel_size,
     IntArrayRef dilation,
@@ -96,7 +96,7 @@ std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused()
                                               input_upsample, {2000, 2560}, true);
 }
 
-std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_batchnorm()
+std::tuple<Tensor, Tensor> im2col_batchnorm()
 {
   auto im2col_input = torch::randn({1, 1, 2850, 2048}, defaultOptions);
   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});

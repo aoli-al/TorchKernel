@@ -194,6 +194,199 @@ struct Var {
   }
 };
 
+template <typename dt60, typename scalar_t0, typename accscalar_t1, template <typename T> class VarTransform31, typename input_scalar_t32, typename stat_scalar_t33, typename stat_accscalar_t34, typename index_t35>
+void im2col_kernel_MaxPoolForward_batch_norm_collect_statistics_kernel_(const int64_t n61, const dt60 *data_im62, const int64_t height63, const int64_t width64, const int64_t kernel_height65, const int64_t kernel_width66, const int64_t pad_height67, const int64_t pad_width68, const int64_t stride_height69, const int64_t stride_width70, const int64_t dilation_height71, const int64_t dilation_width72, const int64_t height_col73, const int64_t width_col74, dt60 *data_col75, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19, const PackedTensorAccessor<input_scalar_t32, 3, RestrictPtrTraits, index_t35> input36, const stat_accscalar_t34 epsilon37, const stat_accscalar_t34 momentum38, PackedTensorAccessor<stat_scalar_t33, 1, RestrictPtrTraits, index_t35> running_mean39, PackedTensorAccessor<stat_scalar_t33, 1, RestrictPtrTraits, index_t35> running_var40, PackedTensorAccessor<stat_accscalar_t34, 1, RestrictPtrTraits, index_t35> save_mean41, PackedTensorAccessor<stat_accscalar_t34, 1, RestrictPtrTraits, index_t35> save_transformed_var42) __attribute__((global))
+ {
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
+unsigned int blockDim_x_2;
+blockDim_x_2 = 512;
+unsigned int threadIdx_x_2;
+threadIdx_x_2 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+unsigned int blockDim_y_2;
+blockDim_y_2 = 1;
+unsigned int threadIdx_y_2;
+threadIdx_y_2 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+unsigned int blockDim_z_2;
+blockDim_z_2 = 1;
+unsigned int threadIdx_z_2;
+threadIdx_z_2 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+for (int index = blockIdx.x * blockDim_x_2 + threadIdx_x_2; index < (n61); index += blockDim_x_2 * gridDim.x) {
+    int64_t w_out76;
+    w_out76 = index % width_col74;
+    index /= width_col74;
+    int64_t h_out77;
+    h_out77 = index % height_col73;
+    int64_t channel_in78;
+    channel_in78 = index / height_col73;
+    int64_t channel_out79;
+    channel_out79 = channel_in78 * kernel_height65 * kernel_width66;
+    int64_t h_in80;
+    h_in80 = h_out77 * stride_height69 - pad_height67;
+    int64_t w_in81;
+    w_in81 = w_out76 * stride_width70 - pad_width68;
+    data_col75 += (channel_out79 * height_col73 + h_out77) * width_col74 + w_out76;
+    data_im62 += (channel_in78 * height63 + h_in80) * width64 + w_in81;
+    for (int64_t i = 0; i < kernel_height65; ++i) {
+        for (int64_t j = 0; j < kernel_width66; ++j) {
+            int64_t h82;
+            h82 = h_in80 + i * dilation_height71;
+            int64_t w83;
+            w83 = w_in81 + j * dilation_width72;
+            * data_col75 = (h82 >= 0 && w83 >= 0 && h82 < height63 && w83 < width64) ? data_im62[i * dilation_height71 * width64 + j * dilation_width72] : ScalarConvert<int, dt60>::to(0);
+            data_col75 += height_col73 * width_col74;
+        }
+    }
+}
+label_0:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_1;
+unsigned int blockDim_x_0;
+blockDim_x_0 = 256;
+unsigned int threadIdx_x_0;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 256;
+unsigned int blockDim_y_0;
+blockDim_y_0 = 1;
+unsigned int threadIdx_y_0;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256 % 1;
+unsigned int blockDim_z_0;
+blockDim_z_0 = 1;
+unsigned int threadIdx_z_0;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256;
+for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
+    int pw20;
+    pw20 = index % pooled_width9;
+    int ph21;
+    ph21 = (index / pooled_width9) % pooled_height8;
+    int c22;
+    c22 = (index / pooled_width9 / pooled_height8) % channels5;
+    int n23;
+    n23 = index / pooled_width9 / pooled_height8 / channels5;
+    int hstart24;
+    hstart24 = ph21 * stride_h12 - pad_h14;
+    int wstart25;
+    wstart25 = pw20 * stride_w13 - pad_w15;
+    int hend26;
+    hend26 = min(hstart24 + (kernel_h10 - 1) * dilation_h16 + 1, height6);
+    int wend27;
+    wend27 = min(wstart25 + (kernel_w11 - 1) * dilation_w17 + 1, width7);
+    while (hstart24 < 0)
+        hstart24 += dilation_h16;
+    while (wstart25 < 0)
+        wstart25 += dilation_w17;
+    accscalar_t1 maxval28;
+    maxval28 = at::numeric_limits<accscalar_t1>::lower_bound();
+    int maxidx29;
+    maxidx29 = hstart24 * width7 + wstart25;
+    bottom_data3 += (n23 * channels5 + c22) * height6 * width7;
+    for (int h = hstart24; h < hend26; h += dilation_h16) {
+        for (int w = wstart25; w < wend27; w += dilation_w17) {
+            scalar_t0 val30;
+            val30 = bottom_data3[h * width7 + w];
+            if ((ScalarConvert<scalar_t0, accscalar_t1>::to(val30) > maxval28) || THCNumerics<scalar_t0>::isnan(val30)) {
+                maxidx29 = h * width7 + w;
+                maxval28 = ScalarConvert<scalar_t0, accscalar_t1>::to(val30);
+            }
+        }
+    }
+    top_data18[index] = ScalarConvert<scalar_t0, accscalar_t1>::to(maxval28);
+    top_mask19[index] = maxidx29;
+}
+label_1:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_2;
+unsigned int blockDim_x_1;
+blockDim_x_1 = 32;
+unsigned int threadIdx_x_1;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) % 32;
+unsigned int blockDim_y_1;
+blockDim_y_1 = 8;
+unsigned int threadIdx_y_1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 32 % 8;
+unsigned int blockDim_z_1;
+blockDim_z_1 = 1;
+unsigned int threadIdx_z_1;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 256;
+static int shared_n43[160] __attribute__((shared));
+int plane44;
+plane44 = blockIdx.x;
+int N45;
+N45 = input36.size(0) * input36.size(2);
+int tid46;
+tid46 = threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1;
+stat_accscalar_t34 *shared_avg_var47;
+shared_avg_var47 = (stat_accscalar_t34 *)&shared_n43[WARP_SIZE];
+stat_accscalar_t34 avg48;
+avg48 = 0;
+stat_accscalar_t34 var_n49;
+var_n49 = 0;
+int n50;
+n50 = 0;
+for (int batch = threadIdx_y_1; batch < input36.size(0); batch += blockDim_y_1) {
+    for (int x = threadIdx_x_1; x < input36.size(2); x += blockDim_x_1) {
+        stat_accscalar_t34 v51;
+        v51 = input36[batch][plane44][x];
+        stat_accscalar_t34 d152;
+        d152 = v51 - avg48;
+        n50++;
+        avg48 += d152 / n50;
+        var_n49 += d152 * (v51 - avg48);
+    }
+}
+for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+    stat_accscalar_t34 o_avg53;
+    o_avg53 = WARP_SHFL_XOR(avg48, 1 << i, WARP_SIZE);
+    int o_n54;
+    o_n54 = WARP_SHFL_XOR(n50, 1 << i, WARP_SIZE);
+    stat_accscalar_t34 factor55;
+    factor55 = 1. / fmaxf(1., n50 + o_n54);
+    var_n49 += WARP_SHFL_XOR(var_n49, 1 << i, WARP_SIZE) + (avg48 - o_avg53) * (avg48 - o_avg53) * n50 * o_n54 * factor55;
+    avg48 = (n50 * avg48 + o_n54 * o_avg53) * factor55;
+    n50 += o_n54;
+}
+label_2:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
+if (tid46 % WARP_SIZE == 0) {
+    shared_n43[tid46 / WARP_SIZE] = n50;
+    shared_avg_var47[tid46 / WARP_SIZE * 2] = avg48;
+    shared_avg_var47[tid46 / WARP_SIZE * 2 + 1] = var_n49;
+}
+label_3:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_4;
+if (tid46 < WARP_SIZE) {
+    n50 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_n43[tid46] : 0);
+    avg48 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_avg_var47[2 * tid46] : stat_accscalar_t34(0));
+    var_n49 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_avg_var47[2 * tid46 + 1] : stat_accscalar_t34(0));
+}
+for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+    stat_accscalar_t34 o_avg56;
+    o_avg56 = WARP_SHFL_XOR(avg48, 1 << i, WARP_SIZE);
+    int o_n57;
+    o_n57 = WARP_SHFL_XOR(n50, 1 << i, WARP_SIZE);
+    stat_accscalar_t34 factor58;
+    factor58 = 1. / fmaxf(1., n50 + o_n57);
+    var_n49 += WARP_SHFL_XOR(var_n49, 1 << i, WARP_SIZE) + (avg48 - o_avg56) * (avg48 - o_avg56) * n50 * o_n57 * factor58;
+    avg48 = (n50 * avg48 + o_n57 * o_avg56) * factor58;
+    n50 += o_n57;
+}
+if (tid46 == 0) {
+    if (save_mean41.data() != __null) {
+        save_mean41[plane44] = avg48;
+    }
+    if (save_transformed_var42.data() != __null) {
+        save_transformed_var42[plane44] = VarTransform31<stat_accscalar_t34>({})(var_n49 / N45, epsilon37);
+    }
+    if (running_mean39.data() != __null) {
+        running_mean39[plane44] = static_cast<stat_scalar_t33>((1 - momentum38) * running_mean39[plane44] + momentum38 * avg48);
+    }
+    if (running_var40.data() != __null) {
+        stat_accscalar_t34 unbiasedVar59;
+        unbiasedVar59 = var_n49 / (N45 - 1);
+        running_var40[plane44] = static_cast<stat_scalar_t33>((1 - momentum38) * running_var40[plane44] + momentum38 * unbiasedVar59);
+    }
+}
+label_4:;
+}
+
 template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
 __global__ void batch_norm_collect_statistics_kernel(
     const PackedTensorAccessor<input_scalar_t, 3, RestrictPtrTraits, index_t> input,
@@ -545,6 +738,8 @@ std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream(
 
       const int blocks = cuda::ATenCeilDiv(count, num_threads);
       printf("%d %d %d\n", count, blocks, num_threads);
+      printf("%d %d\n", threads.x, threads.y);
+      printf("%d\n", blocks);
       MaxPoolForward<scalar_t, scalar_t>
         <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, at::cuda::getCurrentCUDAStream()>>>(
           count, input_maxpool_data,
@@ -552,6 +747,7 @@ std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream(
           kH, kW, dH, dW, padH, padW, dilation_maxpoolH, dilation_maxpoolW, output_maxpool_data, indices_maxpool_data);
     batch_norm_collect_statistics_kernel<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm> <<<blocks, threads, 0, stream1>>>
       (input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+
     cudaDeviceSynchronize();
     cudaProfilerStop();
     AT_CUDA_CHECK(cudaGetLastError());
@@ -567,7 +763,7 @@ std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream(
 }
 
 template<typename scalar_t_batch_norm, typename index_t_batch_norm>
-std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream2(
+std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_fused(
     const Tensor& input_,
     IntArrayRef kernel_size,
     IntArrayRef dilation,
@@ -738,7 +934,18 @@ std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream2(
     const int num_of_threads = 1024;
     const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
     cudaProfilerStart();
-    im2col_kernel<scalar_t><<<num_of_blocks, num_of_threads, 0, stream2>>>(
+      using accscalar_t = acc_type<scalar_t, true>;
+
+      scalar_t *output_maxpool_data = output_maxpool.data<scalar_t>();
+      scalar_t *input_maxpool_data = input_maxpool.data<scalar_t>();
+      int64_t *indices_maxpool_data = indices_maxpool.data<int64_t>();
+
+      const int blocks = cuda::ATenCeilDiv(count, num_threads);
+      printf("%d %d %d\n", count, blocks, num_threads);
+      // printf("%d %d\n", threads.x, threads.y);
+      // printf("%d %d\n", blocks.x, blocks.y);
+    im2col_kernel_MaxPoolForward_batch_norm_collect_statistics_kernel_<scalar_t,scalar_t, scalar_t,InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
+    <<<blocks, 1024, 0, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
         input_n.data<scalar_t>(),
         input_height,
@@ -753,24 +960,12 @@ std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_stream2(
         dilation_width,
         output_height,
         output_width,
-        output_n.data<scalar_t>());
-
-
-      using accscalar_t = acc_type<scalar_t, true>;
-
-      scalar_t *output_maxpool_data = output_maxpool.data<scalar_t>();
-      scalar_t *input_maxpool_data = input_maxpool.data<scalar_t>();
-      int64_t *indices_maxpool_data = indices_maxpool.data<int64_t>();
-
-      const int blocks = cuda::ATenCeilDiv(count, num_threads);
-      printf("%d %d %d\n", count, blocks, num_threads);
-      MaxPoolForward<scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, at::cuda::getCurrentCUDAStream()>>>(
-          count, input_maxpool_data,
-          nbatch, nInputPlane, input_maxpoolHeight, input_maxpoolWidth, output_maxpoolHeight, output_maxpoolWidth,
-          kH, kW, dH, dW, padH, padW, dilation_maxpoolH, dilation_maxpoolW, output_maxpool_data, indices_maxpool_data);
-    batch_norm_collect_statistics_kernel<InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm> <<<blocks, threads, 0, stream1>>>
-      (input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+        output_n.data<scalar_t>(),
+        count, input_maxpool_data,
+        nbatch, nInputPlane, input_maxpoolHeight, input_maxpoolWidth, output_maxpoolHeight, output_maxpoolWidth,
+        kH, kW, dH, dW, padH, padW, dilation_maxpoolH, dilation_maxpoolW, output_maxpool_data, indices_maxpool_data,
+        input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
+    );
     cudaDeviceSynchronize();
     cudaProfilerStop();
     AT_CUDA_CHECK(cudaGetLastError());

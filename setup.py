@@ -15,7 +15,7 @@ setup(
             'fused/MaxPoolUpSample.cu',
         ],
         extra_compile_args={'cxx': [],
-                            'nvcc': ['-O3', '--expt-extended-lambda']},
+                            'nvcc': ['-O3', '--expt-extended-lambda', '-maxrregcount=30']},
         include_dirs = ['/home/hao01/torch_extension/lib/python3.6/site-packages/torch/include', '/home/hao01/pytorch/aten/src'],
         library_dirs = ['/home/hao01/torch_extension/lib/python3.6/site-packages/torch/lib'],
         libraries = ["torch"]),
