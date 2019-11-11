@@ -142,7 +142,7 @@ __global__ void kernelHistogram1D(
       // Convert `linearIndex` into an offset of `b`
       const IndexType bOffset =
           IndexToOffset<input_t, IndexType, BDims>::get(linearIndex, b);
-      const auto bVal = b.data[bOffset];
+      const input_t bVal = b.data[bOffset];
       if (bVal >= minvalue && bVal <= maxvalue) {
         // Use value at `b` as an offset of `smem`
         const IndexType bin = getBin<input_t, IndexType>(bVal, minvalue, maxvalue, nbins);
@@ -305,7 +305,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
     input_n = input.select(0, elt);
     output_n = output.select(0, elt);
     int64_t num_kernels = n_input_plane * output_height * output_width;
-    im2col_kernel<<<GET_BLOCKS(num_kernels), 1024, 0, at::cuda::getCurrentCUDAStream()>>>(
+    im2col_kernel<<<10000, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
         input_n.data<scalar_t>(),
         input_height,
