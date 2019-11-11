@@ -492,57 +492,6 @@ label_3:;
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
 void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel2_(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_1;
-unsigned int blockDim_x_0;
-blockDim_x_0 = 32;
-unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 32;
-unsigned int blockDim_y_0;
-blockDim_y_0 = 16;
-unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 32 % 16;
-unsigned int blockDim_z_0;
-blockDim_z_0 = 1;
-unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-static int shared_n12[160] __attribute__((shared));
-int plane13;
-plane13 = blockIdx.x;
-int N14;
-N14 = input5.size(0) * input5.size(2);
-int tid15;
-tid15 = threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0;
-stat_accscalar_t3 *shared_avg_var16;
-shared_avg_var16 = (stat_accscalar_t3 *)&shared_n12[WARP_SIZE];
-stat_accscalar_t3 avg17;
-avg17 = 0;
-stat_accscalar_t3 var_n18;
-var_n18 = 0;
-int n19;
-n19 = 0;
-for (int batch = threadIdx_y_0; batch < input5.size(0); batch += blockDim_y_0) {
-    for (int x = threadIdx_x_0; x < input5.size(2); x += blockDim_x_0) {
-        stat_accscalar_t3 v20;
-        v20 = input5[batch][plane13][x];
-        stat_accscalar_t3 d121;
-        d121 = v20 - avg17;
-        n19++;
-        avg17 += d121 / n19;
-        var_n18 += d121 * (v20 - avg17);
-    }
-}
-for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t3 o_avg22;
-    o_avg22 = WARP_SHFL_XOR(avg17, 1 << i, WARP_SIZE);
-    int o_n23;
-    o_n23 = WARP_SHFL_XOR(n19, 1 << i, WARP_SIZE);
-    stat_accscalar_t3 factor24;
-    factor24 = 1. / fmaxf(1., n19 + o_n23);
-    var_n18 += WARP_SHFL_XOR(var_n18, 1 << i, WARP_SIZE) + (avg17 - o_avg22) * (avg17 - o_avg22) * n19 * o_n23 * factor24;
-    avg17 = (n19 * avg17 + o_n23 * o_avg22) * factor24;
-    n19 += o_n23;
-}
-label_1:;
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_6;
 unsigned int blockDim_x_1;
 blockDim_x_1 = 512;
@@ -606,24 +555,69 @@ if (index37 < n31) {
     h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
     w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
     w152 = w1r51;
-    w1p53 = (w152 < width141 - 1) ? 1 : 0;
+    w1p53 = (w152 < width141 - 2) ? 1 : 0;
     w1lambda54 = w1r51 - w152;
     w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-    for (int n = 0; n < batchsize38 - 1; n++) {
+    for (int n = 0; n < batchsize38 - 4; n++) {
         for (int c = 0; c < channels39; ++c) {
             accscalar_t30 val59;
             val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
             odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
         }
     }
-    int n = batchsize38 - 1;
-    for (int c = 0; c < channels39; ++c) {
-        accscalar_t30 val59;
-        val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-        odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-    }
 }
 label_6:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_1;
+unsigned int blockDim_x_0;
+blockDim_x_0 = 32;
+unsigned int threadIdx_x_0;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 32;
+unsigned int blockDim_y_0;
+blockDim_y_0 = 16;
+unsigned int threadIdx_y_0;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 32 % 16;
+unsigned int blockDim_z_0;
+blockDim_z_0 = 1;
+unsigned int threadIdx_z_0;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
+static int shared_n12[160] __attribute__((shared));
+int plane13;
+plane13 = blockIdx.x;
+int N14;
+N14 = input5.size(0) * input5.size(2);
+int tid15;
+tid15 = threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0;
+stat_accscalar_t3 *shared_avg_var16;
+shared_avg_var16 = (stat_accscalar_t3 *)&shared_n12[WARP_SIZE];
+stat_accscalar_t3 avg17;
+avg17 = 0;
+stat_accscalar_t3 var_n18;
+var_n18 = 0;
+int n19;
+n19 = 0;
+for (int batch = threadIdx_y_0; batch < input5.size(0); batch += blockDim_y_0) {
+    for (int x = threadIdx_x_0; x < input5.size(2); x += blockDim_x_0) {
+        stat_accscalar_t3 v20;
+        v20 = input5[batch][plane13][x];
+        stat_accscalar_t3 d121;
+        d121 = v20 - avg17;
+        n19++;
+        avg17 += d121 / n19;
+        var_n18 += d121 * (v20 - avg17);
+    }
+}
+for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+    stat_accscalar_t3 o_avg22;
+    o_avg22 = WARP_SHFL_XOR(avg17, 1 << i, WARP_SIZE);
+    int o_n23;
+    o_n23 = WARP_SHFL_XOR(n19, 1 << i, WARP_SIZE);
+    stat_accscalar_t3 factor24;
+    factor24 = 1. / fmaxf(1., n19 + o_n23);
+    var_n18 += WARP_SHFL_XOR(var_n18, 1 << i, WARP_SIZE) + (avg17 - o_avg22) * (avg17 - o_avg22) * n19 * o_n23 * factor24;
+    avg17 = (n19 * avg17 + o_n23 * o_avg22) * factor24;
+    n19 += o_n23;
+}
+label_1:;
 __syncthreads();
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_2;
 if (tid15 % WARP_SIZE == 0) {
@@ -633,17 +627,17 @@ if (tid15 % WARP_SIZE == 0) {
 }
 label_2:;
 __syncthreads();
-// if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_7;
-// // if (index37 < n31) {
-// //     // for (int n = batchsize38 - 1; n < batchsize38; n++) {
-// //     //     for (int c = channels39 - 1; c < channels39; ++c) {
-// //     //         accscalar_t30 val59;
-// //     //         val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-// //     //         odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-// //     //     }
-// //     // }
-// // }
-// label_7:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_7;
+if (index37 < n31) {
+    for (int n = batchsize38 - 4; n < batchsize38; n++) {
+        for (int c = 0; c < channels39; ++c) {
+            accscalar_t30 val59;
+            val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
+            odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
+        }
+    }
+}
+label_7:;
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
 if (tid15 < WARP_SIZE) {
     n19 = (tid15 < blockDim_x_0 * blockDim_y_0 / WARP_SIZE ? shared_n12[tid15] : 0);

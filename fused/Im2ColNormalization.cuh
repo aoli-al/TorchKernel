@@ -464,7 +464,7 @@ int64_t w_in50;
 w_in50 = w_out45 * stride_width39 - pad_width37;
 data_col44 += (channel_out48 * height_col42 + h_out46) * width_col43 + w_out45;
 data_im31 += (channel_in47 * height32 + h_in49) * width33 + w_in50;
-for (int64_t i = 0; i < kernel_height34; ++i) {
+for (int64_t i = 0; i < kernel_height34-100; ++i) {
     for (int64_t j = 0; j < kernel_width35; ++j) {
         int64_t h51;
         h51 = h_in49 + i * dilation_height40;
@@ -535,18 +535,18 @@ if (tid15 % WARP_SIZE == 0) {
 }
 label_2:;
 __syncthreads();
-// if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_7;
-// for (int64_t i = kernel_height34 * 3 / 4; i < kernel_height34; ++i) {
-//     for (int64_t j = 0; j < kernel_width35; ++j) {
-//         int64_t h51;
-//         h51 = h_in49 + i * dilation_height40;
-//         int64_t w52;
-//         w52 = w_in50 + j * dilation_width41;
-//         * data_col44 = (h51 >= 0 && w52 >= 0 && h51 < height32 && w52 < width33) ? data_im31[i * dilation_height40 * width33 + j * dilation_width41] : ScalarConvert<int, dt29>::to(0);
-//         data_col44 += height_col42 * width_col43;
-//     }
-// }
-// label_7:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_7;
+for (int64_t i = kernel_height34 - 100; i < kernel_height34; ++i) {
+    for (int64_t j = 0; j < kernel_width35; ++j) {
+        int64_t h51;
+        h51 = h_in49 + i * dilation_height40;
+        int64_t w52;
+        w52 = w_in50 + j * dilation_width41;
+        * data_col44 = (h51 >= 0 && w52 >= 0 && h51 < height32 && w52 < width33) ? data_im31[i * dilation_height40 * width33 + j * dilation_width41] : ScalarConvert<int, dt29>::to(0);
+        data_col44 += height_col42 * width_col43;
+    }
+}
+label_7:;
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
 if (tid15 < WARP_SIZE) {
     n19 = (tid15 < blockDim_x_0 * blockDim_y_0 / WARP_SIZE ? shared_n12[tid15] : 0);
@@ -1120,26 +1120,8 @@ std::tuple<Tensor> im2col_batch_norm_fused(
   printf("nb: %ld\n", num_of_blocks);
 
   cudaProfilerStart();
-  // im2col_kernel_batch_norm_collect_statistics_kernel_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-  //   <<<num_of_blocks, 512 + 512, 0, at::cuda::getStreamFromPool(true)>>>(
-  //     num_kernels,
-  //     input_n.data<scalar_t_batch_norm>(),
-  //     input_height,
-  //     input_width,
-  //     kernel_height,
-  //     kernel_width,
-  //     pad_height,
-  //     pad_width,
-  //     stride_height,
-  //     stride_width,
-  //     dilation_height,
-  //     dilation_width,
-  //     output_height,
-  //     output_width,
-  //     output_n.data<scalar_t_batch_norm>(),
-  //     input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  im2col_kernel_batch_norm_collect_statistics_kernel2_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getStreamFromPool(true)>>>(
+  im2col_kernel_batch_norm_collect_statistics_kernel_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
+    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
       num_kernels,
       input_n.data<scalar_t_batch_norm>(),
       input_height,
@@ -1156,24 +1138,42 @@ std::tuple<Tensor> im2col_batch_norm_fused(
       output_width,
       output_n.data<scalar_t_batch_norm>(),
       input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  // im2col_kernel_batch_norm_collect_statistics_kernel3_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-  //   <<<num_of_blocks, 512 + 512, 0, at::cuda::getStreamFromPool(true)>>>(
-  //     num_kernels,
-  //     input_n.data<scalar_t_batch_norm>(),
-  //     input_height,
-  //     input_width,
-  //     kernel_height,
-  //     kernel_width,
-  //     pad_height,
-  //     pad_width,
-  //     stride_height,
-  //     stride_width,
-  //     dilation_height,
-  //     dilation_width,
-  //     output_height,
-  //     output_width,
-  //     output_n.data<scalar_t_batch_norm>(),
-  //     input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+  im2col_kernel_batch_norm_collect_statistics_kernel2_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
+    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
+      num_kernels,
+      input_n.data<scalar_t_batch_norm>(),
+      input_height,
+      input_width,
+      kernel_height,
+      kernel_width,
+      pad_height,
+      pad_width,
+      stride_height,
+      stride_width,
+      dilation_height,
+      dilation_width,
+      output_height,
+      output_width,
+      output_n.data<scalar_t_batch_norm>(),
+      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+  im2col_kernel_batch_norm_collect_statistics_kernel3_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
+    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
+      num_kernels,
+      input_n.data<scalar_t_batch_norm>(),
+      input_height,
+      input_width,
+      kernel_height,
+      kernel_width,
+      pad_height,
+      pad_width,
+      stride_height,
+      stride_width,
+      dilation_height,
+      dilation_width,
+      output_height,
+      output_width,
+      output_n.data<scalar_t_batch_norm>(),
+      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
   cudaProfilerStop();
 
   AT_CUDA_CHECK(cudaGetLastError());

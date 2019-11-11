@@ -238,59 +238,6 @@ for (int index = blockIdx.x * blockDim_x_2 + threadIdx_x_2; index < (n61); index
     }
 }
 label_0:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_1;
-unsigned int blockDim_x_0;
-blockDim_x_0 = 256;
-unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 256;
-unsigned int blockDim_y_0;
-blockDim_y_0 = 1;
-unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256 % 1;
-unsigned int blockDim_z_0;
-blockDim_z_0 = 1;
-unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256;
-for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
-    int pw20;
-    pw20 = index % pooled_width9;
-    int ph21;
-    ph21 = (index / pooled_width9) % pooled_height8;
-    int c22;
-    c22 = (index / pooled_width9 / pooled_height8) % channels5;
-    int n23;
-    n23 = index / pooled_width9 / pooled_height8 / channels5;
-    int hstart24;
-    hstart24 = ph21 * stride_h12 - pad_h14;
-    int wstart25;
-    wstart25 = pw20 * stride_w13 - pad_w15;
-    int hend26;
-    hend26 = min(hstart24 + (kernel_h10 - 1) * dilation_h16 + 1, height6);
-    int wend27;
-    wend27 = min(wstart25 + (kernel_w11 - 1) * dilation_w17 + 1, width7);
-    while (hstart24 < 0)
-        hstart24 += dilation_h16;
-    while (wstart25 < 0)
-        wstart25 += dilation_w17;
-    accscalar_t1 maxval28;
-    maxval28 = at::numeric_limits<accscalar_t1>::lower_bound();
-    int maxidx29;
-    maxidx29 = hstart24 * width7 + wstart25;
-    bottom_data3 += (n23 * channels5 + c22) * height6 * width7;
-    for (int h = hstart24; h < hend26; h += dilation_h16) {
-        for (int w = wstart25; w < wend27; w += dilation_w17) {
-            scalar_t0 val30;
-            val30 = bottom_data3[h * width7 + w];
-            if ((ScalarConvert<scalar_t0, accscalar_t1>::to(val30) > maxval28) || THCNumerics<scalar_t0>::isnan(val30)) {
-                maxidx29 = h * width7 + w;
-                maxval28 = ScalarConvert<scalar_t0, accscalar_t1>::to(val30);
-            }
-        }
-    }
-    top_data18[index] = ScalarConvert<scalar_t0, accscalar_t1>::to(maxval28);
-    top_mask19[index] = maxidx29;
-}
-label_1:;
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_2;
 unsigned int blockDim_x_1;
 blockDim_x_1 = 32;
@@ -351,6 +298,59 @@ if (tid46 % WARP_SIZE == 0) {
 }
 label_3:;
 __syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_1;
+unsigned int blockDim_x_0;
+blockDim_x_0 = 256;
+unsigned int threadIdx_x_0;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 256;
+unsigned int blockDim_y_0;
+blockDim_y_0 = 1;
+unsigned int threadIdx_y_0;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256 % 1;
+unsigned int blockDim_z_0;
+blockDim_z_0 = 1;
+unsigned int threadIdx_z_0;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256;
+for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
+    int pw20;
+    pw20 = index % pooled_width9;
+    int ph21;
+    ph21 = (index / pooled_width9) % pooled_height8;
+    int c22;
+    c22 = (index / pooled_width9 / pooled_height8) % channels5;
+    int n23;
+    n23 = index / pooled_width9 / pooled_height8 / channels5;
+    int hstart24;
+    hstart24 = ph21 * stride_h12 - pad_h14;
+    int wstart25;
+    wstart25 = pw20 * stride_w13 - pad_w15;
+    int hend26;
+    hend26 = min(hstart24 + (kernel_h10 - 1) * dilation_h16 + 1, height6);
+    int wend27;
+    wend27 = min(wstart25 + (kernel_w11 - 1) * dilation_w17 + 1, width7);
+    while (hstart24 < 0)
+        hstart24 += dilation_h16;
+    while (wstart25 < 0)
+        wstart25 += dilation_w17;
+    accscalar_t1 maxval28;
+    maxval28 = at::numeric_limits<accscalar_t1>::lower_bound();
+    int maxidx29;
+    maxidx29 = hstart24 * width7 + wstart25;
+    bottom_data3 += (n23 * channels5 + c22) * height6 * width7;
+    for (int h = hstart24; h < hend26; h += dilation_h16) {
+        for (int w = wstart25; w < wend27; w += dilation_w17) {
+            scalar_t0 val30;
+            val30 = bottom_data3[h * width7 + w];
+            if ((ScalarConvert<scalar_t0, accscalar_t1>::to(val30) > maxval28) || THCNumerics<scalar_t0>::isnan(val30)) {
+                maxidx29 = h * width7 + w;
+                maxval28 = ScalarConvert<scalar_t0, accscalar_t1>::to(val30);
+            }
+        }
+    }
+    top_data18[index] = ScalarConvert<scalar_t0, accscalar_t1>::to(maxval28);
+    top_mask19[index] = maxidx29;
+}
+label_1:;
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_4;
 if (tid46 < WARP_SIZE) {
     n50 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_n43[tid46] : 0);

@@ -8,6 +8,8 @@ import torch
 
 import fusion_cuda
 
+torch.backends.cudnn.enabled = False
+
 torch.manual_seed(42)
 
 device = torch.device("cuda")
@@ -23,14 +25,16 @@ def check(kernels):
   for i in range(half):
     print(torch.all(torch.eq(kernels[i], kernels[i+half])))
 
+print(fusion_cuda.histc(torch.randn([912000000], **kwargs), 99))
+torch.cuda.synchronize(device=None)
 
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
-# check(fusion_cuda.im2col_maxpool_batchnorm())
+#  check(fusion_cuda.im2col_maxpool_batchnorm())
 # print(fusion_cuda.im2col_upsample()[0][0])
-# check(fusion_cuda.im2col_batchnorm())
+#  print(fusion_cuda.im2col_batchnorm()[0][0])
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0][0])
 # check(fusion_cuda.max_pool_batch_norm())
-check(fusion_cuda.upsample_batchnorm())
+#  check(fusion_cuda.upsample_batchnorm())
 # i = torch.randn(20, 25600000, **kwargs)
 # print(fusion_cuda.dropout_batchnorm(i)[0][0])
 
