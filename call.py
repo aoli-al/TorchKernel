@@ -25,7 +25,8 @@ def check(kernels):
   for i in range(half):
     print(torch.all(torch.eq(kernels[i], kernels[i+half])))
 
-print(fusion_cuda.histc(torch.randn([900000000], **kwargs), 50))
+# print(fusion_cuda.histc(torch.randn([900000000], **kwargs), 50))
+print(fusion_cuda.hist_norm())
 torch.cuda.synchronize(device=None)
 
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0])

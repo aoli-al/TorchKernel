@@ -636,7 +636,8 @@ std::tuple<Tensor, Tensor, Tensor> batch_norm_backward_cuda_template(const Tenso
 }
 
 template<typename scalar_t, typename index_t>
-std::tuple<Tensor, Tensor> batch_norm_stats_cuda_template(const Tensor& input_, double epsilon) {
+std::tuple<Tensor, Tensor> batch_norm_stats_cuda_template(
+  const Tensor& input_, double epsilon) {
 
   using accscalar_t = at::acc_type<scalar_t, true>;
   int64_t n_input = input_.size(1);

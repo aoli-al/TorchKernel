@@ -6,6 +6,7 @@ setup(
     ext_modules=[
         CUDAExtension('fusion_cuda', [
             'fused/SummaryOps.cu',
+            'fused/SummaryNorm.cu',
             # 'fused/Im2ColMaxpoolNorm.cu',
             # 'fused/UpsampleNormalization.cu',
             # 'fused/Im2ColMaxPool.cu',
