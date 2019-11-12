@@ -5,8 +5,8 @@ setup(
     name='fusion_cuda',
     ext_modules=[
         CUDAExtension('fusion_cuda', [
-            'fused/SummaryOps.cu',
             'fused/SummaryNorm.cu',
+            'fused/SummaryOps.cu',
             # 'fused/Im2ColMaxpoolNorm.cu',
             # 'fused/UpsampleNormalization.cu',
             # 'fused/Im2ColMaxPool.cu',
@@ -18,7 +18,7 @@ setup(
         ],
         extra_compile_args={'cxx': ['-g'],
                             'nvcc': ['-g', '-O3', '--expt-extended-lambda',
-                            # '-maxrregcount=32',
+                            '-maxrregcount=32',
                             '-lineinfo']},
         include_dirs = ['/home/hao01/torch_extension/lib/python3.6/site-packages/torch/include', '/home/hao01/pytorch/aten/src'],
         library_dirs = ['/home/hao01/torch_extension/lib/python3.6/site-packages/torch/lib'],

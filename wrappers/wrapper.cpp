@@ -176,8 +176,8 @@ Tensor histc(Tensor t, uint64_t y)
 // }
 Tensor hist_norm() {
   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
-  auto hist_input = torch::randn({900000000}, defaultOptions);
-  at::native::hist_norm(hist_input, 50, 0.f, 1.f, batch_norm_input);
+  auto hist_input = torch::randn({1000000000}, defaultOptions);
+  at::native::hist_norm(hist_input, 10, 0.f, 1.f, batch_norm_input);
  return torch::randn({100, 100});
 }
 
