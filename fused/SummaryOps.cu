@@ -421,6 +421,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
       output.resize_({n_output_plane, output_length});
     }
   });
+  cudaDeviceSynchronize();
   return std::make_tuple(output_hist, output);
 }
 }

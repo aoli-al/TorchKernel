@@ -25,17 +25,17 @@ def check(kernels):
   for i in range(half):
     print(torch.all(torch.eq(kernels[i], kernels[i+half])))
 
-# print(fusion_cuda.histc(torch.randn([900000000], **kwargs), 50))
+# print(fusion_cuda.histc(torch.randn([1], **kwargs), 50))
 print(fusion_cuda.hist_norm())
-torch.cuda.synchronize(device=None)
+#  torch.cuda.synchronize(device=None)
 
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
 #  check(fusion_cuda.im2col_maxpool_batchnorm())
 # print(fusion_cuda.im2col_upsample()[0][0])
-#  print(fusion_cuda.im2col_batchnorm()[0][0])
+# print(fusion_cuda.im2col_batchnorm()[0][0])
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0][0])
 # check(fusion_cuda.max_pool_batch_norm())
-#  check(fusion_cuda.upsample_batchnorm())
+# check(fusion_cuda.upsample_batchnorm())
 # i = torch.randn(20, 25600000, **kwargs)
 # print(fusion_cuda.dropout_batchnorm(i)[0][0])
 
