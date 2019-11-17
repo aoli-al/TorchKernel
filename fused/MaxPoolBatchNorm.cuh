@@ -1476,6 +1476,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
       printf("%d %d %d\n", count, blocks, num_threads);
 
       cudaProfilerStart();
+      cudaDeviceSynchronize();
       MaxPoolForward_batch_norm_collect_statistics_kernel_<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 768, 0, stream>>>(
           count, input_data,
@@ -1483,6 +1484,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
+      cudaDeviceSynchronize();
       MaxPoolForward_batch_norm_collect_statistics_kernel_100<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 512, 0, stream>>>(
           count, input_data,
@@ -1490,6 +1492,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
+      cudaDeviceSynchronize();
       cudaProfilerStop();
     });
   THCudaCheck(cudaGetLastError());

@@ -944,6 +944,7 @@ std::tuple<Tensor, Tensor, Tensor> im2col_maxpool_batch_norm_fused(
       printf("%d %d %d\n", count, blocks, num_threads);
       // printf("%d %d\n", threads.x, threads.y);
       // printf("%d %d\n", blocks.x, blocks.y);
+      cudaDeviceSynchronize();
     im2col_kernel_MaxPoolForward_batch_norm_collect_statistics_kernel_<scalar_t,scalar_t, scalar_t,InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
     <<<blocks, 1024, 0, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
