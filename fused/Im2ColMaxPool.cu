@@ -425,7 +425,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_fused(
       // Launch CUDA_NUM_THREADS = 1024
       printf("num_kernels %ld, %ld, %ld\n", num_kernels_im2col, n_input_im2col_plane, output_im2col_height);
       im2col_kernel_MaxPoolForward<scalar_t, scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getStreamFromPool(true)>>>(
+        <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels_im2col,
         input_im2col_im2col_n.data<scalar_t>(),
         input_im2col_height,
@@ -444,8 +444,8 @@ std::tuple<Tensor, Tensor> im2col_maxpool_fused(
         count, input_data,
         nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
         kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      im2col_maxpool<scalar_t, scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getStreamFromPool(true)>>>(
+      im2col_kernel_MaxPoolForward_100<scalar_t, scalar_t, scalar_t>
+        <<<cuda::ATenCeilDiv(count, num_threads), 512, 0, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels_im2col,
         input_im2col_im2col_n.data<scalar_t>(),
         input_im2col_height,
