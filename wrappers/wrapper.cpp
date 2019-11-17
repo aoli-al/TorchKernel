@@ -12,6 +12,19 @@ namespace at
 namespace native
 {
 
+std::tuple<Tensor, Tensor> _histc_maxpool(
+    const Tensor& self,
+    int64_t nbins,
+    Scalar min,
+    Scalar max,
+
+           const Tensor& input_,
+           IntArrayRef kernel_size,
+           IntArrayRef stride,
+           IntArrayRef padding,
+           IntArrayRef dilation,
+           bool ceil_mode
+  );
 std::tuple<Tensor, Tensor> _histc_cuda2(
   const Tensor& input_im2col_,
   IntArrayRef kernel_size_im2col,
@@ -123,24 +136,24 @@ std::tuple<Tensor, Tensor> im2col_batchnorm()
                                            batch_norm_input);
 }
 //
-std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batchnorm()
-{
-  auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
-  auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
-  // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
-  // return std::make_tuple(r, r, r, r, r, r);
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
-  return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
-                                          input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
-                                           batch_norm_input);
-}
+// std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batchnorm()
+// {
+//   auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
+//   auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
+//   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
+//   // return std::make_tuple(r, r, r, r, r, r);
+//   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+//   return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
+//                                           input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
+//                                            batch_norm_input);
+// }
 
 Tensor histc(Tensor t, uint64_t y)
 {
-  auto im2col_input = torch::randn({1, 1, 2650, 2048}, defaultOptions);
+  auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
   auto hist_input = torch::randn({100000000}, defaultOptions);
   // auto x = torch::randn({1000, 1000}, defaultOptions);
-  at::native::_histc_cuda2(im2col_input,{151, 1}, {1, 1}, {0, 0}, {1, 1},
+  at::native::_histc_cuda2(im2col_input,{201, 1}, {1, 1}, {0, 0}, {1, 1},
    hist_input, 20, c10::Scalar(0.f), c10::Scalar(0.f));
   return torch::randn({100, 100});
 }
@@ -183,15 +196,26 @@ Tensor hist_norm() {
  return torch::randn({100, 100});
 }
 
+std::tuple<Tensor, Tensor> histc_maxpool()
+{
+  auto hist_input = torch::randn({100000000}, defaultOptions);
+  auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
+  at::native::hist_norm(hist_input, 20, 0.f, 0.f,
+    input_max_pool, {20, 20}, {10, 10}, 0, 1, false
+  );
+ return torch::randn({100, 100});
+}
+
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
-  m.def("call_max_pool_upsample_fused", &call_max_pool_upsample_fused, "LLTM forward (CUDA)");
-  m.def("im2col_batchnorm", &im2col_batchnorm, "LLTM forward (CUDA)");
-  m.def("max_pool_batch_norm", &max_pool_batch_norm, "LLTM forward (CUDA)");
-  m.def("im2col_upsample", &im2col_upsample, "LLTM forward (CUDA)");
-  m.def("im2col_maxpool", &im2col_maxpool, "LLTM forward (CUDA)");
-  m.def("upsample_batchnorm", &upsample_batchnorm, "LLTM forward (CUDA)");
-  m.def("im2col_maxpool_batchnorm", &im2col_maxpool_batchnorm, "LLTM forward (CUDA)");
+  // m.def("call_max_pool_upsample_fused", &call_max_pool_upsample_fused, "LLTM forward (CUDA)");
+  // m.def("im2col_batchnorm", &im2col_batchnorm, "LLTM forward (CUDA)");
+  // m.def("max_pool_batch_norm", &max_pool_batch_norm, "LLTM forward (CUDA)");
+  // m.def("im2col_upsample", &im2col_upsample, "LLTM forward (CUDA)");
+  // m.def("im2col_maxpool", &im2col_maxpool, "LLTM forward (CUDA)");
+  // m.def("upsample_batchnorm", &upsample_batchnorm, "LLTM forward (CUDA)");
+  // m.def("im2col_maxpool_batchnorm", &im2col_maxpool_batchnorm, "LLTM forward (CUDA)");
   m.def("histc", &histc, "LLTM forward (CUDA)");
   m.def("hist_norm", &hist_norm, "LLTM forward (CUDA)");
+  m.def("histc_maxpool", &histc_maxpool, "LLTM forward (CUDA)");
 }
