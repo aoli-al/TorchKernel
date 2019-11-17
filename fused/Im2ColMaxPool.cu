@@ -429,7 +429,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_fused(
       printf("num_kernels %ld, %ld, %ld\n", num_kernels_im2col, n_input_im2col_plane, output_im2col_height);
         cudaProfilerStart();
       cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward<scalar_t, scalar_t, scalar_t>
+      im2col_kernel_MaxPoolForward_0<scalar_t, scalar_t, scalar_t>
         <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels_im2col,
         input_im2col_im2col_n.data<scalar_t>(),
