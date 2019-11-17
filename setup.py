@@ -5,6 +5,7 @@ setup(
     name='fusion_cuda',
     ext_modules=[
         CUDAExtension('fusion_cuda', [
+            'fused/MaxPoolUpSample.cu',
             'fused/SummaryNorm.cu',
             'fused/SummaryOps.cu',
             'fused/Im2ColMaxpoolNorm.cu',
@@ -14,7 +15,6 @@ setup(
             'fused/MaxPoolBatchNorm.cu',
             'wrappers/wrapper.cpp',
             'fused/Im2ColNormalization.cu',
-            'fused/MaxPoolUpSample.cu',
         ],
         extra_compile_args={'cxx': ['-g'],
                             'nvcc': ['-g', '-O3', '--expt-extended-lambda',
