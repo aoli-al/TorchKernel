@@ -20,6 +20,7 @@
 #include <ATen/cuda/detail/IndexUtils.cuh>
 #include <ATen/cuda/detail/TensorInfo.cuh>
 
+#include <cuda_profiler_api.h>
 #include <c10/macros/Macros.h>
 #include "Im2ColUpSample.cuh"
 
@@ -177,6 +178,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
           const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
           printf("%d\n", num_blocks);
 
+        cudaProfilerStart();
           upsample_bilinear2d_out_frame<scalar_t, accscalar_t>
               <<<num_blocks,
                 num_threads,
@@ -202,6 +204,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
           if (!batched_input_im2col) {
             output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
           }
+        cudaProfilerStop();
           AT_CUDA_CHECK(cudaGetLastError());
         });
 
@@ -361,6 +364,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
           const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
           printf("%d\n", num_blocks);
 
+        cudaProfilerStart();
       cudaDeviceSynchronize();
           im2col_kernel_upsample_bilinear2d_out_frame_<scalar_t, scalar_t, accscalar_t>
             <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
@@ -400,6 +404,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
               output_im2col_n.data<scalar_t>(),
               num_kernels, rheight, rwidth, align_corners, idata, odata);
       cudaDeviceSynchronize();
+        cudaProfilerStop();
           AT_CUDA_CHECK(cudaGetLastError());
         });
 

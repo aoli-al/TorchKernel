@@ -13,6 +13,7 @@
 #include <ATen/TensorUtils.h>
 #include <ATen/Utils.h>
 
+#include <cuda_profiler_api.h>
 #include <ATen/cuda/CUDAContext.h>
 #include <ATen/cuda/detail/KernelUtils.h>
 #include <ATen/cuda/CUDAApplyUtils.cuh>
@@ -210,6 +211,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_stream(
       int64_t num_kernels_im2col = n_input_im2col_plane * output_im2col_height * output_im2col_width;
       // Launch CUDA_NUM_THREADS = 1024
       printf("num_kernels %ld, %ld, %ld\n", num_kernels_im2col, n_input_im2col_plane, output_im2col_height);
+    cudaProfilerStart();
       auto s1 = at::cuda::getStreamFromPool(true);
       auto s2 = at::cuda::getStreamFromPool(true);
       im2col_kernel<scalar_t><<<GET_BLOCKS(num_kernels_im2col), 1024, 0, s1>>>(
@@ -235,6 +237,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_stream(
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
       s1.synchronize();
       s2.synchronize();
+    cudaProfilerStop();
 
       if (!batched_input_im2col) {
         output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
@@ -424,6 +427,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_fused(
       int64_t num_kernels_im2col = n_input_im2col_plane * output_im2col_height * output_im2col_width;
       // Launch CUDA_NUM_THREADS = 1024
       printf("num_kernels %ld, %ld, %ld\n", num_kernels_im2col, n_input_im2col_plane, output_im2col_height);
+        cudaProfilerStart();
       cudaDeviceSynchronize();
       im2col_kernel_MaxPoolForward<scalar_t, scalar_t, scalar_t>
         <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
@@ -468,6 +472,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_fused(
         kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
       cudaDeviceSynchronize();
 
+        cudaProfilerStop();
       if (!batched_input_im2col) {
         output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
       }
