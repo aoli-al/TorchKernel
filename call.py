@@ -28,8 +28,8 @@ def check(kernels):
 
 # print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
 print(fusion_cuda.im2col_upsample()[0][0])
-# print(fusion_cuda.im2col_batchnorm()[0][0])
-# print(fusion_cuda.im2col_maxpool()[0][0])
+print(fusion_cuda.im2col_batchnorm()[0][0])
+print(fusion_cuda.im2col_maxpool()[0][0])
 # check(fusion_cuda.max_pool_batch_norm())
 # check(fusion_cuda.upsample_batchnorm())
 torch.cuda.synchronize(device=None)
