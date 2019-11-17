@@ -1438,15 +1438,7 @@ std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
         // cudaEventElapsedTime(&milliseconds, start, stop);
         // printf("time: %f\n", milliseconds);
         upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_100<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel2_<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel3_<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
+            <<<blocks, 512, 0, stream1>>>(
               num_kernels, rheight, rwidth, align_corners, idata, odata,
               input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
         cudaProfilerStop();

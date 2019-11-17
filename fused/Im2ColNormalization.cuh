@@ -1298,44 +1298,8 @@ std::tuple<Tensor> im2col_batch_norm_fused(
       output_width,
       output_n.data<scalar_t_batch_norm>(),
       input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  im2col_kernel_batch_norm_collect_statistics_kernel2_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  im2col_kernel_batch_norm_collect_statistics_kernel3_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
     im2col_kernel_batch_norm_collect_statistics_kernel_100<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
+    <<<num_of_blocks, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
       num_kernels,
       input_n.data<scalar_t_batch_norm>(),
       input_height,
