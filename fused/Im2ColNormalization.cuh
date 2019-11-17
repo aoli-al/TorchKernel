@@ -291,6 +291,166 @@ __global__ void im2col_kernel(
   }
 }
 
+template <typename dt2935, template <typename T> class VarTransform00, typename input_scalar_t11, typename stat_scalar_t22, typename stat_accscalar_t33, typename index_t44>
+void im2col_kernel_batch_norm_collect_statistics_kernel_100(const int64_t n3036, const dt2935 *data_im3137, const int64_t height3238, const int64_t width3339, const int64_t kernel_height3440, const int64_t kernel_width3541, const int64_t pad_height3642, const int64_t pad_width3743, const int64_t stride_height3844, const int64_t stride_width3945, const int64_t dilation_height4046, const int64_t dilation_width4147, const int64_t height_col4248, const int64_t width_col4349, dt2935 *data_col4450, const PackedTensorAccessor<input_scalar_t11, 3, RestrictPtrTraits, index_t44> input55, const stat_accscalar_t33 epsilon66, const stat_accscalar_t33 momentum77, PackedTensorAccessor<stat_scalar_t22, 1, RestrictPtrTraits, index_t44> running_mean88, PackedTensorAccessor<stat_scalar_t22, 1, RestrictPtrTraits, index_t44> running_var99, PackedTensorAccessor<stat_accscalar_t33, 1, RestrictPtrTraits, index_t44> save_mean1010, PackedTensorAccessor<stat_accscalar_t33, 1, RestrictPtrTraits, index_t44> save_transformed_var1111) __attribute__((global))
+ {
+if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+    unsigned int blockDim_x_1;
+    blockDim_x_1 = 512;
+    unsigned int threadIdx_x_1;
+    threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int blockDim_y_1;
+    blockDim_y_1 = 1;
+    unsigned int threadIdx_y_1;
+    threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int blockDim_z_1;
+    blockDim_z_1 = 1;
+    unsigned int threadIdx_z_1;
+    threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int blockDim_x_151;
+    blockDim_x_151 = 512;
+    unsigned int threadIdx_x_152;
+    threadIdx_x_152 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) % 512;
+    unsigned int blockDim_y_153;
+    blockDim_y_153 = 1;
+    unsigned int threadIdx_y_154;
+    threadIdx_y_154 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) / 512 % 1;
+    unsigned int blockDim_z_155;
+    blockDim_z_155 = 1;
+    unsigned int threadIdx_z_156;
+    threadIdx_z_156 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) / 512;
+    for (int index = blockIdx.x * blockDim_x_151 + threadIdx_x_152; index < (n3036); index += blockDim_x_151 * gridDim.x) {
+        int64_t w_out4557;
+        w_out4557 = index % width_col4349;
+        index /= width_col4349;
+        int64_t h_out4658;
+        h_out4658 = index % height_col4248;
+        int64_t channel_in4759;
+        channel_in4759 = index / height_col4248;
+        int64_t channel_out4860;
+        channel_out4860 = channel_in4759 * kernel_height3440 * kernel_width3541;
+        int64_t h_in4961;
+        h_in4961 = h_out4658 * stride_height3844 - pad_height3642;
+        int64_t w_in5062;
+        w_in5062 = w_out4557 * stride_width3945 - pad_width3743;
+        data_col4450 += (channel_out4860 * height_col4248 + h_out4658) * width_col4349 + w_out4557;
+        data_im3137 += (channel_in4759 * height3238 + h_in4961) * width3339 + w_in5062;
+        for (int64_t i = 0; i < kernel_height3440; ++i) {
+            for (int64_t j = 0; j < kernel_width3541; ++j) {
+                int64_t h5163;
+                h5163 = h_in4961 + i * dilation_height4046;
+                int64_t w5264;
+                w5264 = w_in5062 + j * dilation_width4147;
+                * data_col4450 = (h5163 >= 0 && w5264 >= 0 && h5163 < height3238 && w5264 < width3339) ? data_im3137[i * dilation_height4046 * width3339 + j * dilation_width4147] : ScalarConvert<int, dt2935>::to(0);
+                data_col4450 += height_col4248 * width_col4349;
+            }
+        }
+    }
+}
+if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+    unsigned int blockDim_x_0;
+    blockDim_x_0 = 32;
+    unsigned int threadIdx_x_0;
+    threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 32;
+    unsigned int blockDim_y_0;
+    blockDim_y_0 = 16;
+    unsigned int threadIdx_y_0;
+    threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 32 % 16;
+    unsigned int blockDim_z_0;
+    blockDim_z_0 = 1;
+    unsigned int threadIdx_z_0;
+    threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int blockDim_x_012;
+    blockDim_x_012 = 32;
+    unsigned int threadIdx_x_013;
+    threadIdx_x_013 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 512) % 32;
+    unsigned int blockDim_y_014;
+    blockDim_y_014 = 16;
+    unsigned int threadIdx_y_015;
+    threadIdx_y_015 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 512) / 32 % 16;
+    unsigned int blockDim_z_016;
+    blockDim_z_016 = 1;
+    unsigned int threadIdx_z_017;
+    threadIdx_z_017 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 512) / 512;
+    static int shared_n1218[160] __attribute__((shared));
+    int plane1319;
+    plane1319 = blockIdx.x;
+    int N1420;
+    N1420 = input55.size(0) * input55.size(2);
+    int tid1521;
+    tid1521 = threadIdx_x_013 + threadIdx_y_015 * blockDim_x_012;
+    stat_accscalar_t33 *shared_avg_var1622;
+    shared_avg_var1622 = (stat_accscalar_t33 *)&shared_n1218[WARP_SIZE];
+    stat_accscalar_t33 avg1723;
+    avg1723 = 0;
+    stat_accscalar_t33 var_n1824;
+    var_n1824 = 0;
+    int n1925;
+    n1925 = 0;
+    for (int batch = threadIdx_y_015; batch < input55.size(0); batch += blockDim_y_014) {
+        for (int x = threadIdx_x_013; x < input55.size(2); x += blockDim_x_012) {
+            stat_accscalar_t33 v2026;
+            v2026 = input55[batch][plane1319][x];
+            stat_accscalar_t33 d12127;
+            d12127 = v2026 - avg1723;
+            n1925++;
+            avg1723 += d12127 / n1925;
+            var_n1824 += d12127 * (v2026 - avg1723);
+        }
+    }
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t33 o_avg2228;
+        o_avg2228 = WARP_SHFL_XOR(avg1723, 1 << i, WARP_SIZE);
+        int o_n2329;
+        o_n2329 = WARP_SHFL_XOR(n1925, 1 << i, WARP_SIZE);
+        stat_accscalar_t33 factor2430;
+        factor2430 = 1. / fmaxf(1., n1925 + o_n2329);
+        var_n1824 += WARP_SHFL_XOR(var_n1824, 1 << i, WARP_SIZE) + (avg1723 - o_avg2228) * (avg1723 - o_avg2228) * n1925 * o_n2329 * factor2430;
+        avg1723 = (n1925 * avg1723 + o_n2329 * o_avg2228) * factor2430;
+        n1925 += o_n2329;
+    }
+    __syncthreads();
+    if (tid1521 % WARP_SIZE == 0) {
+        shared_n1218[tid1521 / WARP_SIZE] = n1925;
+        shared_avg_var1622[tid1521 / WARP_SIZE * 2] = avg1723;
+        shared_avg_var1622[tid1521 / WARP_SIZE * 2 + 1] = var_n1824;
+    }
+    __syncthreads();
+    if (tid1521 < WARP_SIZE) {
+        n1925 = (tid1521 < blockDim_x_012 * blockDim_y_014 / WARP_SIZE ? shared_n1218[tid1521] : 0);
+        avg1723 = (tid1521 < blockDim_x_012 * blockDim_y_014 / WARP_SIZE ? shared_avg_var1622[2 * tid1521] : stat_accscalar_t33(0));
+        var_n1824 = (tid1521 < blockDim_x_012 * blockDim_y_014 / WARP_SIZE ? shared_avg_var1622[2 * tid1521 + 1] : stat_accscalar_t33(0));
+    }
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t33 o_avg2531;
+        o_avg2531 = WARP_SHFL_XOR(avg1723, 1 << i, WARP_SIZE);
+        int o_n2632;
+        o_n2632 = WARP_SHFL_XOR(n1925, 1 << i, WARP_SIZE);
+        stat_accscalar_t33 factor2733;
+        factor2733 = 1. / fmaxf(1., n1925 + o_n2632);
+        var_n1824 += WARP_SHFL_XOR(var_n1824, 1 << i, WARP_SIZE) + (avg1723 - o_avg2531) * (avg1723 - o_avg2531) * n1925 * o_n2632 * factor2733;
+        avg1723 = (n1925 * avg1723 + o_n2632 * o_avg2531) * factor2733;
+        n1925 += o_n2632;
+    }
+    if (tid1521 == 0) {
+        if (save_mean1010.data() != __null) {
+            save_mean1010[plane1319] = avg1723;
+        }
+        if (save_transformed_var1111.data() != __null) {
+            save_transformed_var1111[plane1319] = VarTransform00<stat_accscalar_t33>({})(var_n1824 / N1420, epsilon66);
+        }
+        if (running_mean88.data() != __null) {
+            running_mean88[plane1319] = static_cast<stat_scalar_t22>((1 - momentum77) * running_mean88[plane1319] + momentum77 * avg1723);
+        }
+        if (running_var99.data() != __null) {
+            stat_accscalar_t33 unbiasedVar2834;
+            unbiasedVar2834 = var_n1824 / (N1420 - 1);
+            running_var99[plane1319] = static_cast<stat_scalar_t22>((1 - momentum77) * running_var99[plane1319] + momentum77 * unbiasedVar2834);
+        }
+    }
+}
+}
+
 template <typename dt29, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
 void im2col_kernel_batch_norm_collect_statistics_kernel_(const int64_t n30, const dt29 *data_im31, const int64_t height32, const int64_t width33, const int64_t kernel_height34, const int64_t kernel_width35, const int64_t pad_height36, const int64_t pad_width37, const int64_t stride_height38, const int64_t stride_width39, const int64_t dilation_height40, const int64_t dilation_width41, const int64_t height_col42, const int64_t width_col43, dt29 *data_col44, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
  {
@@ -1157,6 +1317,24 @@ std::tuple<Tensor> im2col_batch_norm_fused(
       output_n.data<scalar_t_batch_norm>(),
       input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
   im2col_kernel_batch_norm_collect_statistics_kernel3_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
+    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
+      num_kernels,
+      input_n.data<scalar_t_batch_norm>(),
+      input_height,
+      input_width,
+      kernel_height,
+      kernel_width,
+      pad_height,
+      pad_width,
+      stride_height,
+      stride_width,
+      dilation_height,
+      dilation_width,
+      output_height,
+      output_width,
+      output_n.data<scalar_t_batch_norm>(),
+      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+    im2col_kernel_batch_norm_collect_statistics_kernel_100<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
     <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
       num_kernels,
       input_n.data<scalar_t_batch_norm>(),
