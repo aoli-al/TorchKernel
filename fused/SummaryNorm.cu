@@ -2113,7 +2113,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_fused(
   //        (
   //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
   //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-    kernelHistogram1D_batch_norm_collect_statistics_kernel_2<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  kernelHistogram1D_batch_norm_collect_statistics_kernel_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
          (
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
