@@ -27,6 +27,7 @@
 #include <c10/macros/Macros.h>
 #include <ATen/native/im2col_shape_check.h>
 
+#include <cuda_profiler_api.h>
 namespace at {
 namespace native {
 
@@ -101,6 +102,91 @@ namespace {
     if (bin == nbins) bin -= 1;
     return bin;
   }
+}
+
+template <typename dt0, typename output_t24, typename input_t25, typename IndexType26, int ADims27, int PDims28, int BDims29, at::native::CUDAHistogramMemoryType MemoryType30 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op31>
+void im2col_kernel_kernelHistogram1D_100(const int64_t n1, const dt0 *data_im2, const int64_t height3, const int64_t width4, const int64_t kernel_height5, const int64_t kernel_width6, const int64_t pad_height7, const int64_t pad_width8, const int64_t stride_height9, const int64_t stride_width10, const int64_t dilation_height11, const int64_t dilation_width12, const int64_t height_col13, const int64_t width_col14, dt0 *data_col15, TensorInfo<output_t24, IndexType26> a32, TensorInfo<output_t24, IndexType26> p33, TensorInfo<input_t25, IndexType26> b34, int nbins35, input_t25 minvalue36, input_t25 maxvalue37, IndexType26 totalElements38, Op31 getOp39) __attribute__((launch_bounds(0x5c82668, 0x0))) __attribute__((global))
+ {
+if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+    unsigned int blockDim_x_0;
+    blockDim_x_0 = 512;
+    unsigned int threadIdx_x_0;
+    threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int blockDim_y_0;
+    blockDim_y_0 = 1;
+    unsigned int threadIdx_y_0;
+    threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int blockDim_z_0;
+    blockDim_z_0 = 1;
+    unsigned int threadIdx_z_0;
+    threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (n1); index += blockDim_x_0 * gridDim.x) {
+        int64_t w_out16;
+        w_out16 = index % width_col14;
+        index /= width_col14;
+        int64_t h_out17;
+        h_out17 = index % height_col13;
+        int64_t channel_in18;
+        channel_in18 = index / height_col13;
+        int64_t channel_out19;
+        channel_out19 = channel_in18 * kernel_height5 * kernel_width6;
+        int64_t h_in20;
+        h_in20 = h_out17 * stride_height9 - pad_height7;
+        int64_t w_in21;
+        w_in21 = w_out16 * stride_width10 - pad_width8;
+        data_col15 += (channel_out19 * height_col13 + h_out17) * width_col14 + w_out16;
+        data_im2 += (channel_in18 * height3 + h_in20) * width4 + w_in21;
+        for (int64_t i = 0; i < kernel_height5; ++i) {
+            for (int64_t j = 0; j < kernel_width6; ++j) {
+                int64_t h22;
+                h22 = h_in20 + i * dilation_height11;
+                int64_t w23;
+                w23 = w_in21 + j * dilation_width12;
+                * data_col15 = (h22 >= 0 && w23 >= 0 && h22 < height3 && w23 < width4) ? data_im2[i * dilation_height11 * width4 + j * dilation_width12] : ScalarConvert<int, dt0>::to(0);
+                data_col15 += height_col13 * width_col14;
+            }
+        }
+    }
+}
+if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+    unsigned int blockDim_x_1;
+    blockDim_x_1 = 512;
+    unsigned int threadIdx_x_1;
+    threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int blockDim_y_1;
+    blockDim_y_1 = 1;
+    unsigned int threadIdx_y_1;
+    threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int blockDim_z_1;
+    blockDim_z_1 = 1;
+    unsigned int threadIdx_z_1;
+    threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    extern unsigned char my_smem40[] __attribute__((shared));
+    output_t24 *smem41;
+    smem41 = nullptr;
+    smem41 = reinterpret_cast<output_t24 *>(my_smem40);
+    for (IndexType26 i = threadIdx_x_1; i < a32.sizes[0]; i += blockDim_x_1) {
+        smem41[i] = 0;
+    }
+    __syncthreads();
+    for (IndexType26 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements38; linearIndex += gridDim.x * blockDim_x_1) {
+        IndexType26 bOffset42;
+        bOffset42 = IndexToOffset<input_t25, IndexType26, BDims29>::get(linearIndex, b34);
+        input_t25 bVal43;
+        bVal43 = b34.data[bOffset42];
+        if (bVal43 >= minvalue36 && bVal43 <= maxvalue37) {
+            IndexType26 bin44;
+            bin44 = getBin<input_t25, IndexType26>(bVal43, minvalue36, maxvalue37, nbins35);
+            atomicAdd(&smem41[bin44], getOp39(linearIndex));
+        }
+    }
+    __syncthreads();
+    for (IndexType26 i = threadIdx_x_1; i < a32.sizes[0]; i += blockDim_x_1) {
+        IndexType26 aOffset45;
+        aOffset45 = IndexToOffset<output_t24, IndexType26, ADims27>::get(i, a32);
+        atomicAdd(&a32.data[aOffset45], smem41[i]);
+    }
+}
 }
 
 template <typename dt0, typename output_t24, typename input_t25, typename IndexType26, int ADims27, int PDims28, int BDims29, at::native::CUDAHistogramMemoryType MemoryType30 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op31>
@@ -396,6 +482,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
     int64_t num_kernels = n_input_plane * output_height * output_width;
     static const auto getDummyOp = [] __device__(IndexType) { return 1L; };
 
+  cudaProfilerStart();
     im2col_kernel_kernelHistogram1D_
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
@@ -415,7 +502,27 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
+    im2col_kernel_kernelHistogram1D_100
+    <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
+    <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
+        num_kernels,
+        input_n.data<scalar_t>(),
+        input_height,
+        input_width,
+        kernel_height,
+        kernel_width,
+        pad_height,
+        pad_width,
+        stride_height,
+        stride_width,
+        dilation_height,
+        dilation_width,
+        output_height,
+        output_width,
+        output_n.data<scalar_t>(),
+        aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
 
+  cudaProfilerStop();
     AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
     if (!batched_input) {
       output.resize_({n_output_plane, output_length});
@@ -560,7 +667,8 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
     input_n = input.select(0, elt);
     output_n = output.select(0, elt);
     int64_t num_kernels = n_input_plane * output_height * output_width;
-    im2col_kernel<<<10000, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
+    cudaProfilerStart();
+    im2col_kernel<<<10000, 512, 0, at::cuda::getStreamFromPool(true)>>>(
         num_kernels,
         input_n.data<scalar_t>(),
         input_height,
@@ -582,8 +690,10 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
         <<<grid,
           block,
           sharedMem,
-          getCurrentCUDAStream()>>>(
+          getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);        \
+    cudaProfilerStop();
+    cudaDeviceSynchronize();
     AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
     if (!batched_input) {
       output.resize_({n_output_plane, output_length});
