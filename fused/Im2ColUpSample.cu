@@ -431,17 +431,16 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
       input,
       output_size,
       align_corners);
-    return std::tuple_cat(
-        std::make_tuple(input, input),
-      im2col_upsample_fused(
-        input_im2col_,
-        kernel_size,
-        dilation,
-        padding,
-        stride,
-        input,
-        output_size,
-        align_corners));
+    im2col_upsample_fused(
+    input_im2col_,
+    kernel_size,
+    dilation,
+    padding,
+    stride,
+    input,
+    output_size,
+    align_corners);
+    return std::make_tuple(input, input, input, input);
   }
 }
 }
