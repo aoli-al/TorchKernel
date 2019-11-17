@@ -156,7 +156,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> max_pool_batch_norm()
 std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_upsample() {
   auto im2col_input = torch::randn({1, 1, 2650, 2048}, defaultOptions);
   // auto input_upsample = torch::randn({17, 16, 256, 100}, defaultOptions);
-  auto input_upsample = torch::randn({20, 20, 256, 100}, defaultOptions);
+  auto input_upsample = torch::randn({20, 19, 256, 100}, defaultOptions);
   return at::native::im2col_upsample(im2col_input, {151, 1}, {1, 1}, {0, 0}, {1, 1},
                                      input_upsample, {2000, 2560}, true);
 }
