@@ -115,22 +115,22 @@ std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused()
 //
 std::tuple<Tensor, Tensor> im2col_batchnorm()
 {
-  auto im2col_input = torch::randn({1, 1, 2650, 2048}, defaultOptions);
+  auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
   // return std::make_tuple(r, r, r, r, r, r);
   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
-  return at::native::im2col_batchnorm_cuda(im2col_input, {151, 1}, {1, 1}, {0, 0}, {1, 1},
+  return at::native::im2col_batchnorm_cuda(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
                                            batch_norm_input);
 }
 //
 std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batchnorm()
 {
-  auto im2col_input = torch::randn({1, 1, 2650, 2048}, defaultOptions);
+  auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
   auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
   // return std::make_tuple(r, r, r, r, r, r);
   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
-  return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {151, 1}, {1, 1}, {0, 0}, {1, 1},
+  return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
                                           input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
                                            batch_norm_input);
 }
@@ -154,10 +154,10 @@ std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> max_pool_batch_norm()
 }
 //
 std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_upsample() {
-  auto im2col_input = torch::randn({1, 1, 2650, 2048}, defaultOptions);
+  auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
   // auto input_upsample = torch::randn({17, 16, 256, 100}, defaultOptions);
-  auto input_upsample = torch::randn({20, 16, 256, 100}, defaultOptions);
-  return at::native::im2col_upsample(im2col_input, {151, 1}, {1, 1}, {0, 0}, {1, 1},
+  auto input_upsample = torch::randn({20, 15, 256, 100}, defaultOptions);
+  return at::native::im2col_upsample(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
                                      input_upsample, {2000, 2560}, true);
 }
 //
