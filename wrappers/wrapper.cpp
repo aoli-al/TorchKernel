@@ -108,7 +108,7 @@ const auto defaultOptions = torch::TensorOptions({at::kCUDA}).dtype(at::kFloat).
 std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused()
 {
   auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
-  auto input_upsample = torch::randn({20, 12, 256, 100}, defaultOptions);
+  auto input_upsample = torch::randn({20, 20, 256, 100}, defaultOptions);
   return at::native::max_pool_upsample_stream(input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
                                               input_upsample, {2000, 2560}, true);
 }
@@ -156,7 +156,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> max_pool_batch_norm()
 std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_upsample() {
   auto im2col_input = torch::randn({1, 1, 2650, 2048}, defaultOptions);
   // auto input_upsample = torch::randn({17, 16, 256, 100}, defaultOptions);
-  auto input_upsample = torch::randn({20, 12, 256, 100}, defaultOptions);
+  auto input_upsample = torch::randn({20, 20, 256, 100}, defaultOptions);
   return at::native::im2col_upsample(im2col_input, {151, 1}, {1, 1}, {0, 0}, {1, 1},
                                      input_upsample, {2000, 2560}, true);
 }
@@ -171,7 +171,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_maxpool() {
 }
 //
 std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm() {
-  auto input_upsample = torch::randn({20, 12, 256, 100}, defaultOptions);
+  auto input_upsample = torch::randn({20, 20, 256, 100}, defaultOptions);
   auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
   return at::native::upsample_batchnorm(input_upsample, {2000, 2560}, true,
                                         batch_norm_input, 0.2);
