@@ -126,6 +126,208 @@ struct Var {
   }
 };
 
+template <typename scalar_t2935, typename accscalar_t3036, template <typename T> class VarTransform00, typename input_scalar_t11, typename stat_scalar_t22, typename stat_accscalar_t33, typename index_t44>
+void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_100(const int n3137, const accscalar_t3036 rheight3238, const accscalar_t3036 rwidth3339, const bool align_corners3440, const PackedTensorAccessor<scalar_t2935, 4> idata3541, PackedTensorAccessor<scalar_t2935, 4> odata3642, const PackedTensorAccessor<input_scalar_t11, 3, RestrictPtrTraits, index_t44> input55, const stat_accscalar_t33 epsilon66, const stat_accscalar_t33 momentum77, PackedTensorAccessor<stat_scalar_t22, 1, RestrictPtrTraits, index_t44> running_mean88, PackedTensorAccessor<stat_scalar_t22, 1, RestrictPtrTraits, index_t44> running_var99, PackedTensorAccessor<stat_accscalar_t33, 1, RestrictPtrTraits, index_t44> save_mean1010, PackedTensorAccessor<stat_accscalar_t33, 1, RestrictPtrTraits, index_t44> save_transformed_var1111) __attribute__((global))
+ {
+if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+    unsigned int blockDim_x_1;
+    blockDim_x_1 = 512;
+    unsigned int threadIdx_x_1;
+    threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int blockDim_y_1;
+    blockDim_y_1 = 1;
+    unsigned int threadIdx_y_1;
+    threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int blockDim_z_1;
+    blockDim_z_1 = 1;
+    unsigned int threadIdx_z_1;
+    threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int blockDim_x_143;
+    blockDim_x_143 = 512;
+    unsigned int threadIdx_x_144;
+    threadIdx_x_144 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) % 512;
+    unsigned int blockDim_y_145;
+    blockDim_y_145 = 1;
+    unsigned int threadIdx_y_146;
+    threadIdx_y_146 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) / 512 % 1;
+    unsigned int blockDim_z_147;
+    blockDim_z_147 = 1;
+    unsigned int threadIdx_z_148;
+    threadIdx_z_148 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) / 512;
+    int index3749;
+    index3749 = threadIdx_x_144 + blockIdx.x * blockDim_x_143;
+    int batchsize3850;
+    batchsize3850 = idata3541.size(0);
+    int channels3951;
+    channels3951 = idata3541.size(1);
+    int height14052;
+    height14052 = idata3541.size(2);
+    int width14153;
+    width14153 = idata3541.size(3);
+    int height24254;
+    height24254 = odata3642.size(2);
+    int width24355;
+    width24355 = odata3642.size(3);
+    if (index3749 < n3137) {
+        int w24456;
+        w24456 = index3749 % width24355;
+        int h24557;
+        h24557 = index3749 / width24355;
+        if (height14052 == height24254 && width14153 == width24355) {
+            int h15668;
+            h15668 = h24557;
+            int w15769;
+            w15769 = w24456;
+            for (int n = 0; n < batchsize3850; n++) {
+                for (int c = 0; c < channels3951; ++c) {
+                    scalar_t2935 val5870;
+                    val5870 = idata3541[n][c][h15668][w15769];
+                    odata3642[n][c][h24557][w24456] = val5870;
+                }
+            }
+            return;
+        }
+        accscalar_t3036 h1r4658;
+        h1r4658 = area_pixel_compute_source_index<accscalar_t3036>(rheight3238, h24557, align_corners3440, false);
+        int h14759;
+        h14759 = h1r4658;
+        int h1p4860;
+        h1p4860 = (h14759 < height14052 - 1) ? 1 : 0;
+        accscalar_t3036 h1lambda4961;
+        h1lambda4961 = h1r4658 - h14759;
+        accscalar_t3036 h0lambda5062;
+        h0lambda5062 = static_cast<accscalar_t3036>(1) - h1lambda4961;
+        accscalar_t3036 w1r5163;
+        w1r5163 = area_pixel_compute_source_index<accscalar_t3036>(rwidth3339, w24456, align_corners3440, false);
+        int w15264;
+        w15264 = w1r5163;
+        int w1p5365;
+        w1p5365 = (w15264 < width14153 - 1) ? 1 : 0;
+        accscalar_t3036 w1lambda5466;
+        w1lambda5466 = w1r5163 - w15264;
+        accscalar_t3036 w0lambda5567;
+        w0lambda5567 = static_cast<accscalar_t3036>(1) - w1lambda5466;
+        for (int n = 0; n < batchsize3850 - 1; n++) {
+            for (int c = 0; c < channels3951; ++c) {
+                accscalar_t3036 val5971;
+                val5971 = h0lambda5062 * (w0lambda5567 * idata3541[n][c][h14759][w15264] + w1lambda5466 * idata3541[n][c][h14759][w15264 + w1p5365]) + h1lambda4961 * (w0lambda5567 * idata3541[n][c][h14759 + h1p4860][w15264] + w1lambda5466 * idata3541[n][c][h14759 + h1p4860][w15264 + w1p5365]);
+                odata3642[n][c][h24557][w24456] = static_cast<scalar_t2935>(val5971);
+            }
+        }
+        for (int n = batchsize3850 - 1; n < batchsize3850; n++) {
+            for (int c = 0; c < channels3951; ++c) {
+                accscalar_t3036 val6072;
+                val6072 = h0lambda5062 * (w0lambda5567 * idata3541[n][c][h14759][w15264] + w1lambda5466 * idata3541[n][c][h14759][w15264 + w1p5365]) + h1lambda4961 * (w0lambda5567 * idata3541[n][c][h14759 + h1p4860][w15264] + w1lambda5466 * idata3541[n][c][h14759 + h1p4860][w15264 + w1p5365]);
+                odata3642[n][c][h24557][w24456] = static_cast<scalar_t2935>(val6072);
+            }
+        }
+    }
+}
+if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+    unsigned int blockDim_x_0;
+    blockDim_x_0 = 32;
+    unsigned int threadIdx_x_0;
+    threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 32;
+    unsigned int blockDim_y_0;
+    blockDim_y_0 = 16;
+    unsigned int threadIdx_y_0;
+    threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 32 % 16;
+    unsigned int blockDim_z_0;
+    blockDim_z_0 = 1;
+    unsigned int threadIdx_z_0;
+    threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int blockDim_x_012;
+    blockDim_x_012 = 32;
+    unsigned int threadIdx_x_013;
+    threadIdx_x_013 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 0) % 32;
+    unsigned int blockDim_y_014;
+    blockDim_y_014 = 16;
+    unsigned int threadIdx_y_015;
+    threadIdx_y_015 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 0) / 32 % 16;
+    unsigned int blockDim_z_016;
+    blockDim_z_016 = 1;
+    unsigned int threadIdx_z_017;
+    threadIdx_z_017 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 0) / 512;
+    static int shared_n1218[160] __attribute__((shared));
+    int plane1319;
+    plane1319 = blockIdx.x;
+    int N1420;
+    N1420 = input55.size(0) * input55.size(2);
+    int tid1521;
+    tid1521 = threadIdx_x_013 + threadIdx_y_015 * blockDim_x_012;
+    stat_accscalar_t33 *shared_avg_var1622;
+    shared_avg_var1622 = (stat_accscalar_t33 *)&shared_n1218[WARP_SIZE];
+    stat_accscalar_t33 avg1723;
+    avg1723 = 0;
+    stat_accscalar_t33 var_n1824;
+    var_n1824 = 0;
+    int n1925;
+    n1925 = 0;
+    for (int batch = threadIdx_y_015; batch < input55.size(0); batch += blockDim_y_014) {
+        for (int x = threadIdx_x_013; x < input55.size(2); x += blockDim_x_012) {
+            stat_accscalar_t33 v2026;
+            v2026 = input55[batch][plane1319][x];
+            stat_accscalar_t33 d12127;
+            d12127 = v2026 - avg1723;
+            n1925++;
+            avg1723 += d12127 / n1925;
+            var_n1824 += d12127 * (v2026 - avg1723);
+        }
+    }
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t33 o_avg2228;
+        o_avg2228 = WARP_SHFL_XOR(avg1723, 1 << i, WARP_SIZE);
+        int o_n2329;
+        o_n2329 = WARP_SHFL_XOR(n1925, 1 << i, WARP_SIZE);
+        stat_accscalar_t33 factor2430;
+        factor2430 = 1. / fmaxf(1., n1925 + o_n2329);
+        var_n1824 += WARP_SHFL_XOR(var_n1824, 1 << i, WARP_SIZE) + (avg1723 - o_avg2228) * (avg1723 - o_avg2228) * n1925 * o_n2329 * factor2430;
+        avg1723 = (n1925 * avg1723 + o_n2329 * o_avg2228) * factor2430;
+        n1925 += o_n2329;
+    }
+    __syncthreads();
+    if (tid1521 % WARP_SIZE == 0) {
+        shared_n1218[tid1521 / WARP_SIZE] = n1925;
+        shared_avg_var1622[tid1521 / WARP_SIZE * 2] = avg1723;
+        shared_avg_var1622[tid1521 / WARP_SIZE * 2 + 1] = var_n1824;
+    }
+    __syncthreads();
+    if (tid1521 < WARP_SIZE) {
+        n1925 = (tid1521 < blockDim_x_012 * blockDim_y_014 / WARP_SIZE ? shared_n1218[tid1521] : 0);
+        avg1723 = (tid1521 < blockDim_x_012 * blockDim_y_014 / WARP_SIZE ? shared_avg_var1622[2 * tid1521] : stat_accscalar_t33(0));
+        var_n1824 = (tid1521 < blockDim_x_012 * blockDim_y_014 / WARP_SIZE ? shared_avg_var1622[2 * tid1521 + 1] : stat_accscalar_t33(0));
+    }
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t33 o_avg2531;
+        o_avg2531 = WARP_SHFL_XOR(avg1723, 1 << i, WARP_SIZE);
+        int o_n2632;
+        o_n2632 = WARP_SHFL_XOR(n1925, 1 << i, WARP_SIZE);
+        stat_accscalar_t33 factor2733;
+        factor2733 = 1. / fmaxf(1., n1925 + o_n2632);
+        var_n1824 += WARP_SHFL_XOR(var_n1824, 1 << i, WARP_SIZE) + (avg1723 - o_avg2531) * (avg1723 - o_avg2531) * n1925 * o_n2632 * factor2733;
+        avg1723 = (n1925 * avg1723 + o_n2632 * o_avg2531) * factor2733;
+        n1925 += o_n2632;
+    }
+    if (tid1521 == 0) {
+        if (save_mean1010.data() != __null) {
+            save_mean1010[plane1319] = avg1723;
+        }
+        if (save_transformed_var1111.data() != __null) {
+            save_transformed_var1111[plane1319] = VarTransform00<stat_accscalar_t33>({})(var_n1824 / N1420, epsilon66);
+        }
+        if (running_mean88.data() != __null) {
+            running_mean88[plane1319] = static_cast<stat_scalar_t22>((1 - momentum77) * running_mean88[plane1319] + momentum77 * avg1723);
+        }
+        if (running_var99.data() != __null) {
+            stat_accscalar_t33 unbiasedVar2834;
+            unbiasedVar2834 = var_n1824 / (N1420 - 1);
+            running_var99[plane1319] = static_cast<stat_scalar_t22>((1 - momentum77) * running_var99[plane1319] + momentum77 * unbiasedVar2834);
+        }
+    }
+}
+}
+
+
 template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
 __global__ void batch_norm_collect_statistics_kernel(
     const PackedTensorAccessor<input_scalar_t, 3, RestrictPtrTraits, index_t> input,
@@ -1235,6 +1437,10 @@ std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
         // float milliseconds = 0;
         // cudaEventElapsedTime(&milliseconds, start, stop);
         // printf("time: %f\n", milliseconds);
+        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_100<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
+            <<<blocks, 1024, 0, stream1>>>(
+              num_kernels, rheight, rwidth, align_corners, idata, odata,
+              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
         upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel2_<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
             <<<blocks, 1024, 0, stream1>>>(
               num_kernels, rheight, rwidth, align_corners, idata, odata,
