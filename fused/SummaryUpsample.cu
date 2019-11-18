@@ -52,7 +52,6 @@ idx(const size_t nc,
 }
 
 template <typename scalar_t, typename accscalar_t>
-C10_LAUNCH_BOUNDS_1(1024)
 __global__ void upsample_bilinear2d_out_frame(
     const int n,
     const accscalar_t rheight,
