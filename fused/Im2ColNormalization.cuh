@@ -452,7 +452,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 
 template <typename dt29, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
-void im2col_kernel_batch_norm_collect_statistics_kernel_(const int64_t n30, const dt29 *data_im31, const int64_t height32, const int64_t width33, const int64_t kernel_height34, const int64_t kernel_width35, const int64_t pad_height36, const int64_t pad_width37, const int64_t stride_height38, const int64_t stride_width39, const int64_t dilation_height40, const int64_t dilation_width41, const int64_t height_col42, const int64_t width_col43, dt29 *data_col44, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
+void im2col_kernel_batch_norm_collect_statistics_kernel_0(const int64_t n30, const dt29 *data_im31, const int64_t height32, const int64_t width33, const int64_t kernel_height34, const int64_t kernel_width35, const int64_t pad_height36, const int64_t pad_width37, const int64_t stride_height38, const int64_t stride_width39, const int64_t dilation_height40, const int64_t dilation_width41, const int64_t height_col42, const int64_t width_col43, dt29 *data_col44, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
  {
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
 unsigned int blockDim_x_1;
@@ -1281,7 +1281,7 @@ std::tuple<Tensor> im2col_batch_norm_fused(
 
   cudaProfilerStart();
       cudaDeviceSynchronize();
-  im2col_kernel_batch_norm_collect_statistics_kernel_<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
+  im2col_kernel_batch_norm_collect_statistics_kernel_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
     <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
       num_kernels,
       input_n.data<scalar_t_batch_norm>(),

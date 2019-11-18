@@ -746,7 +746,7 @@ __global__ void MaxPoolForward(
 }
 
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
-void MaxPoolForward_batch_norm_collect_statistics_kernel_(const int nthreads31, const scalar_t29 *bottom_data32, const int num33, const int channels34, const int height35, const int width36, const int pooled_height37, const int pooled_width38, const int kernel_h39, const int kernel_w40, const int stride_h41, const int stride_w42, const int pad_h43, const int pad_w44, const int dilation_h45, const int dilation_w46, scalar_t29 *top_data47, int64_t *top_mask48, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
+void MaxPoolForward_batch_norm_collect_statistics_kernel_0(const int nthreads31, const scalar_t29 *bottom_data32, const int num33, const int channels34, const int height35, const int width36, const int pooled_height37, const int pooled_width38, const int kernel_h39, const int kernel_w40, const int stride_h41, const int stride_w42, const int pad_h43, const int pad_w44, const int dilation_h45, const int dilation_w46, scalar_t29 *top_data47, int64_t *top_mask48, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
  {
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)) goto label_0;
 unsigned int blockDim_x_1;
@@ -1477,7 +1477,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
 
       cudaProfilerStart();
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 768, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,

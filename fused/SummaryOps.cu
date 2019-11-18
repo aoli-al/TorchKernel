@@ -190,7 +190,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 
 template <typename dt0, typename output_t24, typename input_t25, typename IndexType26, int ADims27, int PDims28, int BDims29, at::native::CUDAHistogramMemoryType MemoryType30 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op31>
-void im2col_kernel_kernelHistogram1D_(const int64_t n1, const dt0 *data_im2, const int64_t height3, const int64_t width4, const int64_t kernel_height5, const int64_t kernel_width6, const int64_t pad_height7, const int64_t pad_width8, const int64_t stride_height9, const int64_t stride_width10, const int64_t dilation_height11, const int64_t dilation_width12, const int64_t height_col13, const int64_t width_col14, dt0 *data_col15, TensorInfo<output_t24, IndexType26> a32, TensorInfo<output_t24, IndexType26> p33, TensorInfo<input_t25, IndexType26> b34, int nbins35, input_t25 minvalue36, input_t25 maxvalue37, IndexType26 totalElements38, Op31 getOp39) __attribute__((launch_bounds(0xc4fb4b0, 0xc4fb4d0))) __attribute__((global))
+void im2col_kernel_kernelHistogram1D_0(const int64_t n1, const dt0 *data_im2, const int64_t height3, const int64_t width4, const int64_t kernel_height5, const int64_t kernel_width6, const int64_t pad_height7, const int64_t pad_width8, const int64_t stride_height9, const int64_t stride_width10, const int64_t dilation_height11, const int64_t dilation_width12, const int64_t height_col13, const int64_t width_col14, dt0 *data_col15, TensorInfo<output_t24, IndexType26> a32, TensorInfo<output_t24, IndexType26> p33, TensorInfo<input_t25, IndexType26> b34, int nbins35, input_t25 minvalue36, input_t25 maxvalue37, IndexType26 totalElements38, Op31 getOp39) __attribute__((launch_bounds(0xc4fb4b0, 0xc4fb4d0))) __attribute__((global))
  {
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_1;
 unsigned int blockDim_x_1;
@@ -483,7 +483,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
     static const auto getDummyOp = [] __device__(IndexType) { return 1L; };
 
   cudaProfilerStart();
-    im2col_kernel_kernelHistogram1D_
+    im2col_kernel_kernelHistogram1D_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,

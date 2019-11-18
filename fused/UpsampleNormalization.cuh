@@ -878,7 +878,7 @@ label_3:;
 
 
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
-void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
+void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_0(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
  {
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
 unsigned int blockDim_x_1;
@@ -1429,7 +1429,7 @@ std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
         // cudaEventCreate(&stop);
         // cudaEventRecord(start);
         cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
+        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
             <<<blocks, 1024, 0, stream1>>>(
               num_kernels, rheight, rwidth, align_corners, idata, odata,
               input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);

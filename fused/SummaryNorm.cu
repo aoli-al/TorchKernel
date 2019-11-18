@@ -575,7 +575,7 @@ if (tid15 == 0) {
 label_5:;
 }
 template <typename output_t29, typename input_t30, typename IndexType31, int ADims32, int PDims33, int BDims34, at::native::CUDAHistogramMemoryType MemoryType35 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op36, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
-void kernelHistogram1D_batch_norm_collect_statistics_kernel_1(TensorInfo<output_t29, IndexType31> a37, TensorInfo<output_t29, IndexType31> p38, TensorInfo<input_t30, IndexType31> b39, int nbins40, input_t30 minvalue41, input_t30 maxvalue42, IndexType31 totalElements43, Op36 getOp44, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
+void kernelHistogram1D_batch_norm_collect_statistics_kernel_11(TensorInfo<output_t29, IndexType31> a37, TensorInfo<output_t29, IndexType31> p38, TensorInfo<input_t30, IndexType31> b39, int nbins40, input_t30 minvalue41, input_t30 maxvalue42, IndexType31 totalElements43, Op36 getOp44, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) __attribute__((global))
  {
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
 unsigned int blockDim_x_1;
@@ -2113,7 +2113,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_fused(
   //        (
   //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
   //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  kernelHistogram1D_batch_norm_collect_statistics_kernel_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  kernelHistogram1D_batch_norm_collect_statistics_kernel_11<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
          (
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,

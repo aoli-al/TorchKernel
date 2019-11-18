@@ -263,7 +263,7 @@ if (index8 < n2) {
 label_3:;
 }
 template <typename output_t31, typename input_t32, typename IndexType33, int ADims34, int PDims35, int BDims36, at::native::CUDAHistogramMemoryType MemoryType37 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op38, typename scalar_t0, typename accscalar_t1>
-void kernelHistogram1D_upsample_bilinear2d_out_frame_1(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7) __attribute__((global))
+void kernelHistogram1D_upsample_bilinear2d_out_frame_11(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7) __attribute__((global))
  {
 if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
 unsigned int blockDim_x_1;
@@ -836,7 +836,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
         cudaDeviceSynchronize();
 
-      kernelHistogram1D_upsample_bilinear2d_out_frame_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+      kernelHistogram1D_upsample_bilinear2d_out_frame_11<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
