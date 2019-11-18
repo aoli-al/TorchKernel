@@ -801,7 +801,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
 
   const int num_kernels = output_height * output_width;
   const int num_threads = std::min(
-      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 1024);
+      at::cuda::getCurrentDeviceProperties()->maxThreadsPerBlock, 512);
 
   printf("%d %d\n", num_kernels, num_threads);
   cudaStream_t stream = at::cuda::getCurrentCUDAStream();

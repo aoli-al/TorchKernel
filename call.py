@@ -26,9 +26,9 @@ def check(kernels):
     print(torch.all(torch.eq(kernels[i], kernels[i+half])))
 
 
-print(fusion_cuda.histc(torch.randn(0), 1)[0][0])
+# print(fusion_cuda.histc(torch.randn(0), 1)[0][0])
 # torch.cuda.empty_cache()
-# print(fusion_cuda.histc_upsample()[0][0])
+print(fusion_cuda.histc_upsample()[0][0])
 # print(fusion_cuda.histc_maxpool()[0][0])
 # print(fusion_cuda.hist_norm()[0][0])
 
