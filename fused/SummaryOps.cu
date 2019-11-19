@@ -189,6 +189,119 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 
+template <typename dt00, typename output_t2430, typename input_t2531, typename IndexType2632, int ADims2733, int PDims2834, int BDims2935, at::native::CUDAHistogramMemoryType MemoryType3036 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op3137>
+ __attribute__((launch_bounds(0xede6358, 0x0))) __attribute__((global)) void im2col_kernel_kernelHistogram1D_1x(const int64_t n11, const dt00 *data_im22, const int64_t height33, const int64_t width44, const int64_t kernel_height55, const int64_t kernel_width66, const int64_t pad_height77, const int64_t pad_width88, const int64_t stride_height99, const int64_t stride_width1010, const int64_t dilation_height1111, const int64_t dilation_width1212, const int64_t height_col1313, const int64_t width_col1414, dt00 *data_col1515, TensorInfo<output_t2430, IndexType2632> a3238, TensorInfo<output_t2430, IndexType2632> p3339, TensorInfo<input_t2531, IndexType2632> b3440, int nbins3541, input_t2531 minvalue3642, input_t2531 maxvalue3743, IndexType2632 totalElements3844, Op3137 getOp3945)
+ {
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
+unsigned int blockDim_x_0;
+blockDim_x_0 = 512;
+unsigned int threadIdx_x_0;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+unsigned int blockDim_y_0;
+blockDim_y_0 = 1;
+unsigned int threadIdx_y_0;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+unsigned int blockDim_z_0;
+blockDim_z_0 = 1;
+unsigned int threadIdx_z_0;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+unsigned int blockDim_x_016;
+blockDim_x_016 = 512;
+unsigned int threadIdx_x_017;
+threadIdx_x_017 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 0) % 512;
+unsigned int blockDim_y_018;
+blockDim_y_018 = 1;
+unsigned int threadIdx_y_019;
+threadIdx_y_019 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 0) / 512 % 1;
+unsigned int blockDim_z_020;
+blockDim_z_020 = 1;
+unsigned int threadIdx_z_021;
+threadIdx_z_021 = ((threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0 + threadIdx_z_0 * blockDim_x_0 * blockDim_y_0) - 0) / 512;
+for (int index = blockIdx.x * blockDim_x_016 + threadIdx_x_017; index < (n11); index += blockDim_x_016 * gridDim.x) {
+    int64_t w_out1622;
+    w_out1622 = index % width_col1414;
+    index /= width_col1414;
+    int64_t h_out1723;
+    h_out1723 = index % height_col1313;
+    int64_t channel_in1824;
+    channel_in1824 = index / height_col1313;
+    int64_t channel_out1925;
+    channel_out1925 = channel_in1824 * kernel_height55 * kernel_width66;
+    int64_t h_in2026;
+    h_in2026 = h_out1723 * stride_height99 - pad_height77;
+    int64_t w_in2127;
+    w_in2127 = w_out1622 * stride_width1010 - pad_width88;
+    data_col1515 += (channel_out1925 * height_col1313 + h_out1723) * width_col1414 + w_out1622;
+    data_im22 += (channel_in1824 * height33 + h_in2026) * width44 + w_in2127;
+    for (int64_t i = 0; i < kernel_height55; ++i) {
+        for (int64_t j = 0; j < kernel_width66; ++j) {
+            int64_t h2228;
+            h2228 = h_in2026 + i * dilation_height1111;
+            int64_t w2329;
+            w2329 = w_in2127 + j * dilation_width1212;
+            * data_col1515 = (h2228 >= 0 && w2329 >= 0 && h2228 < height33 && w2329 < width44) ? data_im22[i * dilation_height1111 * width44 + j * dilation_width1212] : ScalarConvert<int, dt00>::to(0);
+            data_col1515 += height_col1313 * width_col1414;
+        }
+    }
+}
+label_0:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_1;
+unsigned int blockDim_x_1;
+blockDim_x_1 = 512;
+unsigned int threadIdx_x_1;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 512;
+unsigned int blockDim_y_1;
+blockDim_y_1 = 1;
+unsigned int threadIdx_y_1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
+unsigned int blockDim_z_1;
+blockDim_z_1 = 1;
+unsigned int threadIdx_z_1;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
+unsigned int blockDim_x_146;
+blockDim_x_146 = 512;
+unsigned int threadIdx_x_147;
+threadIdx_x_147 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) % 512;
+unsigned int blockDim_y_148;
+blockDim_y_148 = 1;
+unsigned int threadIdx_y_149;
+threadIdx_y_149 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) / 512 % 1;
+unsigned int blockDim_z_150;
+blockDim_z_150 = 1;
+unsigned int threadIdx_z_151;
+threadIdx_z_151 = ((threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1 + threadIdx_z_1 * blockDim_x_1 * blockDim_y_1) - 0) / 512;
+extern unsigned char my_smem4052[] __attribute__((shared));
+output_t2430 *smem4153;
+smem4153 = nullptr;
+smem4153 = reinterpret_cast<output_t2430 *>(my_smem4052);
+for (IndexType2632 i = threadIdx_x_147; i < a3238.sizes[0]; i += blockDim_x_146) {
+    smem4153[i] = 0;
+}
+label_1:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_2;
+for (IndexType2632 linearIndex = blockIdx.x * blockDim_x_146 + threadIdx_x_147; linearIndex < totalElements3844; linearIndex += gridDim.x * blockDim_x_146) {
+    IndexType2632 bOffset4254;
+    bOffset4254 = IndexToOffset<input_t2531, IndexType2632, BDims2935>::get(linearIndex, b3440);
+    input_t2531 bVal4355;
+    bVal4355 = b3440.data[bOffset4254];
+    if (bVal4355 >= minvalue3642 && bVal4355 <= maxvalue3743) {
+        IndexType2632 bin4456;
+        bin4456 = getBin<input_t2531, IndexType2632>(bVal4355, minvalue3642, maxvalue3743, nbins3541);
+        atomicAdd(&smem4153[bin4456], getOp3945(linearIndex));
+    }
+}
+label_2:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
+for (IndexType2632 i = threadIdx_x_147; i < a3238.sizes[0]; i += blockDim_x_146) {
+    IndexType2632 aOffset4557;
+    aOffset4557 = IndexToOffset<output_t2430, IndexType2632, ADims2733>::get(i, a3238);
+    atomicAdd(&a3238.data[aOffset4557], smem4153[i]);
+}
+label_3:;
+}
+
 template <typename dt0, typename output_t24, typename input_t25, typename IndexType26, int ADims27, int PDims28, int BDims29, at::native::CUDAHistogramMemoryType MemoryType30 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op31>
 void im2col_kernel_kernelHistogram1D_0(const int64_t n1, const dt0 *data_im2, const int64_t height3, const int64_t width4, const int64_t kernel_height5, const int64_t kernel_width6, const int64_t pad_height7, const int64_t pad_width8, const int64_t stride_height9, const int64_t stride_width10, const int64_t dilation_height11, const int64_t dilation_width12, const int64_t height_col13, const int64_t width_col14, dt0 *data_col15, TensorInfo<output_t24, IndexType26> a32, TensorInfo<output_t24, IndexType26> p33, TensorInfo<input_t25, IndexType26> b34, int nbins35, input_t25 minvalue36, input_t25 maxvalue37, IndexType26 totalElements38, Op31 getOp39) __attribute__((launch_bounds(0xc4fb4b0, 0xc4fb4d0))) __attribute__((global))
  {
@@ -483,7 +596,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
     static const auto getDummyOp = [] __device__(IndexType) { return 1L; };
 
   cudaProfilerStart();
-    im2col_kernel_kernelHistogram1D_0
+    im2col_kernel_kernelHistogram1D_1x
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -502,25 +615,25 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_100
-    <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
-    <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels,
-        input_n.data<scalar_t>(),
-        input_height,
-        input_width,
-        kernel_height,
-        kernel_width,
-        pad_height,
-        pad_width,
-        stride_height,
-        stride_width,
-        dilation_height,
-        dilation_width,
-        output_height,
-        output_width,
-        output_n.data<scalar_t>(),
-        aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
+    // im2col_kernel_kernelHistogram1D_100
+    // <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
+    // <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
+    //     num_kernels,
+    //     input_n.data<scalar_t>(),
+    //     input_height,
+    //     input_width,
+    //     kernel_height,
+    //     kernel_width,
+    //     pad_height,
+    //     pad_width,
+    //     stride_height,
+    //     stride_width,
+    //     dilation_height,
+    //     dilation_width,
+    //     output_height,
+    //     output_width,
+    //     output_n.data<scalar_t>(),
+    //     aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
 
   cudaProfilerStop();
     AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
@@ -720,16 +833,16 @@ std::tuple<Tensor, Tensor> _histc_cuda2(
     AT_ERROR("HalfTensor is not supported");
   }
     printf("0\n");
-  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "histc", [&] {
-    printf("1\n");
-    return native::_histc_cuda_template<scalar_t>(self, nbins, min.to<scalar_t>(), max.to<scalar_t>(),
-    input_im2col_,
-    kernel_size_im2col,
-    dilation_im2col,
-    pad_im2colding_im2col,
-    stride_im2col
-  );
-  });
+  // AT_DISPATCH_ALL_TYPES(self.scalar_type(), "histc", [&] {
+  //   printf("1\n");
+  //   return native::_histc_cuda_template<scalar_t>(self, nbins, min.to<scalar_t>(), max.to<scalar_t>(),
+  //   input_im2col_,
+  //   kernel_size_im2col,
+  //   dilation_im2col,
+  //   pad_im2colding_im2col,
+  //   stride_im2col
+  // );
+  // });
   return AT_DISPATCH_ALL_TYPES(self.scalar_type(), "histc", [&] {
     printf("1\n");
     return native::_histc_cuda_template_fused<scalar_t>(self, nbins, min.to<scalar_t>(), max.to<scalar_t>(),

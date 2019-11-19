@@ -36,7 +36,7 @@ def run(idx):
     if idx == 3:
       print(fusion_cuda.hist_norm()[0][0])
     if idx == 4:
-      print(fusion_cuda.im2col_upsample()[0][0])
+      print(fusion_cuda.histc_upsample()[0][0])
     if idx == 5:
       print(fusion_cuda.im2col_batchnorm()[0][0])
     if idx == 6:
@@ -44,7 +44,7 @@ def run(idx):
     if idx == 7:
       check(fusion_cuda.max_pool_batch_norm())
     if idx == 8:
-      print(fusion_cuda.histc_upsample()[0][0])
+      print(fusion_cuda.im2col_upsample()[0][0])
     if idx == 9:
       print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
     if idx == 0:
@@ -53,7 +53,7 @@ def run(idx):
     torch.cuda.synchronize(device=None)
 
 with Pool(1) as p:
-  p.map(run, range(10))
+  p.map(run, range(9, 10))
 
 
 
