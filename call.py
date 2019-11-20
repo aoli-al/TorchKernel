@@ -52,8 +52,11 @@ def run(idx):
     torch.cuda.empty_cache()
     torch.cuda.synchronize(device=None)
 
-with Pool(1) as p:
-  p.map(run, range(9, 10))
+if len(sys.argv) == 2:
+    run(int(sys.argv[1]))
+else:
+    with Pool(1) as p:
+      p.map(run, range(10))
 
 
 
