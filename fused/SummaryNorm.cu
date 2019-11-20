@@ -29,7 +29,6 @@
 #include "../cuda/DeviceSqrt.cuh"
 #include "../cuda/LaunchUtils.h"
 #include <c10/macros/Macros.h>
-#include <ATen/native/im2col_shape_check.h>
 
 namespace at {
 namespace native {
