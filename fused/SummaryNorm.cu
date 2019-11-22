@@ -2167,7 +2167,7 @@ std::tuple<Tensor, Tensor> hist_norm(
     AT_ERROR("HalfTensor is not supported");
   }
     printf("0\n");
-  return AT_DISPATCH_ALL_TYPES(self.scalar_type(), "histc", [&] {
+  AT_DISPATCH_ALL_TYPES(self.scalar_type(), "histc", [&] {
     printf("1\n");
     return native::_histc_cuda_fused<scalar_t, scalar_t, int32_t>(self, nbins, min.to<scalar_t>(), max.to<scalar_t>()
     , input_, 0.2

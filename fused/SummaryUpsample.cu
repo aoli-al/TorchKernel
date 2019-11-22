@@ -835,6 +835,14 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
         cudaDeviceSynchronize();
+      kernelHistogram1D_upsample_bilinear2d_out_frame_11<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        <<<grid,
+          block.x + 512,
+          sharedMem,
+          getStreamFromPool(true)>>>(
+            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+                num_kernels, rheight, rwidth, align_corners, idata, odata
+          );
 
       kernelHistogram1D_upsample_bilinear2d_out_frame_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,

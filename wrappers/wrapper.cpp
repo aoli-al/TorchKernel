@@ -139,7 +139,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
 } // namespace at
 
 const auto defaultOptions = torch::TensorOptions({at::kCUDA}).dtype(at::kFloat).requires_grad(true);
-static auto batch_norm_input = torch::randn({100, 10000, 100}, defaultOptions);
+static auto batch_norm_input = torch::randn({128, 10000, 100}, defaultOptions);
 static auto input_max_pool = torch::randn({1, 1, 2560, 1000}, defaultOptions);
 static auto hist_input = torch::randn({5000000}, defaultOptions);
 static auto im2col_input = torch::randn({1, 1, 2512, 2048}, defaultOptions);
