@@ -110,20 +110,20 @@ constexpr int WARP_SIZE = 32;
 #endif
 
 // The maximum number of threads in a block
-// #if defined(__HIP_PLATFORM_HCC__)
-// constexpr int MAX_BLOCK_SIZE = 256;
-// #else
-// constexpr int MAX_BLOCK_SIZE = 512;
-// #endif
+#if defined(__HIP_PLATFORM_HCC__)
 constexpr int MAX_BLOCK_SIZE = 256;
+#else
+constexpr int MAX_BLOCK_SIZE = 512;
+#endif
+// constexpr int MAX_BLOCK_SIZE = 256;
 
 // Number of threads in a block given an input size up to MAX_BLOCK_SIZE
 static int getNumThreads(int nElem) {
-// #if defined(__HIP_PLATFORM_HCC__)
+#if defined(__HIP_PLATFORM_HCC__)
   int threadSizes[5] = { 16, 32, 64, 128, MAX_BLOCK_SIZE };
-// #else
-//   int threadSizes[5] = { 32, 64, 128, 256, MAX_BLOCK_SIZE };
-// #endif
+#else
+  int threadSizes[5] = { 32, 64, 128, 256, MAX_BLOCK_SIZE };
+#endif
   for (int i = 0; i != 5; ++i) {
     if (nElem <= threadSizes[i]) {
       return threadSizes[i];
@@ -490,6 +490,199 @@ __global__ void kernelHistogram1D(
 }
 
 
+template <typename scalar_t0, typename accscalar_t1, typename output_t60, typename input_t61, typename IndexType62, int ADims63, int PDims64, int BDims65, at::native::CUDAHistogramMemoryType MemoryType66 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op67, template <typename T> class VarTransform31, typename input_scalar_t32, typename stat_scalar_t33, typename stat_accscalar_t34, typename index_t35>
+ __attribute__((global)) void FUNC(const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19, TensorInfo<output_t60, IndexType62> a68, TensorInfo<output_t60, IndexType62> p69, TensorInfo<input_t61, IndexType62> b70, int nbins71, input_t61 minvalue72, input_t61 maxvalue73, IndexType62 totalElements74, Op67 getOp75, const PackedTensorAccessor<input_scalar_t32, 3, RestrictPtrTraits, index_t35> input36, const stat_accscalar_t34 epsilon37, const stat_accscalar_t34 momentum38, PackedTensorAccessor<stat_scalar_t33, 1, RestrictPtrTraits, index_t35> running_mean39, PackedTensorAccessor<stat_scalar_t33, 1, RestrictPtrTraits, index_t35> running_var40, PackedTensorAccessor<stat_accscalar_t34, 1, RestrictPtrTraits, index_t35> save_mean41, PackedTensorAccessor<stat_accscalar_t34, 1, RestrictPtrTraits, index_t35> save_transformed_var42)
+ {
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=256 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_1;
+unsigned int blockDim_x_2;
+blockDim_x_2 = 512;
+unsigned int threadIdx_x_2;
+threadIdx_x_2 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) % 512;
+unsigned int blockDim_y_2;
+blockDim_y_2 = 1;
+unsigned int threadIdx_y_2;
+threadIdx_y_2 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 512 % 1;
+unsigned int blockDim_z_2;
+blockDim_z_2 = 1;
+unsigned int threadIdx_z_2;
+threadIdx_z_2 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 512;
+extern unsigned char my_smem76[] __attribute__((shared));
+output_t60 *smem77;
+smem77 = nullptr;
+smem77 = reinterpret_cast<output_t60 *>(my_smem76);
+for (IndexType62 i = threadIdx_x_2; i < a68.sizes[0]; i += blockDim_x_2) {
+    smem77[i] = 0;
+}
+label_1:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=256 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_2;
+for (IndexType62 linearIndex = blockIdx.x * blockDim_x_2 + threadIdx_x_2; linearIndex < totalElements74; linearIndex += gridDim.x * blockDim_x_2) {
+    IndexType62 bOffset78;
+    bOffset78 = IndexToOffset<input_t61, IndexType62, BDims65>::get(linearIndex, b70);
+    input_t61 bVal79;
+    bVal79 = b70.data[bOffset78];
+    if (bVal79 >= minvalue72 && bVal79 <= maxvalue73) {
+        IndexType62 bin80;
+        bin80 = getBin<input_t61, IndexType62>(bVal79, minvalue72, maxvalue73, nbins71);
+        atomicAdd(&smem77[bin80], getOp75(linearIndex));
+    }
+}
+label_2:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)) goto label_0;
+unsigned int blockDim_x_0;
+blockDim_x_0 = 256;
+unsigned int threadIdx_x_0;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+unsigned int blockDim_y_0;
+blockDim_y_0 = 1;
+unsigned int threadIdx_y_0;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
+unsigned int blockDim_z_0;
+blockDim_z_0 = 1;
+unsigned int threadIdx_z_0;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
+for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
+    int pw20;
+    pw20 = index % pooled_width9;
+    int ph21;
+    ph21 = (index / pooled_width9) % pooled_height8;
+    int c22;
+    c22 = (index / pooled_width9 / pooled_height8) % channels5;
+    int n23;
+    n23 = index / pooled_width9 / pooled_height8 / channels5;
+    int hstart24;
+    hstart24 = ph21 * stride_h12 - pad_h14;
+    int wstart25;
+    wstart25 = pw20 * stride_w13 - pad_w15;
+    int hend26;
+    hend26 = min(hstart24 + (kernel_h10 - 1) * dilation_h16 + 1, height6);
+    int wend27;
+    wend27 = min(wstart25 + (kernel_w11 - 1) * dilation_w17 + 1, width7);
+    while (hstart24 < 0)
+        hstart24 += dilation_h16;
+    while (wstart25 < 0)
+        wstart25 += dilation_w17;
+    accscalar_t1 maxval28;
+    maxval28 = at::numeric_limits<accscalar_t1>::lower_bound();
+    int maxidx29;
+    maxidx29 = hstart24 * width7 + wstart25;
+    bottom_data3 += (n23 * channels5 + c22) * height6 * width7;
+    for (int h = hstart24; h < hend26; h += dilation_h16) {
+        for (int w = wstart25; w < wend27; w += dilation_w17) {
+            scalar_t0 val30;
+            val30 = bottom_data3[h * width7 + w];
+            if ((ScalarConvert<scalar_t0, accscalar_t1>::to(val30) > maxval28) || THCNumerics<scalar_t0>::isnan(val30)) {
+                maxidx29 = h * width7 + w;
+                maxval28 = ScalarConvert<scalar_t0, accscalar_t1>::to(val30);
+            }
+        }
+    }
+    top_data18[index] = ScalarConvert<scalar_t0, accscalar_t1>::to(maxval28);
+    top_mask19[index] = maxidx29;
+}
+label_0:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_4;
+unsigned int blockDim_x_1;
+blockDim_x_1 = 16;
+unsigned int threadIdx_x_1;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) % 16;
+unsigned int blockDim_y_1;
+blockDim_y_1 = 16;
+unsigned int threadIdx_y_1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 16 % 16;
+unsigned int blockDim_z_1;
+blockDim_z_1 = 1;
+unsigned int threadIdx_z_1;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 256;
+static int shared_n43[160] __attribute__((shared));
+int plane44;
+plane44 = blockIdx.x;
+int N45;
+N45 = input36.size(0) * input36.size(2);
+int tid46;
+tid46 = threadIdx_x_1 + threadIdx_y_1 * blockDim_x_1;
+stat_accscalar_t34 *shared_avg_var47;
+shared_avg_var47 = (stat_accscalar_t34 *)&shared_n43[WARP_SIZE];
+stat_accscalar_t34 avg48;
+avg48 = 0;
+stat_accscalar_t34 var_n49;
+var_n49 = 0;
+int n50;
+n50 = 0;
+for (int batch = threadIdx_y_1; batch < input36.size(0); batch += blockDim_y_1) {
+    for (int x = threadIdx_x_1; x < input36.size(2); x += blockDim_x_1) {
+        stat_accscalar_t34 v51;
+        v51 = input36[batch][plane44][x];
+        stat_accscalar_t34 d152;
+        d152 = v51 - avg48;
+        n50++;
+        avg48 += d152 / n50;
+        var_n49 += d152 * (v51 - avg48);
+    }
+}
+for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+    stat_accscalar_t34 o_avg53;
+    o_avg53 = WARP_SHFL_XOR(avg48, 1 << i, WARP_SIZE);
+    int o_n54;
+    o_n54 = WARP_SHFL_XOR(n50, 1 << i, WARP_SIZE);
+    stat_accscalar_t34 factor55;
+    factor55 = 1. / fmaxf(1., n50 + o_n54);
+    var_n49 += WARP_SHFL_XOR(var_n49, 1 << i, WARP_SIZE) + (avg48 - o_avg53) * (avg48 - o_avg53) * n50 * o_n54 * factor55;
+    avg48 = (n50 * avg48 + o_n54 * o_avg53) * factor55;
+    n50 += o_n54;
+}
+label_4:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=256 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_3;
+for (IndexType62 i = threadIdx_x_2; i < a68.sizes[0]; i += blockDim_x_2) {
+    IndexType62 aOffset81;
+    aOffset81 = IndexToOffset<output_t60, IndexType62, ADims63>::get(i, a68);
+    atomicAdd(&a68.data[aOffset81], smem77[i]);
+}
+label_3:;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_5;
+if (tid46 % WARP_SIZE == 0) {
+    shared_n43[tid46 / WARP_SIZE] = n50;
+    shared_avg_var47[tid46 / WARP_SIZE * 2] = avg48;
+    shared_avg_var47[tid46 / WARP_SIZE * 2 + 1] = var_n49;
+}
+label_5:;
+__syncthreads();
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=768 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_6;
+if (tid46 < WARP_SIZE) {
+    n50 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_n43[tid46] : 0);
+    avg48 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_avg_var47[2 * tid46] : stat_accscalar_t34(0));
+    var_n49 = (tid46 < blockDim_x_1 * blockDim_y_1 / WARP_SIZE ? shared_avg_var47[2 * tid46 + 1] : stat_accscalar_t34(0));
+}
+for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+    stat_accscalar_t34 o_avg56;
+    o_avg56 = WARP_SHFL_XOR(avg48, 1 << i, WARP_SIZE);
+    int o_n57;
+    o_n57 = WARP_SHFL_XOR(n50, 1 << i, WARP_SIZE);
+    stat_accscalar_t34 factor58;
+    factor58 = 1. / fmaxf(1., n50 + o_n57);
+    var_n49 += WARP_SHFL_XOR(var_n49, 1 << i, WARP_SIZE) + (avg48 - o_avg56) * (avg48 - o_avg56) * n50 * o_n57 * factor58;
+    avg48 = (n50 * avg48 + o_n57 * o_avg56) * factor58;
+    n50 += o_n57;
+}
+if (tid46 == 0) {
+    if (save_mean41.data() != __null) {
+        save_mean41[plane44] = avg48;
+    }
+    if (save_transformed_var42.data() != __null) {
+        save_transformed_var42[plane44] = VarTransform31<stat_accscalar_t34>({})(var_n49 / N45, epsilon37);
+    }
+    if (running_mean39.data() != __null) {
+        running_mean39[plane44] = static_cast<stat_scalar_t33>((1 - momentum38) * running_mean39[plane44] + momentum38 * avg48);
+    }
+    if (running_var40.data() != __null) {
+        stat_accscalar_t34 unbiasedVar59;
+        unbiasedVar59 = var_n49 / (N45 - 1);
+        running_var40[plane44] = static_cast<stat_scalar_t33>((1 - momentum38) * running_var40[plane44] + momentum38 * unbiasedVar59);
+    }
+}
+label_6:;
+}
 
 
 
@@ -695,6 +888,17 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
       count, input_maxpool_data,
       nbatch, nInputPlane, input_maxpoolHeight, input_maxpoolWidth, output_maxpoolHeight, output_maxpoolWidth,
       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_maxpool_data, indices_data);
+  cudaDeviceSynchronize();
+  FUNC<scalar_t, scalar_t,input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<blocks, 1024, sharedMem>>>(
+      count, input_maxpool_data,
+      nbatch, nInputPlane, input_maxpoolHeight, input_maxpoolWidth, output_maxpoolHeight, output_maxpoolWidth,
+      kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_maxpool_data, indices_data,
+          aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+
+
   cudaDeviceSynchronize();
   cudaProfilerStop();
   AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
