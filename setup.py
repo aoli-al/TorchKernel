@@ -11,6 +11,7 @@ setup(
     name='fusion_cuda',
     ext_modules=[
         CUDAExtension('fusion_cuda', [
+            'fused/MaxpoolSummaryNorm.cu',
             'fused/MaxPoolUpSample.cu',
             'fused/SummaryUpsample.cu',
             'fused/SummaryMaxpool.cu',

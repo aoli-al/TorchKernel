@@ -12,6 +12,19 @@ namespace at
 namespace native
 {
 
+std::tuple<Tensor, Tensor> max_hist_norm(
+    const Tensor& self,
+    int64_t nbins,
+    Scalar min,
+    Scalar max,
+  Tensor& input_,
+    const Tensor& input_maxpool_,
+    IntArrayRef kernel_size,
+    IntArrayRef stride,
+    IntArrayRef padding,
+    IntArrayRef dilation,
+    bool ceil_mode
+);
 std::tuple<Tensor, Tensor> _histc_maxpool(
     const Tensor& self,
     int64_t nbins,
@@ -219,9 +232,22 @@ Tensor histc_upsample()
 {
   auto hist_input = torch::randn({100000000}, defaultOptions);
   auto input_upsample = torch::randn({20, 20, 256, 100}, defaultOptions);
-  at::native::_histc_upsample(hist_input, 20, 0.f, 0.f,
+  at::native::_histc_upsample(
+    hist_input, 20, 0.f, 0.f,
                               input_upsample, {2000, 2560}, true);
  return torch::randn({100, 100});
+}
+
+std::tuple<Tensor, Tensor> max_hist_norm(
+) {
+  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
+  auto hist_input = torch::randn({100000000}, defaultOptions);
+  at::native::max_hist_norm(
+    hist_input, 20, 0.f, 0.f,
+    batch_norm_input,
+    input_max_pool, {20, 20}, {10, 10}, 0, 1, false
+    );
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
@@ -237,4 +263,5 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("hist_norm", &hist_norm, "LLTM forward (CUDA)");
   m.def("histc_maxpool", &histc_maxpool, "LLTM forward (CUDA)");
   m.def("histc_upsample", &histc_upsample, "LLTM forward (CUDA)");
+  m.def("max_hist_norm", &max_hist_norm, "LLTM forward (CUDA)");
 }

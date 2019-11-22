@@ -50,6 +50,10 @@ def run(idx):
       print(fusion_cuda.call_max_pool_upsample_fused()[0][0])
     if idx == 0:
       check(fusion_cuda.upsample_batchnorm())
+    if idx == 11:
+      print(fusion_cuda.im2col_maxpool_batchnorm()[0])
+    if idx == 12:
+      print(fusion_cuda.max_hist_norm()[0])
     torch.cuda.empty_cache()
     torch.cuda.synchronize(device=None)
 
