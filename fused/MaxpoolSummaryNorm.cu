@@ -489,6 +489,7 @@ __global__ void kernelHistogram1D(
 
 }
 
+template <typename scalar_t0, typename accscalar_t1, typename output_t60, typename input_t61, typename IndexType62, int ADims63, int PDims64, int BDims65, at::native::CUDAHistogramMemoryType MemoryType66 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op67, template <typename T> class VarTransform31, typename input_scalar_t32, typename stat_scalar_t33, typename stat_accscalar_t34, typename index_t35>
  __attribute__((global)) void FUNC2(const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19, TensorInfo<output_t60, IndexType62> a68, TensorInfo<output_t60, IndexType62> p69, TensorInfo<input_t61, IndexType62> b70, int nbins71, input_t61 minvalue72, input_t61 maxvalue73, IndexType62 totalElements74, Op67 getOp75, const PackedTensorAccessor<input_scalar_t32, 3, RestrictPtrTraits, index_t35> input36, const stat_accscalar_t34 epsilon37, const stat_accscalar_t34 momentum38, PackedTensorAccessor<stat_scalar_t33, 1, RestrictPtrTraits, index_t35> running_mean39, PackedTensorAccessor<stat_scalar_t33, 1, RestrictPtrTraits, index_t35> running_var40, PackedTensorAccessor<stat_accscalar_t34, 1, RestrictPtrTraits, index_t35> save_mean41, PackedTensorAccessor<stat_accscalar_t34, 1, RestrictPtrTraits, index_t35> save_transformed_var42)
  {
    if (threadIdx.x < 256) {
@@ -1061,6 +1062,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
 
   const int blocks_maxpool = cuda::ATenCeilDiv(count, num_threads);
   printf("%d %d %d\n", count, blocks_maxpool, num_threads);
+  printf("%d %d %d\n", input.size(0), input.size(1), input.size(2));
   cudaProfilerStart();
   batch_norm_collect_statistics_kernel<InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<blocks, threads, 0, getStreamFromPool(true)>>>
     (input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
@@ -1071,11 +1073,12 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
         getStreamFromPool(true)>>>(
           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
   MaxPoolForward<scalar_t, scalar_t>
-    <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, at::cuda::getCurrentCUDAStream()>>>(
+    <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, at::cuda::getStreamFromPool(true)>>>(
       count, input_maxpool_data,
       nbatch, nInputPlane, input_maxpoolHeight, input_maxpoolWidth, output_maxpoolHeight, output_maxpoolWidth,
       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_maxpool_data, indices_data);
   cudaDeviceSynchronize();
+  AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
   FUNC<scalar_t, scalar_t,input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<blocks, 1024, sharedMem>>>(
       count, input_maxpool_data,
@@ -1083,6 +1086,8 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_maxpool_data, indices_data,
           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
     input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+  cudaDeviceSynchronize();
+  AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
   FUNC2<scalar_t, scalar_t,input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<blocks, 512, sharedMem>>>(
       count, input_maxpool_data,

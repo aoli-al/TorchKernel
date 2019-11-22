@@ -153,7 +153,7 @@ std::tuple<Tensor, Tensor> im2col_batchnorm()
   auto im2col_input = torch::randn({1, 1, 2700, 2048}, defaultOptions);
   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
   // return std::make_tuple(r, r, r, r, r, r);
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  auto batch_norm_input = torch::randn({500, 10000, 500}, defaultOptions);
   return at::native::im2col_batchnorm_cuda(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
                                            batch_norm_input);
 }
@@ -164,7 +164,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batchn
   auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
   // auto r = at::native::im2col_cuda(im2col_input, {251, 1}, {1, 1}, {0, 0}, {1, 1});
   // return std::make_tuple(r, r, r, r, r, r);
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  auto batch_norm_input = torch::randn({500, 10000, 500}, defaultOptions);
   return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {201, 1}, {1, 1}, {0, 0}, {1, 1},
                                           input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
                                            batch_norm_input);
@@ -182,7 +182,7 @@ Tensor histc(Tensor t, uint64_t y)
 
 
 std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> max_pool_batch_norm() {
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  auto batch_norm_input = torch::randn({500, 10000, 500}, defaultOptions);
   auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
   return at::native::max_pool2d_batch_norm(input_max_pool, {20, 20}, {10, 10}, 0, 1, false,
     batch_norm_input, 0.1);
@@ -207,12 +207,12 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_maxpool() {
 //
 std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm() {
   auto input_upsample = torch::randn({20, 20, 256, 100}, defaultOptions);
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  auto batch_norm_input = torch::randn({500, 10000, 500}, defaultOptions);
   return at::native::upsample_batchnorm(input_upsample, {2000, 2560}, true,
                                         batch_norm_input, 0.2);
 }
 Tensor hist_norm() {
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
+  auto batch_norm_input = torch::randn({500, 10000, 500}, defaultOptions);
   auto hist_input = torch::randn({100000000}, defaultOptions);
   at::native::hist_norm(hist_input, 20, 0.f, 0.f, batch_norm_input);
  return torch::randn({100, 100});
@@ -238,16 +238,17 @@ Tensor histc_upsample()
  return torch::randn({100, 100});
 }
 
-std::tuple<Tensor, Tensor> max_hist_norm(
+Tensor max_hist_norm(
 ) {
-  auto batch_norm_input = torch::randn({10000, 10000}, defaultOptions);
-  auto input_max_pool = torch::randn({4, 4, 3210, 5010}, defaultOptions);
+  auto batch_norm_input = torch::randn({100, 10000, 100}, defaultOptions);
+  auto input_max_pool = torch::randn({1, 1, 3210, 5010}, defaultOptions);
   auto hist_input = torch::randn({100000000}, defaultOptions);
   at::native::max_hist_norm(
     hist_input, 20, 0.f, 0.f,
     batch_norm_input,
     input_max_pool, {20, 20}, {10, 10}, 0, 1, false
     );
+ return torch::randn({100, 100});
 }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
