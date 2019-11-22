@@ -140,17 +140,17 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
 
 const auto defaultOptions = torch::TensorOptions({at::kCUDA}).dtype(at::kFloat).requires_grad(true);
 static auto batch_norm_input = torch::randn({128, 10000, 100}, defaultOptions);
-static auto input_max_pool = torch::randn({1, 1, 2560, 1000}, defaultOptions);
+static auto input_max_pool = torch::randn({10, 10, 2560, 1000}, defaultOptions);
 static auto hist_input = torch::randn({5000000}, defaultOptions);
 static auto im2col_input = torch::randn({1, 1, 2512, 2048}, defaultOptions);
 static auto input_upsample = torch::randn({5, 4, 256, 100}, defaultOptions);
 
 std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused()
 {
-  return at::native::max_pool_upsample_stream(input_max_pool, {13, 13}, {1, 1}, 6, 1, false,
+  return at::native::max_pool_upsample_stream(input_max_pool, {5, 5}, {10, 10}, 2, 1, false,
                                               input_upsample, {2000, 2560}, true);
 }
-//
+
 std::tuple<Tensor, Tensor> im2col_batchnorm()
 {
   return at::native::im2col_batchnorm_cuda(im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
@@ -160,7 +160,7 @@ std::tuple<Tensor, Tensor> im2col_batchnorm()
 std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> im2col_maxpool_batchnorm()
 {
   return at::native::im2col_maxpool_batch_norm_stream(im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
-                                          input_max_pool, {13, 13}, {1, 1}, 6, 1, false,
+                                          input_max_pool, {5, 5}, {10, 10}, 2, 1, false,
                                            batch_norm_input);
 }
 
@@ -173,7 +173,7 @@ Tensor histc(Tensor t, uint64_t y)
 
 
 std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> max_pool_batch_norm() {
-  return at::native::max_pool2d_batch_norm(input_max_pool, {13, 13}, {1, 1}, 6, 1, false,
+  return at::native::max_pool2d_batch_norm(input_max_pool, {5, 5}, {10, 10}, 2, 1, false,
     batch_norm_input, 0.1);
 }
 
@@ -185,7 +185,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_upsample() {
 std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_maxpool() {
   return at::native::im2col_maxpool(
     im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
-    input_max_pool, {13, 13}, {1, 1}, 6, 1, false
+    input_max_pool, {5, 5}, {10, 10}, 2, 1, false
   );
 }
 //
@@ -201,7 +201,7 @@ Tensor hist_norm() {
 Tensor histc_maxpool()
 {
   at::native::_histc_maxpool(hist_input, 20, 0.f, 0.f,
-    input_max_pool, {13, 13}, {1, 1}, 6, 1, false
+    input_max_pool, {5, 5}, {10, 10}, 2, 1, false
   );
  return torch::randn({100, 100});
 }
@@ -219,7 +219,7 @@ Tensor max_hist_norm(
   at::native::max_hist_norm(
     hist_input, 20, 0.f, 0.f,
     batch_norm_input,
-    input_max_pool, {13, 13}, {1, 1}, 6, 1, false
+    input_max_pool, {5, 5}, {10, 10}, 2, 1, false
     );
  return torch::randn({100, 100});
 }
