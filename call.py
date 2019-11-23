@@ -23,19 +23,19 @@ def run(idx):
   kwargs = {'dtype': dtype,
             'device': device,
             'requires_grad': True}
-
-  # lstm = nn.LSTM(3, 3).cuda()
-  # i = torch.randn(1, 3, **kwargs)
-  # hidden = (torch.randn(1, 1, 3, **kwargs),
-  #           torch.randn(1, 1, 3, **kwargs))
-  # for _ in range(50000):
-  #   out, hidden = lstm(i.view(1, 1, -1), hidden)
+  # if idx == 1 or idx == 12 or idx == 11:
+  #   lstm = nn.LSTM(3, 3).cuda()
+  #   i = torch.randn(1, 3, **kwargs)
+  #   hidden = (torch.randn(1, 1, 3, **kwargs),
+  #             torch.randn(1, 1, 3, **kwargs))
+  #   for _ in range(10000):
+  #     out, hidden = lstm(i.view(1, 1, -1), hidden)
 
   def check(kernels):
     half = len(kernels) // 2
     for i in range(half):
       print(torch.all(torch.eq(kernels[i], kernels[i+half])))
-  for _ in range(1):
+  for _ in range(10):
     if idx == 1:
       print(fusion_cuda.histc(torch.randn(0), 1)[0][0])
     if idx == 2:
