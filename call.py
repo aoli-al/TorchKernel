@@ -35,7 +35,7 @@ def run(idx):
     half = len(kernels) // 2
     for i in range(half):
       print(torch.all(torch.eq(kernels[i], kernels[i+half])))
-  for _ in range(10):
+  for _ in range(1):
     if idx == 1:
       print(fusion_cuda.histc(torch.randn(0), 1)[0][0])
     if idx == 2:
