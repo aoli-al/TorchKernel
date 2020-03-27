@@ -188,7 +188,7 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_maxpool() {
     input_max_pool, {5, 5}, {10, 10}, 2, 1, false
   );
 }
-//
+
 std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm() {
   return at::native::upsample_batchnorm(input_upsample, {2000, 2560}, true,
                                         batch_norm_input, 0.2);
