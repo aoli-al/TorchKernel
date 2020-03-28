@@ -140,612 +140,7 @@ namespace {
   }
 }
 
-template <typename output_t31, typename input_t32, typename IndexType33, int ADims34, int PDims35, int BDims36, at::native::CUDAHistogramMemoryType MemoryType37 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op38, typename scalar_t0, typename accscalar_t1>
-void kernelHistogram1D_upsample_bilinear2d_out_frame_0(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7) __attribute__((global))
- {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
-unsigned int blockDim_x_1;
-blockDim_x_1 = 512;
-unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
-unsigned int blockDim_y_1;
-blockDim_y_1 = 1;
-unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
-unsigned int blockDim_z_1;
-blockDim_z_1 = 1;
-unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-extern unsigned char my_smem47[] __attribute__((shared));
-output_t31 *smem48;
-smem48 = nullptr;
-smem48 = reinterpret_cast<output_t31 *>(my_smem47);
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    smem48[i] = 0;
-}
-label_0:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_1;
-for (IndexType33 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements45; linearIndex += gridDim.x * blockDim_x_1) {
-    IndexType33 bOffset49;
-    bOffset49 = IndexToOffset<input_t32, IndexType33, BDims36>::get(linearIndex, b41);
-    input_t32 bVal50;
-    bVal50 = b41.data[bOffset49];
-    if (bVal50 >= minvalue43 && bVal50 <= maxvalue44) {
-        IndexType33 bin51;
-        bin51 = getBin<input_t32, IndexType33>(bVal50, minvalue43, maxvalue44, nbins42);
-        atomicAdd(&smem48[bin51], getOp46(linearIndex));
-    }
-}
-label_1:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_2;
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    IndexType33 aOffset52;
-    aOffset52 = IndexToOffset<output_t31, IndexType33, ADims34>::get(i, a39);
-    atomicAdd(&a39.data[aOffset52], smem48[i]);
-}
-label_2:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
-unsigned int blockDim_x_0;
-blockDim_x_0 = 512;
-unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 512;
-unsigned int blockDim_y_0;
-blockDim_y_0 = 1;
-unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
-unsigned int blockDim_z_0;
-blockDim_z_0 = 1;
-unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-int index8;
-index8 = threadIdx_x_0 + blockIdx.x * blockDim_x_0;
-int batchsize9;
-batchsize9 = idata6.size(0);
-int channels10;
-channels10 = idata6.size(1);
-int height111;
-height111 = idata6.size(2);
-int width112;
-width112 = idata6.size(3);
-int height213;
-height213 = odata7.size(2);
-int width214;
-width214 = odata7.size(3);
-if (index8 < n2) {
-    int w215;
-    w215 = index8 % width214;
-    int h216;
-    h216 = index8 / width214;
-    if (height111 == height213 && width112 == width214) {
-        int h127;
-        h127 = h216;
-        int w128;
-        w128 = w215;
-        for (int n = 0; n < batchsize9; n++) {
-            for (int c = 0; c < channels10; ++c) {
-                scalar_t0 val29;
-                val29 = idata6[n][c][h127][w128];
-                odata7[n][c][h216][w215] = val29;
-            }
-        }
-        return;
-    }
-    accscalar_t1 h1r17;
-    h1r17 = area_pixel_compute_source_index<accscalar_t1>(rheight3, h216, align_corners5, false);
-    int h118;
-    h118 = h1r17;
-    int h1p19;
-    h1p19 = (h118 < height111 - 1) ? 1 : 0;
-    accscalar_t1 h1lambda20;
-    h1lambda20 = h1r17 - h118;
-    accscalar_t1 h0lambda21;
-    h0lambda21 = static_cast<accscalar_t1>(1) - h1lambda20;
-    accscalar_t1 w1r22;
-    w1r22 = area_pixel_compute_source_index<accscalar_t1>(rwidth4, w215, align_corners5, false);
-    int w123;
-    w123 = w1r22;
-    int w1p24;
-    w1p24 = (w123 < width112 - 1) ? 1 : 0;
-    accscalar_t1 w1lambda25;
-    w1lambda25 = w1r22 - w123;
-    accscalar_t1 w0lambda26;
-    w0lambda26 = static_cast<accscalar_t1>(1) - w1lambda25;
-    for (int n = 0; n < batchsize9; n++) {
-        for (int c = 0; c < channels10; ++c) {
-            accscalar_t1 val30;
-            val30 = h0lambda21 * (w0lambda26 * idata6[n][c][h118][w123] + w1lambda25 * idata6[n][c][h118][w123 + w1p24]) + h1lambda20 * (w0lambda26 * idata6[n][c][h118 + h1p19][w123] + w1lambda25 * idata6[n][c][h118 + h1p19][w123 + w1p24]);
-            odata7[n][c][h216][w215] = static_cast<scalar_t0>(val30);
-        }
-    }
-}
-label_3:;
-}
-template <typename output_t31, typename input_t32, typename IndexType33, int ADims34, int PDims35, int BDims36, at::native::CUDAHistogramMemoryType MemoryType37 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op38, typename scalar_t0, typename accscalar_t1>
-void kernelHistogram1D_upsample_bilinear2d_out_frame_11(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7) __attribute__((global))
- {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
-unsigned int blockDim_x_1;
-blockDim_x_1 = 512;
-unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
-unsigned int blockDim_y_1;
-blockDim_y_1 = 1;
-unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
-unsigned int blockDim_z_1;
-blockDim_z_1 = 1;
-unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-extern unsigned char my_smem47[] __attribute__((shared));
-output_t31 *smem48;
-smem48 = nullptr;
-smem48 = reinterpret_cast<output_t31 *>(my_smem47);
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    smem48[i] = 0;
-}
-label_0:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_1;
-for (IndexType33 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements45; linearIndex += gridDim.x * blockDim_x_1) {
-    IndexType33 bOffset49;
-    bOffset49 = IndexToOffset<input_t32, IndexType33, BDims36>::get(linearIndex, b41);
-    input_t32 bVal50;
-    bVal50 = b41.data[bOffset49];
-    if (bVal50 >= minvalue43 && bVal50 <= maxvalue44) {
-        IndexType33 bin51;
-        bin51 = getBin<input_t32, IndexType33>(bVal50, minvalue43, maxvalue44, nbins42);
-        atomicAdd(&smem48[bin51], getOp46(linearIndex));
-    }
-}
-label_1:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
-unsigned int blockDim_x_0;
-blockDim_x_0 = 512;
-unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 512;
-unsigned int blockDim_y_0;
-blockDim_y_0 = 1;
-unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
-unsigned int blockDim_z_0;
-blockDim_z_0 = 1;
-unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-int index8;
-index8 = threadIdx_x_0 + blockIdx.x * blockDim_x_0;
-int batchsize9;
-batchsize9 = idata6.size(0);
-int channels10;
-channels10 = idata6.size(1);
-int height111;
-height111 = idata6.size(2);
-int width112;
-width112 = idata6.size(3);
-int height213;
-height213 = odata7.size(2);
-int width214;
-width214 = odata7.size(3);
-if (index8 < n2) {
-    int w215;
-    w215 = index8 % width214;
-    int h216;
-    h216 = index8 / width214;
-    if (height111 == height213 && width112 == width214) {
-        int h127;
-        h127 = h216;
-        int w128;
-        w128 = w215;
-        for (int n = 0; n < batchsize9; n++) {
-            for (int c = 0; c < channels10; ++c) {
-                scalar_t0 val29;
-                val29 = idata6[n][c][h127][w128];
-                odata7[n][c][h216][w215] = val29;
-            }
-        }
-        return;
-    }
-    accscalar_t1 h1r17;
-    h1r17 = area_pixel_compute_source_index<accscalar_t1>(rheight3, h216, align_corners5, false);
-    int h118;
-    h118 = h1r17;
-    int h1p19;
-    h1p19 = (h118 < height111 - 1) ? 1 : 0;
-    accscalar_t1 h1lambda20;
-    h1lambda20 = h1r17 - h118;
-    accscalar_t1 h0lambda21;
-    h0lambda21 = static_cast<accscalar_t1>(1) - h1lambda20;
-    accscalar_t1 w1r22;
-    w1r22 = area_pixel_compute_source_index<accscalar_t1>(rwidth4, w215, align_corners5, false);
-    int w123;
-    w123 = w1r22;
-    int w1p24;
-    w1p24 = (w123 < width112 - 1) ? 1 : 0;
-    accscalar_t1 w1lambda25;
-    w1lambda25 = w1r22 - w123;
-    accscalar_t1 w0lambda26;
-    w0lambda26 = static_cast<accscalar_t1>(1) - w1lambda25;
-    for (int n = 0; n < batchsize9; n++) {
-        for (int c = 0; c < channels10; ++c) {
-            accscalar_t1 val30;
-            val30 = h0lambda21 * (w0lambda26 * idata6[n][c][h118][w123] + w1lambda25 * idata6[n][c][h118][w123 + w1p24]) + h1lambda20 * (w0lambda26 * idata6[n][c][h118 + h1p19][w123] + w1lambda25 * idata6[n][c][h118 + h1p19][w123 + w1p24]);
-            odata7[n][c][h216][w215] = static_cast<scalar_t0>(val30);
-        }
-    }
-}
-label_3:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_2;
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    IndexType33 aOffset52;
-    aOffset52 = IndexToOffset<output_t31, IndexType33, ADims34>::get(i, a39);
-    atomicAdd(&a39.data[aOffset52], smem48[i]);
-}
-label_2:;
-}
-template <typename output_t31, typename input_t32, typename IndexType33, int ADims34, int PDims35, int BDims36, at::native::CUDAHistogramMemoryType MemoryType37 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op38, typename scalar_t0, typename accscalar_t1>
-void kernelHistogram1D_upsample_bilinear2d_out_frame_100(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7) __attribute__((global))
- {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
-    unsigned int blockDim_x_1;
-    blockDim_x_1 = 512;
-    unsigned int threadIdx_x_1;
-    threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
-    unsigned int blockDim_y_1;
-    blockDim_y_1 = 1;
-    unsigned int threadIdx_y_1;
-    threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
-    unsigned int blockDim_z_1;
-    blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1;
-    threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    extern unsigned char my_smem47[] __attribute__((shared));
-    output_t31 *smem48;
-    smem48 = nullptr;
-    smem48 = reinterpret_cast<output_t31 *>(my_smem47);
-    for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-        smem48[i] = 0;
-    }
-    __syncthreads();
-    for (IndexType33 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements45; linearIndex += gridDim.x * blockDim_x_1) {
-        IndexType33 bOffset49;
-        bOffset49 = IndexToOffset<input_t32, IndexType33, BDims36>::get(linearIndex, b41);
-        input_t32 bVal50;
-        bVal50 = b41.data[bOffset49];
-        if (bVal50 >= minvalue43 && bVal50 <= maxvalue44) {
-            IndexType33 bin51;
-            bin51 = getBin<input_t32, IndexType33>(bVal50, minvalue43, maxvalue44, nbins42);
-            atomicAdd(&smem48[bin51], getOp46(linearIndex));
-        }
-    }
-    __syncthreads();
-    for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-        IndexType33 aOffset52;
-        aOffset52 = IndexToOffset<output_t31, IndexType33, ADims34>::get(i, a39);
-        atomicAdd(&a39.data[aOffset52], smem48[i]);
-    }
-}
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
-    unsigned int blockDim_x_0;
-    blockDim_x_0 = 512;
-    unsigned int threadIdx_x_0;
-    threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
-    unsigned int blockDim_y_0;
-    blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0;
-    threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
-    unsigned int blockDim_z_0;
-    blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0;
-    threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index8;
-    index8 = threadIdx_x_0 + blockIdx.x * blockDim_x_0;
-    int batchsize9;
-    batchsize9 = idata6.size(0);
-    int channels10;
-    channels10 = idata6.size(1);
-    int height111;
-    height111 = idata6.size(2);
-    int width112;
-    width112 = idata6.size(3);
-    int height213;
-    height213 = odata7.size(2);
-    int width214;
-    width214 = odata7.size(3);
-    if (index8 < n2) {
-        int w215;
-        w215 = index8 % width214;
-        int h216;
-        h216 = index8 / width214;
-        if (height111 == height213 && width112 == width214) {
-            int h127;
-            h127 = h216;
-            int w128;
-            w128 = w215;
-            for (int n = 0; n < batchsize9; n++) {
-                for (int c = 0; c < channels10; ++c) {
-                    scalar_t0 val29;
-                    val29 = idata6[n][c][h127][w128];
-                    odata7[n][c][h216][w215] = val29;
-                }
-            }
-            return;
-        }
-        accscalar_t1 h1r17;
-        h1r17 = area_pixel_compute_source_index<accscalar_t1>(rheight3, h216, align_corners5, false);
-        int h118;
-        h118 = h1r17;
-        int h1p19;
-        h1p19 = (h118 < height111 - 1) ? 1 : 0;
-        accscalar_t1 h1lambda20;
-        h1lambda20 = h1r17 - h118;
-        accscalar_t1 h0lambda21;
-        h0lambda21 = static_cast<accscalar_t1>(1) - h1lambda20;
-        accscalar_t1 w1r22;
-        w1r22 = area_pixel_compute_source_index<accscalar_t1>(rwidth4, w215, align_corners5, false);
-        int w123;
-        w123 = w1r22;
-        int w1p24;
-        w1p24 = (w123 < width112 - 1) ? 1 : 0;
-        accscalar_t1 w1lambda25;
-        w1lambda25 = w1r22 - w123;
-        accscalar_t1 w0lambda26;
-        w0lambda26 = static_cast<accscalar_t1>(1) - w1lambda25;
-        for (int n = 0; n < batchsize9; n++) {
-            for (int c = 0; c < channels10; ++c) {
-                accscalar_t1 val30;
-                val30 = h0lambda21 * (w0lambda26 * idata6[n][c][h118][w123] + w1lambda25 * idata6[n][c][h118][w123 + w1p24]) + h1lambda20 * (w0lambda26 * idata6[n][c][h118 + h1p19][w123] + w1lambda25 * idata6[n][c][h118 + h1p19][w123 + w1p24]);
-                odata7[n][c][h216][w215] = static_cast<scalar_t0>(val30);
-            }
-        }
-    }
-}
-}
-
-template <typename output_t31, typename input_t32, typename IndexType33, int ADims34, int PDims35, int BDims36, at::native::CUDAHistogramMemoryType MemoryType37 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op38, typename scalar_t0, typename accscalar_t1>
- __attribute__((global)) void kernelHistogram1D_upsample_bilinear2d_out_frame_bar_sync(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7)
- {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
-unsigned int blockDim_x_1;
-blockDim_x_1 = 512;
-unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
-unsigned int blockDim_y_1;
-blockDim_y_1 = 1;
-unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
-unsigned int blockDim_z_1;
-blockDim_z_1 = 1;
-unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-extern unsigned char my_smem47[] __attribute__((shared));
-output_t31 *smem48;
-smem48 = nullptr;
-smem48 = reinterpret_cast<output_t31 *>(my_smem47);
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    smem48[i] = 0;
-}
-asm ("bar.sync 1,512;");
-;
-for (IndexType33 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements45; linearIndex += gridDim.x * blockDim_x_1) {
-    IndexType33 bOffset49;
-    bOffset49 = IndexToOffset<input_t32, IndexType33, BDims36>::get(linearIndex, b41);
-    input_t32 bVal50;
-    bVal50 = b41.data[bOffset49];
-    if (bVal50 >= minvalue43 && bVal50 <= maxvalue44) {
-        IndexType33 bin51;
-        bin51 = getBin<input_t32, IndexType33>(bVal50, minvalue43, maxvalue44, nbins42);
-        atomicAdd(&smem48[bin51], getOp46(linearIndex));
-    }
-}
-asm ("bar.sync 1,512;");
-;
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    IndexType33 aOffset52;
-    aOffset52 = IndexToOffset<output_t31, IndexType33, ADims34>::get(i, a39);
-    atomicAdd(&a39.data[aOffset52], smem48[i]);
-}
-label_0:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_1;
-unsigned int blockDim_x_0;
-blockDim_x_0 = 512;
-unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 512;
-unsigned int blockDim_y_0;
-blockDim_y_0 = 1;
-unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
-unsigned int blockDim_z_0;
-blockDim_z_0 = 1;
-unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-int index8;
-index8 = threadIdx_x_0 + blockIdx.x * blockDim_x_0;
-int batchsize9;
-batchsize9 = idata6.size(0);
-int channels10;
-channels10 = idata6.size(1);
-int height111;
-height111 = idata6.size(2);
-int width112;
-width112 = idata6.size(3);
-int height213;
-height213 = odata7.size(2);
-int width214;
-width214 = odata7.size(3);
-if (index8 < n2) {
-    int w215;
-    w215 = index8 % width214;
-    int h216;
-    h216 = index8 / width214;
-    if (height111 == height213 && width112 == width214) {
-        int h127;
-        h127 = h216;
-        int w128;
-        w128 = w215;
-        for (int n = 0; n < batchsize9; n++) {
-            for (int c = 0; c < channels10; ++c) {
-                scalar_t0 val29;
-                val29 = idata6[n][c][h127][w128];
-                odata7[n][c][h216][w215] = val29;
-            }
-        }
-        return;
-    }
-    accscalar_t1 h1r17;
-    h1r17 = area_pixel_compute_source_index<accscalar_t1>(rheight3, h216, align_corners5, false);
-    int h118;
-    h118 = h1r17;
-    int h1p19;
-    h1p19 = (h118 < height111 - 1) ? 1 : 0;
-    accscalar_t1 h1lambda20;
-    h1lambda20 = h1r17 - h118;
-    accscalar_t1 h0lambda21;
-    h0lambda21 = static_cast<accscalar_t1>(1) - h1lambda20;
-    accscalar_t1 w1r22;
-    w1r22 = area_pixel_compute_source_index<accscalar_t1>(rwidth4, w215, align_corners5, false);
-    int w123;
-    w123 = w1r22;
-    int w1p24;
-    w1p24 = (w123 < width112 - 1) ? 1 : 0;
-    accscalar_t1 w1lambda25;
-    w1lambda25 = w1r22 - w123;
-    accscalar_t1 w0lambda26;
-    w0lambda26 = static_cast<accscalar_t1>(1) - w1lambda25;
-    for (int n = 0; n < batchsize9; n++) {
-        for (int c = 0; c < channels10; ++c) {
-            accscalar_t1 val30;
-            val30 = h0lambda21 * (w0lambda26 * idata6[n][c][h118][w123] + w1lambda25 * idata6[n][c][h118][w123 + w1p24]) + h1lambda20 * (w0lambda26 * idata6[n][c][h118 + h1p19][w123] + w1lambda25 * idata6[n][c][h118 + h1p19][w123 + w1p24]);
-            odata7[n][c][h216][w215] = static_cast<scalar_t0>(val30);
-        }
-    }
-}
-label_1:;
-}
-
-template <typename output_t31, typename input_t32, typename IndexType33, int ADims34, int PDims35, int BDims36, at::native::CUDAHistogramMemoryType MemoryType37 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op38, typename scalar_t0, typename accscalar_t1>
-void kernelHistogram1D_upsample_bilinear2d_out_frame_2(TensorInfo<output_t31, IndexType33> a39, TensorInfo<output_t31, IndexType33> p40, TensorInfo<input_t32, IndexType33> b41, int nbins42, input_t32 minvalue43, input_t32 maxvalue44, IndexType33 totalElements45, Op38 getOp46, const int n2, const accscalar_t1 rheight3, const accscalar_t1 rwidth4, const bool align_corners5, const PackedTensorAccessor<scalar_t0, 4> idata6, PackedTensorAccessor<scalar_t0, 4> odata7) __attribute__((global))
- {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_0;
-unsigned int blockDim_x_1;
-blockDim_x_1 = 512;
-unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
-unsigned int blockDim_y_1;
-blockDim_y_1 = 1;
-unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
-unsigned int blockDim_z_1;
-blockDim_z_1 = 1;
-unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-extern unsigned char my_smem47[] __attribute__((shared));
-output_t31 *smem48;
-smem48 = nullptr;
-smem48 = reinterpret_cast<output_t31 *>(my_smem47);
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    smem48[i] = 0;
-}
-label_0:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 1024)) goto label_3;
-unsigned int blockDim_x_0;
-blockDim_x_0 = 512;
-unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 512;
-unsigned int blockDim_y_0;
-blockDim_y_0 = 1;
-unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
-unsigned int blockDim_z_0;
-blockDim_z_0 = 1;
-unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-int index8;
-index8 = threadIdx_x_0 + blockIdx.x * blockDim_x_0;
-int batchsize9;
-batchsize9 = idata6.size(0);
-int channels10;
-channels10 = idata6.size(1);
-int height111;
-height111 = idata6.size(2);
-int width112;
-width112 = idata6.size(3);
-int height213;
-height213 = odata7.size(2);
-int width214;
-width214 = odata7.size(3);
-if (index8 < n2) {
-    int w215;
-    w215 = index8 % width214;
-    int h216;
-    h216 = index8 / width214;
-    if (height111 == height213 && width112 == width214) {
-        int h127;
-        h127 = h216;
-        int w128;
-        w128 = w215;
-        for (int n = 0; n < batchsize9; n++) {
-            for (int c = 0; c < channels10; ++c) {
-                scalar_t0 val29;
-                val29 = idata6[n][c][h127][w128];
-                odata7[n][c][h216][w215] = val29;
-            }
-        }
-        return;
-    }
-    accscalar_t1 h1r17;
-    h1r17 = area_pixel_compute_source_index<accscalar_t1>(rheight3, h216, align_corners5, false);
-    int h118;
-    h118 = h1r17;
-    int h1p19;
-    h1p19 = (h118 < height111 - 1) ? 1 : 0;
-    accscalar_t1 h1lambda20;
-    h1lambda20 = h1r17 - h118;
-    accscalar_t1 h0lambda21;
-    h0lambda21 = static_cast<accscalar_t1>(1) - h1lambda20;
-    accscalar_t1 w1r22;
-    w1r22 = area_pixel_compute_source_index<accscalar_t1>(rwidth4, w215, align_corners5, false);
-    int w123;
-    w123 = w1r22;
-    int w1p24;
-    w1p24 = (w123 < width112 - 1) ? 1 : 0;
-    accscalar_t1 w1lambda25;
-    w1lambda25 = w1r22 - w123;
-    accscalar_t1 w0lambda26;
-    w0lambda26 = static_cast<accscalar_t1>(1) - w1lambda25;
-    for (int n = 0; n < batchsize9; n++) {
-        for (int c = 0; c < channels10; ++c) {
-            accscalar_t1 val30;
-            val30 = h0lambda21 * (w0lambda26 * idata6[n][c][h118][w123] + w1lambda25 * idata6[n][c][h118][w123 + w1p24]) + h1lambda20 * (w0lambda26 * idata6[n][c][h118 + h1p19][w123] + w1lambda25 * idata6[n][c][h118 + h1p19][w123 + w1p24]);
-            odata7[n][c][h216][w215] = static_cast<scalar_t0>(val30);
-        }
-    }
-}
-label_3:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_1;
-for (IndexType33 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements45; linearIndex += gridDim.x * blockDim_x_1) {
-    IndexType33 bOffset49;
-    bOffset49 = IndexToOffset<input_t32, IndexType33, BDims36>::get(linearIndex, b41);
-    input_t32 bVal50;
-    bVal50 = b41.data[bOffset49];
-    if (bVal50 >= minvalue43 && bVal50 <= maxvalue44) {
-        IndexType33 bin51;
-        bin51 = getBin<input_t32, IndexType33>(bVal50, minvalue43, maxvalue44, nbins42);
-        atomicAdd(&smem48[bin51], getOp46(linearIndex));
-    }
-}
-label_1:;
-__syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)) goto label_2;
-for (IndexType33 i = threadIdx_x_1; i < a39.sizes[0]; i += blockDim_x_1) {
-    IndexType33 aOffset52;
-    aOffset52 = IndexToOffset<output_t31, IndexType33, ADims34>::get(i, a39);
-    atomicAdd(&a39.data[aOffset52], smem48[i]);
-}
-label_2:;
-}
+#include "kernelHistogram1D_upsample_bilinear2d_out_frame_.inc"
 
 /*
   Kernel for computing the histogram of the input.
@@ -957,7 +352,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
         cudaDeviceSynchronize();
-      kernelHistogram1D_upsample_bilinear2d_out_frame_11<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -967,7 +362,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-      kernelHistogram1D_upsample_bilinear2d_out_frame_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -975,8 +370,49 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
                 num_kernels, rheight, rwidth, align_corners, idata, odata
           );
+
         cudaDeviceSynchronize();
-      kernelHistogram1D_upsample_bilinear2d_out_frame_100<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        <<<grid,
+          block.x + 512,
+          sharedMem,
+          getStreamFromPool(true)>>>(
+            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+                num_kernels, rheight, rwidth, align_corners, idata, odata
+          );
+
+        cudaDeviceSynchronize();
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        <<<grid,
+          block.x + 512,
+          sharedMem,
+          getStreamFromPool(true)>>>(
+            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+                num_kernels, rheight, rwidth, align_corners, idata, odata
+          );
+
+        cudaDeviceSynchronize();
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_bar_sync_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        <<<grid,
+          block.x + 512,
+          sharedMem,
+          getStreamFromPool(true)>>>(
+            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+                num_kernels, rheight, rwidth, align_corners, idata, odata
+          );
+
+        cudaDeviceSynchronize();
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_bar_sync_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        <<<grid,
+          block.x + 512,
+          sharedMem,
+          getStreamFromPool(true)>>>(
+            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+                num_kernels, rheight, rwidth, align_corners, idata, odata
+          );
+
+        cudaDeviceSynchronize();
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           512,
           sharedMem,
@@ -985,9 +421,9 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
                 num_kernels, rheight, rwidth, align_corners, idata, odata
           );
         cudaDeviceSynchronize();
-      kernelHistogram1D_upsample_bilinear2d_out_frame_bar_sync<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
-          block.x + 512,
+          512,
           sharedMem,
           getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,

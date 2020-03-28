@@ -438,7 +438,7 @@ __global__ void kernelHistogram1D(
 
 }
 
-#include "tmp.inc"
+#include "kernelHistogram1D_batch_norm_collect_statistics_kernel_.inc"
 
 inline int64_t getFreeGlobalMemory() {
   // no need to use `cudaSetDevice`
@@ -667,65 +667,38 @@ std::tuple<Tensor, Tensor> _histc_cuda_fused(
 
     static const auto getDummyOp = [] __device__(IndexType) { return 1L; };
     cudaProfilerStart();
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel2_<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel_<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-//   kernelHistogram1D_batch_norm_collect_statistics_kernel_11<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-//   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-//          (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-//     input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-kernelHistogram1D_batch_norm_collect_statistics_kernel__fused_kernel_vfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 512, sharedMem, stream>>>
          (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
     input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-kernelHistogram1D_batch_norm_collect_statistics_kernel__fused_kernel_vfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 512, sharedMem, stream>>>
          (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
     input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-//     kernelHistogram1D_batch_norm_collect_statistics_kernel_101<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-//   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-//          (
-//             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-//     input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-//     kernelHistogram1D_batch_norm_collect_statistics_kernel_bar_sync<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-//   InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-//          (
-//             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-//     input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel_3<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel_4<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-
-  //   kernelHistogram1D_batch_norm_collect_statistics_kernel_5<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-  // InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
-  //        (
-  //           aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-  //   input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
+         (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
+         (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
+         (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
+         (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
+         (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
+    kernelHistogram1D_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+  InvStd, scalar_t, scalar_t, accscalar_t, index_t> <<<10000, 1024, sharedMem, stream>>>
+         (aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    input, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
 
   cudaDeviceSynchronize();
     cudaProfilerStop();
