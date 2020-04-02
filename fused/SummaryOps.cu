@@ -502,82 +502,82 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_imba_idx_1
-    <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
-    <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels,
-        input_n.data<scalar_t>(),
-        input_height,
-        input_width,
-        kernel_height,
-        kernel_width,
-        pad_height,
-        pad_width,
-        stride_height,
-        stride_width,
-        dilation_height,
-        dilation_width,
-        output_height,
-        output_width,
-        output_n.data<scalar_t>(),
-        aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_imba_idx_1
-    <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
-    <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels,
-        input_n.data<scalar_t>(),
-        input_height,
-        input_width,
-        kernel_height,
-        kernel_width,
-        pad_height,
-        pad_width,
-        stride_height,
-        stride_width,
-        dilation_height,
-        dilation_width,
-        output_height,
-        output_width,
-        output_n.data<scalar_t>(),
-        aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_imba_idx_0
-    <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
-    <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels,
-        input_n.data<scalar_t>(),
-        input_height,
-        input_width,
-        kernel_height,
-        kernel_width,
-        pad_height,
-        pad_width,
-        stride_height,
-        stride_width,
-        dilation_height,
-        dilation_width,
-        output_height,
-        output_width,
-        output_n.data<scalar_t>(),
-        aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_imba_idx_0
-    <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
-    <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels,
-        input_n.data<scalar_t>(),
-        input_height,
-        input_width,
-        kernel_height,
-        kernel_width,
-        pad_height,
-        pad_width,
-        stride_height,
-        stride_width,
-        dilation_height,
-        dilation_width,
-        output_height,
-        output_width,
-        output_n.data<scalar_t>(),
-        aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
+    // im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_imba_idx_1
+    // <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
+    // <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
+    //     num_kernels,
+    //     input_n.data<scalar_t>(),
+    //     input_height,
+    //     input_width,
+    //     kernel_height,
+    //     kernel_width,
+    //     pad_height,
+    //     pad_width,
+    //     stride_height,
+    //     stride_width,
+    //     dilation_height,
+    //     dilation_width,
+    //     output_height,
+    //     output_width,
+    //     output_n.data<scalar_t>(),
+    //     aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
+    // im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_imba_idx_1
+    // <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
+    // <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
+    //     num_kernels,
+    //     input_n.data<scalar_t>(),
+    //     input_height,
+    //     input_width,
+    //     kernel_height,
+    //     kernel_width,
+    //     pad_height,
+    //     pad_width,
+    //     stride_height,
+    //     stride_width,
+    //     dilation_height,
+    //     dilation_width,
+    //     output_height,
+    //     output_width,
+    //     output_n.data<scalar_t>(),
+    //     aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
+    // im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_imba_idx_0
+    // <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
+    // <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
+    //     num_kernels,
+    //     input_n.data<scalar_t>(),
+    //     input_height,
+    //     input_width,
+    //     kernel_height,
+    //     kernel_width,
+    //     pad_height,
+    //     pad_width,
+    //     stride_height,
+    //     stride_width,
+    //     dilation_height,
+    //     dilation_width,
+    //     output_height,
+    //     output_width,
+    //     output_n.data<scalar_t>(),
+    //     aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
+    // im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_imba_idx_0
+    // <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
+    // <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
+    //     num_kernels,
+    //     input_n.data<scalar_t>(),
+    //     input_height,
+    //     input_width,
+    //     kernel_height,
+    //     kernel_width,
+    //     pad_height,
+    //     pad_width,
+    //     stride_height,
+    //     stride_width,
+    //     dilation_height,
+    //     dilation_width,
+    //     output_height,
+    //     output_width,
+    //     output_n.data<scalar_t>(),
+    //     aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
   cudaProfilerStop();
     AT_ASSERTM(cudaGetLastError() == cudaSuccess, "kernelHistogram1D failed");
     if (!batched_input) {
