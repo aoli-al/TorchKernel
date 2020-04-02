@@ -23,13 +23,13 @@ def run(idx):
   kwargs = {'dtype': dtype,
             'device': device,
             'requires_grad': True}
-  # if idx == 1 or idx == 12 or idx == 11:
-  #   lstm = nn.LSTM(3, 3).cuda()
-  #   i = torch.randn(1, 3, **kwargs)
-  #   hidden = (torch.randn(1, 1, 3, **kwargs),
-  #             torch.randn(1, 1, 3, **kwargs))
-  #   for _ in range(10000):
-  #     out, hidden = lstm(i.view(1, 1, -1), hidden)
+  if idx == 0 or idx == 12 or idx == 11:
+   lstm = nn.LSTM(3, 3).cuda()
+   i = torch.randn(1, 3, **kwargs)
+   hidden = (torch.randn(1, 1, 3, **kwargs),
+             torch.randn(1, 1, 3, **kwargs))
+   for _ in range(10000):
+     out, hidden = lstm(i.view(1, 1, -1), hidden)
 
   def check(kernels):
     half = len(kernels) // 2
@@ -66,8 +66,8 @@ def run(idx):
 if len(sys.argv) == 2:
     run(int(sys.argv[1]))
 else:
-    with Pool(1) as p:
-      p.map(run, range(10))
+    for i in range(10):
+        run(i)
 
 
 
