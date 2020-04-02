@@ -266,6 +266,22 @@ void max_pool2d_upsample_fused(
         kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
         num_kernels, rheight, rwidth, align_corners, idata, odata);
       cudaDeviceSynchronize();
+      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_hfuse_imba_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
+      <<<num_blocks, num_threads_max_pool + num_threads_max_pool, 0, at::cuda::getCurrentCUDAStream()>>>
+      (
+        count, input_data,
+        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
+        num_kernels, rheight, rwidth, align_corners, idata, odata);
+      cudaDeviceSynchronize();
+      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_imba_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
+      <<<num_blocks, num_threads_max_pool + num_threads_max_pool, 0, at::cuda::getCurrentCUDAStream()>>>
+      (
+        count, input_data,
+        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
+        num_kernels, rheight, rwidth, align_corners, idata, odata);
+      cudaDeviceSynchronize();
       cudaProfilerStop();
     });
   AT_CUDA_CHECK(cudaGetLastError());
