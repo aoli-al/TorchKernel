@@ -571,7 +571,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
 
       cudaProfilerStart();
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 768, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
@@ -579,7 +579,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 768, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
@@ -587,7 +587,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_idx_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 768, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
@@ -595,7 +595,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_idx_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 768, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
@@ -603,7 +603,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_idx_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 512, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
@@ -611,7 +611,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd
       );
       cudaDeviceSynchronize();
-      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
+      MaxPoolForward_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_idx_0<scalar_t, scalar_t, InvStd, scalar_t_norm, scalar_t_norm, accscalar_t_norm, index_t_norm>
         <<<blocks, 512, 0, stream>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,

@@ -366,7 +366,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
 
         cudaProfilerStart();
       cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_0<scalar_t, scalar_t, accscalar_t>
+      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_0<scalar_t, scalar_t, accscalar_t>
             <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
               num_kernels_im2col,
               input_im2col_n.data<scalar_t>(),
@@ -385,7 +385,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
               output_im2col_n.data<scalar_t>(),
               num_kernels, rheight, rwidth, align_corners, idata, odata);
       cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_0<scalar_t, scalar_t, accscalar_t>
+      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_0<scalar_t, scalar_t, accscalar_t>
             <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
               num_kernels_im2col,
               input_im2col_n.data<scalar_t>(),
@@ -404,7 +404,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
               output_im2col_n.data<scalar_t>(),
               num_kernels, rheight, rwidth, align_corners, idata, odata);
       cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_0<scalar_t, scalar_t, accscalar_t>
+      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_idx_0<scalar_t, scalar_t, accscalar_t>
             <<<num_blocks, dim3(512, 1), 0, at::cuda::getCurrentCUDAStream()>>>(
               num_kernels_im2col,
               input_im2col_n.data<scalar_t>(),
@@ -423,7 +423,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
               output_im2col_n.data<scalar_t>(),
               num_kernels, rheight, rwidth, align_corners, idata, odata);
       cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_vfuse_0<scalar_t, scalar_t, accscalar_t>
+      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_vfuse_idx_0<scalar_t, scalar_t, accscalar_t>
             <<<num_blocks, dim3(512, 1), 0, at::cuda::getCurrentCUDAStream()>>>(
               num_kernels_im2col,
               input_im2col_n.data<scalar_t>(),

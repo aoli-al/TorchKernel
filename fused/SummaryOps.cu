@@ -311,7 +311,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
     static const auto getDummyOp = [] __device__(IndexType) { return 1L; };
 
   cudaProfilerStart();
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_bar_sync_0
+    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_bar_sync_idx_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -330,7 +330,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_bar_sync_0
+    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_bar_sync_idx_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -349,7 +349,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_1
+    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_idx_1
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -368,7 +368,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_1
+    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_idx_1
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -387,7 +387,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_0
+    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_idx_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -406,7 +406,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_0
+    im2col_kernel_kernelHistogram1D_fused_kernel_hfuse_lb_idx_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 1024, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -425,7 +425,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_vfuse_lb_0
+    im2col_kernel_kernelHistogram1D_fused_kernel_vfuse_lb_idx_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 512, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,
@@ -444,7 +444,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template_fused(
         output_width,
         output_n.data<scalar_t>(),
         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
-    im2col_kernel_kernelHistogram1D_fused_kernel_vfuse_0
+    im2col_kernel_kernelHistogram1D_fused_kernel_vfuse_idx_0
     <scalar_t, input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED>
     <<<10000, 512, sharedMem, at::cuda::getCurrentCUDAStream()>>>(
         num_kernels,

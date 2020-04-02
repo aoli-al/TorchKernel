@@ -352,7 +352,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -362,7 +362,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -372,7 +372,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -382,7 +382,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -392,7 +392,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_bar_sync_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_bar_sync_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -402,7 +402,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_bar_sync_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_bar_sync_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,
           sharedMem,
@@ -412,7 +412,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           );
 
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           512,
           sharedMem,
@@ -421,7 +421,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
                 num_kernels, rheight, rwidth, align_corners, idata, odata
           );
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
+        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           512,
           sharedMem,

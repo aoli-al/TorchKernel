@@ -363,7 +363,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_0
+    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_idx_0
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -375,7 +375,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_0
+    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_idx_0
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -387,7 +387,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_1
+    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_idx_1
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -399,7 +399,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_1
+    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_idx_1
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -411,7 +411,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_bar_sync_0
+    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_bar_sync_idx_0
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -423,7 +423,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_bar_sync_0
+    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_bar_sync_idx_0
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -435,7 +435,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_vfuse_lb_0
+    kernelHistogram1D_MaxPoolForward_fused_kernel_vfuse_lb_idx_0
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
@@ -447,7 +447,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_vfuse_0
+    kernelHistogram1D_MaxPoolForward_fused_kernel_vfuse_idx_0
     <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
       scalar_t, scalar_t>
         <<<grid,
