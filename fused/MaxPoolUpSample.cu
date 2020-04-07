@@ -88,48 +88,7 @@ __global__ void upsample_bilinear2d_out_frame(
   }
 }
 
-__device__ inline int min(int a, int b) {
-  return a <= b ? a : b;
-}
-
-// kernels borrowed from Caffe
-template <typename scalar_t, typename accscalar_t>
-__global__ void MaxPoolForward(const int nthreads, const scalar_t* bottom_data,
-    const int num, const int channels, const int height,
-    const int width, const int pooled_height, const int pooled_width,
-    const int kernel_h, const int kernel_w, const int stride_h,
-    const int stride_w, const int pad_h, const int pad_w,
-    const int dilation_h, const int dilation_w, scalar_t* top_data,
-    int64_t* top_mask) {
-  CUDA_KERNEL_LOOP(index, nthreads) {
-    int pw = index % pooled_width;
-    int ph = (index / pooled_width) % pooled_height;
-    int c = (index / pooled_width / pooled_height) % channels;
-    int n = index / pooled_width / pooled_height / channels;
-    int hstart = ph * stride_h - pad_h;
-    int wstart = pw * stride_w - pad_w;
-    int hend = min(hstart + (kernel_h - 1) * dilation_h + 1, height);
-    int wend = min(wstart + (kernel_w - 1) * dilation_w + 1, width);
-    while(hstart < 0)
-      hstart += dilation_h;
-    while(wstart < 0)
-      wstart += dilation_w;
-    accscalar_t maxval = at::numeric_limits<accscalar_t>::lower_bound(); // -Infinity
-    int maxidx = hstart * width + wstart;
-    bottom_data += (n * channels + c) * height * width;
-    for (int h = hstart; h < hend; h += dilation_h) {
-      for (int w = wstart; w < wend; w += dilation_w) {
-        scalar_t val = bottom_data[h * width + w];
-        if ((ScalarConvert<scalar_t, accscalar_t>::to(val) > maxval) || THCNumerics<scalar_t>::isnan(val)) {
-          maxidx = h * width + w;
-          maxval = ScalarConvert<scalar_t, accscalar_t>::to(val);
-        }
-      }
-    }
-    top_data[index] = ScalarConvert<scalar_t, accscalar_t>::to(maxval);
-    top_mask[index] = maxidx;
-  }
-}
+#include "maxpool.inc"
 
 
 #include "MaxPoolForward_upsample_bilinear2d_out_frame_.inc"

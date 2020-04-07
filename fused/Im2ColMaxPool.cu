@@ -214,7 +214,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_stream(
     cudaProfilerStart();
       auto s1 = at::cuda::getStreamFromPool(true);
       auto s2 = at::cuda::getStreamFromPool(true);
-      im2col_kernel<scalar_t><<<GET_BLOCKS(num_kernels_im2col), 1024, 0, s1>>>(
+      im2col_kernel<scalar_t><<<10000, 1024, 0, s1>>>(
         num_kernels_im2col,
         input_im2col_im2col_n.data<scalar_t>(),
         input_im2col_height,
@@ -231,7 +231,7 @@ std::tuple<Tensor, Tensor> im2col_maxpool_stream(
         output_im2col_width,
         output_im2col_im2col_n.data<scalar_t>());
       MaxPoolForward<scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, s2>>>(
+        <<<10000, 1024, 0, s2>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
@@ -239,9 +239,9 @@ std::tuple<Tensor, Tensor> im2col_maxpool_stream(
       s2.synchronize();
     cudaProfilerStop();
 
-      if (!batched_input_im2col) {
-        output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
-      }
+      // if (!batched_input_im2col) {
+      //   output_im2col.resize_({n_output_im2col_plane, output_im2col_length});
+      // }
       AT_CUDA_CHECK(cudaGetLastError());
     });
 
@@ -587,18 +587,18 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> im2col_maxpool(
   IntArrayRef padding,
   IntArrayRef dilation,
   bool ceil_mode) {
-    im2col_maxpool_fused(
-      input_im2col_,
-      kernel_size_im2col,
-      dilation_im2col,
-      pad_im2colding_im2col,
-      stride_im2col,
-      input_,
-      kernel_size,
-      stride,
-      padding,
-      dilation,
-      ceil_mode);
+    // im2col_maxpool_fused(
+    //   input_im2col_,
+    //   kernel_size_im2col,
+    //   dilation_im2col,
+    //   pad_im2colding_im2col,
+    //   stride_im2col,
+    //   input_,
+    //   kernel_size,
+    //   stride,
+    //   padding,
+    //   dilation,
+    //   ceil_mode);
     return std::tuple_cat(
       im2col_maxpool_stream(
         input_im2col_,
