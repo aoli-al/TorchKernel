@@ -39,14 +39,15 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         maxval59 = at::numeric_limits<accscalar_t32>::lower_bound();
         int maxidx60;
         maxidx60 = hstart55 * width38 + wstart56;
-        bottom_data34 += (n54 * channels36 + c53) * height37 * width38;
+        const scalar_t31 *btm_data61;
+        btm_data61 = bottom_data34 + (n54 * channels36 + c53) * height37 * width38;
         for (int h = hstart55; h < hend57; h += dilation_h47) {
             for (int w = wstart56; w < wend58; w += dilation_w48) {
-                scalar_t31 val61;
-                val61 = bottom_data34[h * width38 + w];
-                if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val61) > maxval59) || THCNumerics<scalar_t31>::isnan(val61)) {
+                scalar_t31 val62;
+                val62 = btm_data61[h * width38 + w];
+                if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val62) > maxval59) || THCNumerics<scalar_t31>::isnan(val62)) {
                     maxidx60 = h * width38 + w;
-                    maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val61);
+                    maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val62);
                 }
             }
         }
@@ -171,14 +172,15 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         maxval59 = at::numeric_limits<accscalar_t32>::lower_bound();
         int maxidx60;
         maxidx60 = hstart55 * width38 + wstart56;
-        bottom_data34 += (n54 * channels36 + c53) * height37 * width38;
+        const scalar_t31 *btm_data61;
+        btm_data61 = bottom_data34 + (n54 * channels36 + c53) * height37 * width38;
         for (int h = hstart55; h < hend57; h += dilation_h47) {
             for (int w = wstart56; w < wend58; w += dilation_w48) {
-                scalar_t31 val61;
-                val61 = bottom_data34[h * width38 + w];
-                if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val61) > maxval59) || THCNumerics<scalar_t31>::isnan(val61)) {
+                scalar_t31 val62;
+                val62 = btm_data61[h * width38 + w];
+                if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val62) > maxval59) || THCNumerics<scalar_t31>::isnan(val62)) {
                     maxidx60 = h * width38 + w;
-                    maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val61);
+                    maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val62);
                 }
             }
         }
@@ -303,14 +305,15 @@ for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (nthreads33)
     maxval59 = at::numeric_limits<accscalar_t32>::lower_bound();
     int maxidx60;
     maxidx60 = hstart55 * width38 + wstart56;
-    bottom_data34 += (n54 * channels36 + c53) * height37 * width38;
+    const scalar_t31 *btm_data61;
+    btm_data61 = bottom_data34 + (n54 * channels36 + c53) * height37 * width38;
     for (int h = hstart55; h < hend57; h += dilation_h47) {
         for (int w = wstart56; w < wend58; w += dilation_w48) {
-            scalar_t31 val61;
-            val61 = bottom_data34[h * width38 + w];
-            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val61) > maxval59) || THCNumerics<scalar_t31>::isnan(val61)) {
+            scalar_t31 val62;
+            val62 = btm_data61[h * width38 + w];
+            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val62) > maxval59) || THCNumerics<scalar_t31>::isnan(val62)) {
                 maxidx60 = h * width38 + w;
-                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val61);
+                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val62);
             }
         }
     }
@@ -435,14 +438,15 @@ for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (nthreads33)
     maxval59 = at::numeric_limits<accscalar_t32>::lower_bound();
     int maxidx60;
     maxidx60 = hstart55 * width38 + wstart56;
-    bottom_data34 += (n54 * channels36 + c53) * height37 * width38;
+    const scalar_t31 *btm_data61;
+    btm_data61 = bottom_data34 + (n54 * channels36 + c53) * height37 * width38;
     for (int h = hstart55; h < hend57; h += dilation_h47) {
         for (int w = wstart56; w < wend58; w += dilation_w48) {
-            scalar_t31 val61;
-            val61 = bottom_data34[h * width38 + w];
-            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val61) > maxval59) || THCNumerics<scalar_t31>::isnan(val61)) {
+            scalar_t31 val62;
+            val62 = btm_data61[h * width38 + w];
+            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val62) > maxval59) || THCNumerics<scalar_t31>::isnan(val62)) {
                 maxidx60 = h * width38 + w;
-                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val61);
+                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val62);
             }
         }
     }
@@ -567,14 +571,15 @@ for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (nthreads33)
     maxval59 = at::numeric_limits<accscalar_t32>::lower_bound();
     int maxidx60;
     maxidx60 = hstart55 * width38 + wstart56;
-    bottom_data34 += (n54 * channels36 + c53) * height37 * width38;
+    const scalar_t31 *btm_data61;
+    btm_data61 = bottom_data34 + (n54 * channels36 + c53) * height37 * width38;
     for (int h = hstart55; h < hend57; h += dilation_h47) {
         for (int w = wstart56; w < wend58; w += dilation_w48) {
-            scalar_t31 val61;
-            val61 = bottom_data34[h * width38 + w];
-            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val61) > maxval59) || THCNumerics<scalar_t31>::isnan(val61)) {
+            scalar_t31 val62;
+            val62 = btm_data61[h * width38 + w];
+            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val62) > maxval59) || THCNumerics<scalar_t31>::isnan(val62)) {
                 maxidx60 = h * width38 + w;
-                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val61);
+                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val62);
             }
         }
     }
@@ -699,14 +704,15 @@ for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (nthreads33)
     maxval59 = at::numeric_limits<accscalar_t32>::lower_bound();
     int maxidx60;
     maxidx60 = hstart55 * width38 + wstart56;
-    bottom_data34 += (n54 * channels36 + c53) * height37 * width38;
+    const scalar_t31 *btm_data61;
+    btm_data61 = bottom_data34 + (n54 * channels36 + c53) * height37 * width38;
     for (int h = hstart55; h < hend57; h += dilation_h47) {
         for (int w = wstart56; w < wend58; w += dilation_w48) {
-            scalar_t31 val61;
-            val61 = bottom_data34[h * width38 + w];
-            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val61) > maxval59) || THCNumerics<scalar_t31>::isnan(val61)) {
+            scalar_t31 val62;
+            val62 = btm_data61[h * width38 + w];
+            if ((ScalarConvert<scalar_t31, accscalar_t32>::to(val62) > maxval59) || THCNumerics<scalar_t31>::isnan(val62)) {
                 maxidx60 = h * width38 + w;
-                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val61);
+                maxval59 = ScalarConvert<scalar_t31, accscalar_t32>::to(val62);
             }
         }
     }
