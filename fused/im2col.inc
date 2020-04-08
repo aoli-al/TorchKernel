@@ -19,10 +19,10 @@ __global__ void im2col_kernel(
   CUDA_KERNEL_LOOP(index, n) {
     int64_t w_out = index % width_col;
 
-    index /= width_col;
+    int idx = index / width_col;
 
-    int64_t h_out = index % height_col;
-    int64_t channel_in = index / height_col;
+    int64_t h_out = idx % height_col;
+    int64_t channel_in = idx / height_col;
     int64_t channel_out = channel_in * kernel_height * kernel_width;
     int64_t h_in = h_out * stride_height - pad_height;
     int64_t w_in = w_out * stride_width - pad_width;
