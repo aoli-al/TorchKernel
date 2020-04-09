@@ -645,6 +645,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_fused(
   auto dummy_mean = dummy_mean_.packed_accessor<scalar_t, 1, RestrictPtrTraits, index_t>();
   auto dummy_invstd = dummy_var_.packed_accessor<scalar_t, 1, RestrictPtrTraits, index_t>();
   auto stream = at::cuda::getCurrentCUDAStream();
+  printf("input: %d %d \n", input.size(0), input.size(1));
 
   dim3 blocks(input.size(1));
   int tf = getNumThreads(input.size(2));

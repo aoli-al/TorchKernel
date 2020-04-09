@@ -386,7 +386,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_stream(
       cudaEventCreate(&stop);
       cudaEventRecord(start);
       MaxPoolForward<scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, stream2>>>(
+        <<<10000, 256, 0, stream2>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
@@ -522,7 +522,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
       scalar_t *input_data = input.data<scalar_t>();
       int64_t *indices_data = indices.data<int64_t>();
 
-      const int blocks = cuda::ATenCeilDiv(count, num_threads);
+      const int blocks = 10000;
       printf("%d %d %d\n", count, blocks, num_threads);
 
       cudaProfilerStart();

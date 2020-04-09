@@ -185,7 +185,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_stream(
                 0,
                 stream>>>(
                   num_kernels, rheight, rwidth, align_corners, idata, odata);
-          im2col_kernel<scalar_t><<<GET_BLOCKS(num_kernels_im2col), 1024, 0, at::cuda::getStreamFromPool(true)>>>(
+          im2col_kernel<scalar_t><<<10000, 1024, 0, at::cuda::getStreamFromPool(true)>>>(
               num_kernels_im2col,
               input_im2col_n.data<scalar_t>(),
               input_im2col_height,
@@ -361,7 +361,7 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
           const accscalar_t rwidth = area_pixel_compute_scale<accscalar_t>(
               input_width, output_width, align_corners);
 
-          const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
+          const int num_blocks = 10000;
           printf("%d\n", num_blocks);
 
         cudaProfilerStart();

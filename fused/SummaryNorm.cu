@@ -547,6 +547,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
   dim3 blocks(input.size(1));
   int tf = getNumThreads(input.size(2));
   dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
+  printf("input: %d %d \n", input.size(0), input.size(1));
   printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);
   static const auto getDummyOp = [] __device__(IndexType) { return 1L; };
   cudaProfilerStart();

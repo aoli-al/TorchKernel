@@ -58,10 +58,6 @@ namespace at {
 namespace native {
 
 
-__device__ inline int min(int a, int b) {
-  return a <= b ? a : b;
-}
-
 #include "maxpool.inc"
 
 static const int BACKWARD_THREADS = 256;
@@ -314,7 +310,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
       cudaProfilerStart();
             cudaDeviceSynchronize();
       MaxPoolForward<scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads, 0, at::cuda::getStreamFromPool(true)>>>(
+        <<<10000, 256, 0, at::cuda::getStreamFromPool(true)>>>(
           count, input_data,
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);

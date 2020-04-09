@@ -356,7 +356,7 @@ std::tuple<Tensor> im2col_batch_norm_stream(
 
 
     cudaProfilerStart();
-    im2col_kernel<scalar_t><<<num_of_blocks, num_of_threads, 0, stream2>>>(
+    im2col_kernel<scalar_t><<<10000, 1024, 0, stream2>>>(
         num_kernels,
         input_n.data<scalar_t>(),
         input_height,
@@ -487,7 +487,7 @@ std::tuple<Tensor> im2col_batch_norm_fused(
   int64_t num_kernels = n_input_plane * output_height * output_width;
   printf("nk: %ld\n", num_kernels);
   const int num_of_threads = 512;
-  const int num_of_blocks = (num_kernels + num_of_threads - 1) / num_of_threads;
+  const int num_of_blocks = 10000; 
 
   printf("kh: %d, kw: %d\n", kernel_height, kernel_width);
   printf("nb: %ld\n", num_of_blocks);

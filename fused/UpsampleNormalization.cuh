@@ -505,7 +505,7 @@ std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
   auto dummy_invstd = dummy_var_.packed_accessor<scalar_t_bn, 1, RestrictPtrTraits, index_t_bn>();
   auto stream1 = at::cuda::getCurrentCUDAStream();
 
-  dim3 blocks(input_bn.size(1));
+  dim3 blocks(10000);
   int tf = getNumThreads(input_bn.size(2));
   dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
   printf("%d %d %d\n", blocks.x, blocks.y, blocks.z);

@@ -184,7 +184,7 @@ void max_pool2d_upsample_fused(
       const accscalar_t rwidth = area_pixel_compute_scale<accscalar_t>(
           input_upsample_width, output_upsample_width, align_corners);
 
-      const int num_blocks = cuda::ATenCeilDiv(num_kernels, num_threads);
+      const int num_blocks = 10000;
       printf("%d\n", num_blocks);
       printf("%d\n", num_threads_max_pool);
       printf("%d\n", num_threads_max_pool + num_threads);
@@ -351,7 +351,7 @@ void max_pool2d_upsample_stream(
              at::cuda::getStreamFromPool(true)>>>(
              num_kernels, rheight, rwidth, align_corners, idata, odata);
       MaxPoolForward<scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads_max_pool), num_threads_max_pool, 0, at::cuda::getStreamFromPool(true)>>>(
+        <<<10000, 256, 0, at::cuda::getStreamFromPool(true)>>>(
           count, input_data,
           nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
