@@ -24,7 +24,7 @@ def run(idx):
             'device': device,
             'requires_grad': True}
   batch_norm_input = torch.randn(128, 10000, 576, **kwargs)
-  input_max_pool = torch.randn(25, 25, 2560, 1000, **kwargs)
+  input_max_pool = torch.randn(25, 23, 2560, 1000, **kwargs)
   hist_input = torch.randn(120000000, **kwargs)
   im2col_input = torch.randn(1, 8, 2512, 2048, **kwargs)
   input_upsample = torch.randn(12, 12, 256, 100, **kwargs)
@@ -40,7 +40,7 @@ def run(idx):
     half = len(kernels) // 2
     for i in range(half):
       print(torch.all(torch.eq(kernels[i], kernels[i+half])))
-  for _ in range(1):
+  for _ in range(10):
     if idx == 1:
       print(fusion_cuda.histc(im2col_input, hist_input)[0][0])
     if idx == 2:

@@ -418,78 +418,78 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
             cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_0
-    <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-      scalar_t, scalar_t>
-        <<<grid,
-          block.x + num_threads,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-          count, input_data,
-          nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-          kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-            cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_0
-    <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-      scalar_t, scalar_t>
-        <<<grid,
-          block.x + num_threads,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-          count, input_data,
-          nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-          kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-            cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_1
-    <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-      scalar_t, scalar_t>
-        <<<grid,
-          block.x + num_threads,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-          count, input_data,
-          nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-          kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-            cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_1
-    <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-      scalar_t, scalar_t>
-        <<<grid,
-          block.x + num_threads,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-          count, input_data,
-          nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-          kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-            cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_bar_sync_imba_idx_0
-    <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-      scalar_t, scalar_t>
-        <<<grid,
-          block.x + num_threads,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-          count, input_data,
-          nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-          kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-            cudaDeviceSynchronize();
-    kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_bar_sync_imba_idx_0
-    <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
-      scalar_t, scalar_t>
-        <<<grid,
-          block.x + num_threads,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-          count, input_data,
-          nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-          kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-            cudaDeviceSynchronize();
+    // kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_0
+    // <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    //   scalar_t, scalar_t>
+    //     <<<grid,
+    //       block.x + num_threads,
+    //       sharedMem,
+    //       getStreamFromPool(true)>>>(
+    //         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    //       count, input_data,
+    //       nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+    //       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+    //         cudaDeviceSynchronize();
+    // kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_0
+    // <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    //   scalar_t, scalar_t>
+    //     <<<grid,
+    //       block.x + num_threads,
+    //       sharedMem,
+    //       getStreamFromPool(true)>>>(
+    //         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    //       count, input_data,
+    //       nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+    //       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+    //         cudaDeviceSynchronize();
+    // kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_1
+    // <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    //   scalar_t, scalar_t>
+    //     <<<grid,
+    //       block.x + num_threads,
+    //       sharedMem,
+    //       getStreamFromPool(true)>>>(
+    //         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    //       count, input_data,
+    //       nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+    //       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+    //         cudaDeviceSynchronize();
+    // kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_1
+    // <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    //   scalar_t, scalar_t>
+    //     <<<grid,
+    //       block.x + num_threads,
+    //       sharedMem,
+    //       getStreamFromPool(true)>>>(
+    //         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    //       count, input_data,
+    //       nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+    //       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+    //         cudaDeviceSynchronize();
+    // kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_bar_sync_imba_idx_0
+    // <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    //   scalar_t, scalar_t>
+    //     <<<grid,
+    //       block.x + num_threads,
+    //       sharedMem,
+    //       getStreamFromPool(true)>>>(
+    //         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    //       count, input_data,
+    //       nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+    //       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+    //         cudaDeviceSynchronize();
+    // kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_bar_sync_imba_idx_0
+    // <input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp),
+    //   scalar_t, scalar_t>
+    //     <<<grid,
+    //       block.x + num_threads,
+    //       sharedMem,
+    //       getStreamFromPool(true)>>>(
+    //         aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
+    //       count, input_data,
+    //       nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+    //       kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
+    //         cudaDeviceSynchronize();
       cudaProfilerStop();
     });
 
