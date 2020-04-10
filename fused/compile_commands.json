@@ -1,0 +1,57 @@
+[
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62  --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c Im2ColUpSample.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColUpSample.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/Im2ColUpSample.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62  --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c Im2ColMaxPool.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/Im2ColMaxPool.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c UpsampleNormalization.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/UpsampleNormalization.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c Im2ColNormalization.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/Im2ColNormalization.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c MaxPoolUpSample.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/MaxPoolUpSample.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c MaxPoolBatchNorm.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/MaxPoolBatchNorm.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c Im2ColMaxpoolNorm.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/Im2ColMaxpoolNorm.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c SummaryOps.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/SummaryOps.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c SummaryNorm.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/SummaryNorm.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c SummaryMaxpool.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/SummaryMaxpool.cu"
+  },
+  {
+    "directory": "/u/leo/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/libs/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c SummaryUpsample.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++11",
+    "file": "/u/leo/HomemadeKernel/fused/SummaryUpsample.cu"
+  }
+]
