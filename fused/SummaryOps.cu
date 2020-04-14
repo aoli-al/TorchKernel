@@ -681,7 +681,7 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
     output_n = output.select(0, elt);
     int64_t num_kernels = n_input_plane * output_height * output_width;
     cudaProfilerStart();
-    im2col_kernel<<<10000, 1024, 0, at::cuda::getStreamFromPool(true)>>>(
+    im2col_kernel<<<10000, 512, 0, at::cuda::getStreamFromPool(true)>>>(
         num_kernels,
         input_n.data<scalar_t>(),
         input_height,
