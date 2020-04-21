@@ -25,29 +25,29 @@ def run(idx):
             'device': device,
             'requires_grad': True}
   def batch_norm_input(): 
-    c = range(-128, 128, 2)
+    c = range(-64, 64)
     for x in c:
-      yield torch.randn(128, 10000, 256+x, **kwargs)
+      yield torch.randn(128, 10000, 100+x, **kwargs)
   def maxpool_input():
-    c = range(-100, 100, 2)
+    c = range(-40, 40)
     for x in c:
-      yield torch.randn(1, 220 + x, 2560, 1000, **kwargs)
+      yield torch.randn(1, 80 + x, 2560, 1000, **kwargs)
   def hist_input():
-    c = range(-256, 128, 2)
+    c = range(-25, 50)
     for x in c:
-      yield torch.randn((512-32 + x)* 100000, **kwargs)
+      yield torch.randn((50 + x)* 100000, **kwargs)
   def im2col_input():
     pass
   def upsample_input():
-    c = range(32, 96)
+    c = range(12, 32)
     for x in c:
       yield torch.randn(1, x, 256, 100, **kwargs)
 
-  input_batchnorm = torch.randn(128, 10000, 256-128, **kwargs)
-  input_max_pool = torch.randn(1, 220, 2560, 1000, **kwargs)
-  input_hist = torch.randn((512-32)* 100000, **kwargs)
-  im2col_input = torch.randn(1, 3, 2512, 2048, **kwargs)
-  input_upsample = torch.randn(1, 64, 256, 100, **kwargs)
+  input_batchnorm = torch.randn(128, 10000, 100 + 64, **kwargs)
+  input_max_pool = torch.randn(1, 80, 2560, 1000, **kwargs)
+  input_hist = torch.randn((50)* 100000, **kwargs)
+  im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
+  input_upsample = torch.randn(1, 20, 256, 100, **kwargs)
   if idx == 0 or idx == 12 or idx == 11:
    lstm = nn.LSTM(3, 3).cuda()
    i = torch.randn(1, 3, **kwargs)
@@ -60,7 +60,7 @@ def run(idx):
     half = len(kernels) // 2
     for i in range(half):
       print(torch.all(torch.eq(kernels[i], kernels[i+half])))
-  for _ in range(10):
+  for _ in range(5):
     if idx == 1:
       for i in hist_input():
         print(fusion_cuda.histc(im2col_input, i)[0][0])
@@ -68,18 +68,19 @@ def run(idx):
       for i in maxpool_input():
         print(fusion_cuda.histc_maxpool(input_hist, i)[0][0])
     if idx == 3:
-      # print(fusion_cuda.hist_norm(hist_input, batch_norm_input)[0][0])
+      # print(fusion_cuda.hist_norm(input_hist, input_batchnorm)[0][0])
       for i in batch_norm_input():
         print(fusion_cuda.hist_norm(input_hist, i)[0][0])
     if idx == 4:
       for i in upsample_input():
         print(fusion_cuda.histc_upsample(input_hist, i)[0][0])
-      # print(fusion_cuda.histc_upsample(hist_input, input_upsample)[0][0])
+      # print(fusion_cuda.histc_upsample(input_hist, input_upsample)[0][0])
     if idx == 5:
       # print(fusion_cuda.im2col_batchnorm(im2col_input, batch_norm_input)[0][0])
       for i in batch_norm_input():
         print(fusion_cuda.im2col_batchnorm(im2col_input, i)[0][0])
     if idx == 6:
+      # print(fusion_cuda.im2col_maxpool(im2col_input, input_max_pool)[0][0])
       for i in maxpool_input():
         print(fusion_cuda.im2col_maxpool(im2col_input, i)[0][0])
     if idx == 7:
@@ -105,7 +106,7 @@ def run(idx):
 if len(sys.argv) == 2:
     run(int(sys.argv[1]))
 else:
-    for i in range(10):
+    for i in range(5, 10):
         run(i)
 
 
