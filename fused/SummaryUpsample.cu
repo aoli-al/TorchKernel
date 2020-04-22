@@ -430,46 +430,6 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
                 num_kernels, rheight, rwidth, align_corners, idata, odata
           );
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_imba_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_imba_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_imba_idx_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_imba_idx_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
         kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_bar_sync_imba_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
         <<<grid,
           block.x + 512,

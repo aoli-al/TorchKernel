@@ -26,24 +26,28 @@ def run(idx):
             'requires_grad': True}
   def batch_norm_input(): 
     c = range(-64, 64)
-    for x in c:
-      yield torch.randn(128, 10000, 100+x, **kwargs)
+    # for x in c:
+    #   yield torch.randn(128, 10000, 100+x, **kwargs)
+    yield torch.randn(128, 10000, 100, **kwargs)
   def maxpool_input():
     c = range(-40, 40)
     for x in c:
       yield torch.randn(1, 80 + x, 2560, 1000, **kwargs)
+    # yield torch.randn(1, 80, 2560, 1000, **kwargs)
   def hist_input():
     c = range(-25, 50)
-    for x in c:
-      yield torch.randn((50 + x)* 100000, **kwargs)
+    # for x in c:
+    #   yield torch.randn((50 + x)* 100000, **kwargs)
+    yield torch.randn((50)* 100000, **kwargs)
   def im2col_input():
     pass
   def upsample_input():
     c = range(12, 32)
     for x in c:
       yield torch.randn(1, x, 256, 100, **kwargs)
+    # yield torch.randn(1, 20, 256, 100, **kwargs)
 
-  input_batchnorm = torch.randn(128, 10000, 100 + 64, **kwargs)
+  input_batchnorm = torch.randn(128, 10000, 100, **kwargs)
   input_max_pool = torch.randn(1, 80, 2560, 1000, **kwargs)
   input_hist = torch.randn((50)* 100000, **kwargs)
   im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
@@ -60,7 +64,7 @@ def run(idx):
     half = len(kernels) // 2
     for i in range(half):
       print(torch.all(torch.eq(kernels[i], kernels[i+half])))
-  for _ in range(5):
+  for _ in range(1):
     if idx == 1:
       for i in hist_input():
         print(fusion_cuda.histc(im2col_input, i)[0][0])
@@ -106,7 +110,7 @@ def run(idx):
 if len(sys.argv) == 2:
     run(int(sys.argv[1]))
 else:
-    for i in range(5, 10):
+    for i in range(10):
         run(i)
 
 
