@@ -145,11 +145,11 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
 // static auto im2col_input = torch::randn({1, 10, 2512, 2048}, defaultOptions);
 // static auto input_upsample = torch::randn({16, 16, 256, 100}, defaultOptions);
 
-// std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused(Tensor input_max_pool, Tensor input_upsample)
-// {
-//   return at::native::max_pool_upsample_stream(input_max_pool, {5, 5}, {10, 10}, 2, 1, false,
-//                                               input_upsample, {2000, 2560}, true);
-// }
+std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused(Tensor input_max_pool, Tensor input_upsample)
+{
+  return at::native::max_pool_upsample_stream(input_max_pool, {5, 5}, {10, 10}, 2, 1, false,
+                                              input_upsample, {2000, 2560}, true);
+}
 
 // std::tuple<Tensor, Tensor> im2col_batchnorm(Tensor im2col_input, Tensor batch_norm_input)
 // {
@@ -179,19 +179,19 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
 //     batch_norm_input, 0.1);
 // }
 
-// std::tuple<Tensor, Tensor, Tensor, Tensor> 
-// im2col_upsample(Tensor im2col_input, Tensor input_upsample) {
-//   return at::native::im2col_upsample(im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
-//                                      input_upsample, {2000, 2560}, true);
-// }
+std::tuple<Tensor, Tensor, Tensor, Tensor> 
+im2col_upsample(Tensor im2col_input, Tensor input_upsample) {
+  return at::native::im2col_upsample(im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
+                                     input_upsample, {2000, 2560}, true);
+}
 
-// std::tuple<Tensor, Tensor, Tensor, Tensor> 
-// im2col_maxpool(Tensor im2col_input, Tensor input_max_pool) {
-//   return at::native::im2col_maxpool(
-//     im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
-//     input_max_pool, {5, 5}, {10, 10}, 2, 1, false
-//   );
-// }
+std::tuple<Tensor, Tensor, Tensor, Tensor> 
+im2col_maxpool(Tensor im2col_input, Tensor input_max_pool) {
+  return at::native::im2col_maxpool(
+    im2col_input, {13, 1}, {1, 1}, {0, 0}, {1, 1},
+    input_max_pool, {5, 5}, {10, 10}, 2, 1, false
+  );
+}
 
 // std::tuple<Tensor, Tensor, Tensor, Tensor> 
 // upsample_batchnorm(Tensor input_upsample, Tensor batch_norm_input) {
@@ -203,21 +203,21 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
 //  return torch::randn({100, 100});
 // }
 
-Tensor histc_maxpool(Tensor hist_input, Tensor input_max_pool)
-{
-  at::native::_histc_maxpool(hist_input, 20, 0.f, 0.f,
-    input_max_pool, {5, 5}, {10, 10}, 2, 1, false
-  );
- return torch::randn({100, 100});
-}
+// Tensor histc_maxpool(Tensor hist_input, Tensor input_max_pool)
+// {
+//   at::native::_histc_maxpool(hist_input, 20, 0.f, 0.f,
+//     input_max_pool, {5, 5}, {10, 10}, 2, 1, false
+//   );
+//  return torch::randn({100, 100});
+// }
 
-Tensor histc_upsample(Tensor hist_input, Tensor input_upsample)
-{
-  at::native::_histc_upsample(
-    hist_input, 20, 0.f, 0.f,
-                              input_upsample, {2000, 2560}, true);
- return torch::randn({100, 100});
-}
+// Tensor histc_upsample(Tensor hist_input, Tensor input_upsample)
+// {
+//   at::native::_histc_upsample(
+//     hist_input, 20, 0.f, 0.f,
+//                               input_upsample, {2000, 2560}, true);
+//  return torch::randn({100, 100});
+// }
 
 // Tensor max_hist_norm( Tensor
 // ) {
@@ -231,16 +231,16 @@ Tensor histc_upsample(Tensor hist_input, Tensor input_upsample)
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
-  // m.def("call_max_pool_upsample_fused", &call_max_pool_upsample_fused, "LLTM forward (CUDA)");
+  m.def("call_max_pool_upsample_fused", &call_max_pool_upsample_fused, "LLTM forward (CUDA)");
   // m.def("im2col_batchnorm", &im2col_batchnorm, "LLTM forward (CUDA)");
   // m.def("max_pool_batch_norm", &max_pool_batch_norm, "LLTM forward (CUDA)");
-  // m.def("im2col_upsample", &im2col_upsample, "LLTM forward (CUDA)");
-  // m.def("im2col_maxpool", &im2col_maxpool, "LLTM forward (CUDA)");
+  m.def("im2col_upsample", &im2col_upsample, "LLTM forward (CUDA)");
+  m.def("im2col_maxpool", &im2col_maxpool, "LLTM forward (CUDA)");
   // m.def("upsample_batchnorm", &upsample_batchnorm, "LLTM forward (CUDA)");
   // m.def("histc", &histc, "LLTM forward (CUDA)");
   // m.def("hist_norm", &hist_norm, "LLTM forward (CUDA)");
-  m.def("histc_maxpool", &histc_maxpool, "LLTM forward (CUDA)");
-  m.def("histc_upsample", &histc_upsample, "LLTM forward (CUDA)");
+  // m.def("histc_maxpool", &histc_maxpool, "LLTM forward (CUDA)");
+  // m.def("histc_upsample", &histc_upsample, "LLTM forward (CUDA)");
 
 
 
