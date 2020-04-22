@@ -999,19 +999,19 @@ label_19:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 0) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_bar_sync_imba_idx_0(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_20;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_20;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1019,7 +1019,7 @@ smem49 = reinterpret_cast<output_t32 *>(my_smem48);
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     smem49[i] = 0;
 }
-asm ("bar.sync 1,160;");
+asm ("bar.sync 1,480;");
 ;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
@@ -1032,7 +1032,7 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
         atomicAdd(&smem49[bin52], getOp47(linearIndex));
     }
 }
-asm ("bar.sync 1,160;");
+asm ("bar.sync 1,480;");
 ;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
@@ -1040,19 +1040,19 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     atomicAdd(&a40.data[aOffset53], smem49[i]);
 }
 label_20:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_21;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_21;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1098,19 +1098,19 @@ label_21:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 0) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_0(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_22;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_22;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1120,7 +1120,7 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
 }
 label_22:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_23;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_23;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
     bOffset50 = IndexToOffset<input_t33, IndexType34, BDims37>::get(linearIndex, b42);
@@ -1134,26 +1134,26 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
 }
 label_23:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_24;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_24;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
     aOffset53 = IndexToOffset<output_t32, IndexType34, ADims35>::get(i, a40);
     atomicAdd(&a40.data[aOffset53], smem49[i]);
 }
 label_24:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_25;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_25;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1199,19 +1199,19 @@ label_25:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 0) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_1(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_22;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_22;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1221,7 +1221,7 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
 }
 label_22:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_23;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_23;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
     bOffset50 = IndexToOffset<input_t33, IndexType34, BDims37>::get(linearIndex, b42);
@@ -1234,19 +1234,19 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
     }
 }
 label_23:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_25;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_25;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1289,7 +1289,7 @@ for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2);
 }
 label_25:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_24;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_24;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
     aOffset53 = IndexToOffset<output_t32, IndexType34, ADims35>::get(i, a40);
@@ -1300,19 +1300,19 @@ label_24:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 0) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_imba_idx_2(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_22;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_22;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1321,19 +1321,19 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     smem49[i] = 0;
 }
 label_22:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_25;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_25;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1376,7 +1376,7 @@ for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2);
 }
 label_25:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_23;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_23;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
     bOffset50 = IndexToOffset<input_t33, IndexType34, BDims37>::get(linearIndex, b42);
@@ -1390,7 +1390,7 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
 }
 label_23:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_24;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_24;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
     aOffset53 = IndexToOffset<output_t32, IndexType34, ADims35>::get(i, a40);
@@ -1401,19 +1401,19 @@ label_24:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 2) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_0(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_26;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_26;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1423,7 +1423,7 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
 }
 label_26:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_27;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_27;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
     bOffset50 = IndexToOffset<input_t33, IndexType34, BDims37>::get(linearIndex, b42);
@@ -1437,26 +1437,26 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
 }
 label_27:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_28;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_28;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
     aOffset53 = IndexToOffset<output_t32, IndexType34, ADims35>::get(i, a40);
     atomicAdd(&a40.data[aOffset53], smem49[i]);
 }
 label_28:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_29;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_29;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1502,19 +1502,19 @@ label_29:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 2) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_1(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_26;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_26;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1524,7 +1524,7 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
 }
 label_26:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_27;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_27;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
     bOffset50 = IndexToOffset<input_t33, IndexType34, BDims37>::get(linearIndex, b42);
@@ -1537,19 +1537,19 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
     }
 }
 label_27:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_29;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_29;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1592,7 +1592,7 @@ for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2);
 }
 label_29:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_28;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_28;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
     aOffset53 = IndexToOffset<output_t32, IndexType34, ADims35>::get(i, a40);
@@ -1603,19 +1603,19 @@ label_28:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 2) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_2(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_26;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_26;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1624,19 +1624,19 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     smem49[i] = 0;
 }
 label_26:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_29;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_29;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
@@ -1679,7 +1679,7 @@ for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2);
 }
 label_29:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_27;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_27;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
     bOffset50 = IndexToOffset<input_t33, IndexType34, BDims37>::get(linearIndex, b42);
@@ -1693,7 +1693,7 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
 }
 label_27:;
 __syncthreads();
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_28;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_28;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
     aOffset53 = IndexToOffset<output_t32, IndexType34, ADims35>::get(i, a40);
@@ -1704,19 +1704,19 @@ label_28:;
 template <typename output_t32, typename input_t33, typename IndexType34, int ADims35, int PDims36, int BDims37, at::native::CUDAHistogramMemoryType MemoryType38 = CUDAHistogramMemoryType::MULTI_BLOCK, typename Op39, typename scalar_t0, typename accscalar_t1>
  __global__ __launch_bounds__(768, 2) void kernelHistogram1D_MaxPoolForward_fused_kernel_hfuse_lb_bar_sync_imba_idx_0(TensorInfo<output_t32, IndexType34> a40, TensorInfo<output_t32, IndexType34> p41, TensorInfo<input_t33, IndexType34> b42, int nbins43, input_t33 minvalue44, input_t33 maxvalue45, IndexType34 totalElements46, Op39 getOp47, const int nthreads2, const scalar_t0 *bottom_data3, const int num4, const int channels5, const int height6, const int width7, const int pooled_height8, const int pooled_width9, const int kernel_h10, const int kernel_w11, const int stride_h12, const int stride_w13, const int pad_h14, const int pad_w15, const int dilation_h16, const int dilation_w17, scalar_t0 *top_data18, int64_t *top_mask19)
  {
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 160)) goto label_30;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 480)) goto label_30;
 unsigned int blockDim_x_1;
-blockDim_x_1 = 160;
+blockDim_x_1 = 480;
 unsigned int threadIdx_x_1;
-threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 160;
+threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 480;
 unsigned int blockDim_y_1;
 blockDim_y_1 = 1;
 unsigned int threadIdx_y_1;
-threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160 % 1;
+threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480 % 1;
 unsigned int blockDim_z_1;
 blockDim_z_1 = 1;
 unsigned int threadIdx_z_1;
-threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 160;
+threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 480;
 extern unsigned char my_smem48[] __attribute__((shared));
 output_t32 *smem49;
 smem49 = nullptr;
@@ -1724,7 +1724,7 @@ smem49 = reinterpret_cast<output_t32 *>(my_smem48);
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     smem49[i] = 0;
 }
-asm ("bar.sync 1,160;");
+asm ("bar.sync 1,480;");
 ;
 for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements46; linearIndex += gridDim.x * blockDim_x_1) {
     IndexType34 bOffset50;
@@ -1737,7 +1737,7 @@ for (IndexType34 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linear
         atomicAdd(&smem49[bin52], getOp47(linearIndex));
     }
 }
-asm ("bar.sync 1,160;");
+asm ("bar.sync 1,480;");
 ;
 for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     IndexType34 aOffset53;
@@ -1745,19 +1745,19 @@ for (IndexType34 i = threadIdx_x_1; i < a40.sizes[0]; i += blockDim_x_1) {
     atomicAdd(&a40.data[aOffset53], smem49[i]);
 }
 label_30:;
-if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=160 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_31;
+if (!((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=480 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)) goto label_31;
 unsigned int blockDim_x_0;
-blockDim_x_0 = 608;
+blockDim_x_0 = 288;
 unsigned int threadIdx_x_0;
-threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) % 608;
+threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) % 288;
 unsigned int blockDim_y_0;
 blockDim_y_0 = 1;
 unsigned int threadIdx_y_0;
-threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608 % 1;
+threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288 % 1;
 unsigned int blockDim_z_0;
 blockDim_z_0 = 1;
 unsigned int threadIdx_z_0;
-threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 160) / 608;
+threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 480) / 288;
 for (int index = blockIdx.x * blockDim_x_0 + threadIdx_x_0; index < (nthreads2); index += blockDim_x_0 * gridDim.x) {
     int pw20;
     pw20 = index % pooled_width9;
