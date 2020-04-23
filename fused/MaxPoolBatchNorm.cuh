@@ -534,7 +534,7 @@ std::tuple<Tensor, Tensor, Tensor> max_pool2d_batch_norm_fused(
           kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,\
           input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd\
       );\
-      cudaDeviceSynchronize()\
+      cudaDeviceSynchronize()
       CALL(0, vfuse, 512);
       CALL(0, vfuse_lb, 512);
       CALL(0, hfuse, 768);
