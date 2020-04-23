@@ -366,119 +366,41 @@ std::tuple<Tensor, Tensor> im2col_upsample_fused(
 
         cudaProfilerStart();
       cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_0<scalar_t, scalar_t, accscalar_t>
-            <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
-              num_kernels_im2col,
-              input_im2col_n.data<scalar_t>(),
-              input_im2col_height,
-              input_im2col_width,
-              kernel_height,
-              kernel_width,
-              pad_height,
-              pad_width,
-              stride_height,
-              stride_width,
-              dilation_height,
-              dilation_width,
-              output_im2col_height,
-              output_im2col_width,
-              output_im2col_n.data<scalar_t>(),
-              num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_0<scalar_t, scalar_t, accscalar_t>
-            <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
-              num_kernels_im2col,
-              input_im2col_n.data<scalar_t>(),
-              input_im2col_height,
-              input_im2col_width,
-              kernel_height,
-              kernel_width,
-              pad_height,
-              pad_width,
-              stride_height,
-              stride_width,
-              dilation_height,
-              dilation_width,
-              output_im2col_height,
-              output_im2col_width,
-              output_im2col_n.data<scalar_t>(),
-              num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_idx_0<scalar_t, scalar_t, accscalar_t>
-            <<<num_blocks, dim3(512, 1), 0, at::cuda::getCurrentCUDAStream()>>>(
-              num_kernels_im2col,
-              input_im2col_n.data<scalar_t>(),
-              input_im2col_height,
-              input_im2col_width,
-              kernel_height,
-              kernel_width,
-              pad_height,
-              pad_width,
-              stride_height,
-              stride_width,
-              dilation_height,
-              dilation_width,
-              output_im2col_height,
-              output_im2col_width,
-              output_im2col_n.data<scalar_t>(),
-              num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_vfuse_idx_0<scalar_t, scalar_t, accscalar_t>
-            <<<num_blocks, dim3(512, 1), 0, at::cuda::getCurrentCUDAStream()>>>(
-              num_kernels_im2col,
-              input_im2col_n.data<scalar_t>(),
-              input_im2col_height,
-              input_im2col_width,
-              kernel_height,
-              kernel_width,
-              pad_height,
-              pad_width,
-              stride_height,
-              stride_width,
-              dilation_height,
-              dilation_width,
-              output_im2col_height,
-              output_im2col_width,
-              output_im2col_n.data<scalar_t>(),
-              num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_imba_idx_0<scalar_t, scalar_t, accscalar_t>
-            <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
-              num_kernels_im2col,
-              input_im2col_n.data<scalar_t>(),
-              input_im2col_height,
-              input_im2col_width,
-              kernel_height,
-              kernel_width,
-              pad_height,
-              pad_width,
-              stride_height,
-              stride_width,
-              dilation_height,
-              dilation_width,
-              output_im2col_height,
-              output_im2col_width,
-              output_im2col_n.data<scalar_t>(),
-              num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_hfuse_imba_idx_0<scalar_t, scalar_t, accscalar_t>
-            <<<num_blocks, dim3(512, 2), 0, at::cuda::getCurrentCUDAStream()>>>(
-              num_kernels_im2col,
-              input_im2col_n.data<scalar_t>(),
-              input_im2col_height,
-              input_im2col_width,
-              kernel_height,
-              kernel_width,
-              pad_height,
-              pad_width,
-              stride_height,
-              stride_width,
-              dilation_height,
-              dilation_width,
-              output_im2col_height,
-              output_im2col_width,
-              output_im2col_n.data<scalar_t>(),
-              num_kernels, rheight, rwidth, align_corners, idata, odata);
+      #define CALL(i,type,thread) im2col_kernel_upsample_bilinear2d_out_frame_fused_kernel_##type##_idx_##i<scalar_t, scalar_t, accscalar_t>\
+            <<<num_blocks, thread, 0, at::cuda::getCurrentCUDAStream()>>>(\
+              num_kernels_im2col,\
+              input_im2col_n.data<scalar_t>(),\
+              input_im2col_height,\
+              input_im2col_width,\
+              kernel_height,\
+              kernel_width,\
+              pad_height,\
+              pad_width,\
+              stride_height,\
+              stride_width,\
+              dilation_height,\
+              dilation_width,\
+              output_im2col_height,\
+              output_im2col_width,\
+              output_im2col_n.data<scalar_t>(),\
+              num_kernels, rheight, rwidth, align_corners, idata, odata);\
+        cudaDeviceSynchronize()
+      CALL(0, vfuse,512);
+      CALL(0, vfuse_lb,512);
+      CALL(0, hfuse,1024);
+      CALL(0, hfuse_lb,1024);
+      CALL(1, hfuse,1024);
+      CALL(1, hfuse_lb,1024);
+      CALL(2, hfuse,1024);
+      CALL(2, hfuse_lb,1024);
+      CALL(3, hfuse,1024);
+      CALL(3, hfuse_lb,1024);
+      CALL(4, hfuse,1024);
+      CALL(4, hfuse_lb,1024);
+      CALL(5, hfuse,1024);
+      CALL(5, hfuse_lb,1024);
+      CALL(6, hfuse,1024);
+      CALL(6, hfuse_lb,1024);
       cudaDeviceSynchronize();
         cudaProfilerStop();
           AT_CUDA_CHECK(cudaGetLastError());

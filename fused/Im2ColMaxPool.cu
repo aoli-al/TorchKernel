@@ -428,134 +428,60 @@ std::tuple<Tensor, Tensor> im2col_maxpool_fused(
       // Launch CUDA_NUM_THREADS = 1024
       printf("num_kernels %ld, %ld, %ld\n", num_kernels_im2col, n_input_im2col_plane, output_im2col_height);
         cudaProfilerStart();
+      #define CALL(i, type, thread) im2col_kernel_MaxPoolForward_fused_kernel_##type##_idx_##i<scalar_t, scalar_t, scalar_t>\
+        <<<10000, thread, 0, at::cuda::getCurrentCUDAStream()>>>(\
+        num_kernels_im2col,\
+        input_im2col_im2col_n.data<scalar_t>(),\
+        input_im2col_height,\
+        input_im2col_width,\
+        kernel_height,\
+        kernel_width,\
+        pad_im2col_height,\
+        pad_im2col_width,\
+        stride_im2col_height,\
+        stride_im2col_width,\
+        dilation_im2col_height,\
+        dilation_im2col_width,\
+        output_im2col_height,\
+        output_im2col_width,\
+        output_im2col_im2col_n.data<scalar_t>(),\
+        count, input_data,\
+        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,\
+        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);\
+        cudaDeviceSynchronize()
+      CALL(0, vfuse_lb, 512);
+      CALL(0, vfuse, 512);
+      CALL(0, hfuse_lb, 768);
+      CALL(0, hfuse, 768);
+      CALL(1, hfuse_lb, 768);
+      CALL(1, hfuse, 768);
+      CALL(2, hfuse_lb, 768);
+      CALL(2, hfuse, 768);
+      CALL(3, hfuse_lb, 768);
+      CALL(3, hfuse, 768);
+      CALL(4, hfuse_lb, 768);
+      CALL(4, hfuse, 768);
+      // im2col_kernel_MaxPoolForward_fused_kernel_hfuse_idx_0<scalar_t, scalar_t, scalar_t>
+      //   <<<10000, num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
+      //   num_kernels_im2col,
+      //   input_im2col_im2col_n.data<scalar_t>(),
+      //   input_im2col_height,
+      //   input_im2col_width,
+      //   kernel_height,
+      //   kernel_width,
+      //   pad_im2col_height,
+      //   pad_im2col_width,
+      //   stride_im2col_height,
+      //   stride_im2col_width,
+      //   dilation_im2col_height,
+      //   dilation_im2col_width,
+      //   output_im2col_height,
+      //   output_im2col_width,
+      //   output_im2col_im2col_n.data<scalar_t>(),
+      //   count, input_data,
+      //   nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+      //   kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
       cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward_fused_kernel_vfuse_lb_idx_0<scalar_t, scalar_t, scalar_t>
-        <<<10000, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels_im2col,
-        input_im2col_im2col_n.data<scalar_t>(),
-        input_im2col_height,
-        input_im2col_width,
-        kernel_height,
-        kernel_width,
-        pad_im2col_height,
-        pad_im2col_width,
-        stride_im2col_height,
-        stride_im2col_width,
-        dilation_im2col_height,
-        dilation_im2col_width,
-        output_im2col_height,
-        output_im2col_width,
-        output_im2col_im2col_n.data<scalar_t>(),
-        count, input_data,
-        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward_fused_kernel_vfuse_idx_0<scalar_t, scalar_t, scalar_t>
-        <<<10000, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels_im2col,
-        input_im2col_im2col_n.data<scalar_t>(),
-        input_im2col_height,
-        input_im2col_width,
-        kernel_height,
-        kernel_width,
-        pad_im2col_height,
-        pad_im2col_width,
-        stride_im2col_height,
-        stride_im2col_width,
-        dilation_im2col_height,
-        dilation_im2col_width,
-        output_im2col_height,
-        output_im2col_width,
-        output_im2col_im2col_n.data<scalar_t>(),
-        count, input_data,
-        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward_fused_kernel_hfuse_lb_idx_0<scalar_t, scalar_t, scalar_t>
-        <<<10000, num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels_im2col,
-        input_im2col_im2col_n.data<scalar_t>(),
-        input_im2col_height,
-        input_im2col_width,
-        kernel_height,
-        kernel_width,
-        pad_im2col_height,
-        pad_im2col_width,
-        stride_im2col_height,
-        stride_im2col_width,
-        dilation_im2col_height,
-        dilation_im2col_width,
-        output_im2col_height,
-        output_im2col_width,
-        output_im2col_im2col_n.data<scalar_t>(),
-        count, input_data,
-        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward_fused_kernel_hfuse_idx_0<scalar_t, scalar_t, scalar_t>
-        <<<10000, num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels_im2col,
-        input_im2col_im2col_n.data<scalar_t>(),
-        input_im2col_height,
-        input_im2col_width,
-        kernel_height,
-        kernel_width,
-        pad_im2col_height,
-        pad_im2col_width,
-        stride_im2col_height,
-        stride_im2col_width,
-        dilation_im2col_height,
-        dilation_im2col_width,
-        output_im2col_height,
-        output_im2col_width,
-        output_im2col_im2col_n.data<scalar_t>(),
-        count, input_data,
-        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward_fused_kernel_hfuse_lb_imba_idx_0<scalar_t, scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels_im2col,
-        input_im2col_im2col_n.data<scalar_t>(),
-        input_im2col_height,
-        input_im2col_width,
-        kernel_height,
-        kernel_width,
-        pad_im2col_height,
-        pad_im2col_width,
-        stride_im2col_height,
-        stride_im2col_width,
-        dilation_im2col_height,
-        dilation_im2col_width,
-        output_im2col_height,
-        output_im2col_width,
-        output_im2col_im2col_n.data<scalar_t>(),
-        count, input_data,
-        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      cudaDeviceSynchronize();
-      im2col_kernel_MaxPoolForward_fused_kernel_hfuse_imba_idx_0<scalar_t, scalar_t, scalar_t>
-        <<<cuda::ATenCeilDiv(count, num_threads), num_threads + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-        num_kernels_im2col,
-        input_im2col_im2col_n.data<scalar_t>(),
-        input_im2col_height,
-        input_im2col_width,
-        kernel_height,
-        kernel_width,
-        pad_im2col_height,
-        pad_im2col_width,
-        stride_im2col_height,
-        stride_im2col_width,
-        dilation_im2col_height,
-        dilation_im2col_width,
-        output_im2col_height,
-        output_im2col_width,
-        output_im2col_im2col_n.data<scalar_t>(),
-        count, input_data,
-        nbatch, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data);
-      cudaDeviceSynchronize();
-
 
         cudaProfilerStop();
       if (!batched_input_im2col) {

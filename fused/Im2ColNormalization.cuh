@@ -494,196 +494,42 @@ std::tuple<Tensor> im2col_batch_norm_fused(
 
   cudaProfilerStart();
       cudaDeviceSynchronize();
-    // im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_imba_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    // <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-    //   num_kernels,
-    //   input_n.data<scalar_t_batch_norm>(),
-    //   input_height,
-    //   input_width,
-    //   kernel_height,
-    //   kernel_width,
-    //   pad_height,
-    //   pad_width,
-    //   stride_height,
-    //   stride_width,
-    //   dilation_height,
-    //   dilation_width,
-    //   output_height,
-    //   output_width,
-    //   output_n.data<scalar_t_batch_norm>(),
-    //   input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-    //   cudaDeviceSynchronize();
-    // im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_imba_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    // <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-    //   num_kernels,
-    //   input_n.data<scalar_t_batch_norm>(),
-    //   input_height,
-    //   input_width,
-    //   kernel_height,
-    //   kernel_width,
-    //   pad_height,
-    //   pad_width,
-    //   stride_height,
-    //   stride_width,
-    //   dilation_height,
-    //   dilation_width,
-    //   output_height,
-    //   output_width,
-    //   output_n.data<scalar_t_batch_norm>(),
-    //   input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-    //   cudaDeviceSynchronize();
-    // im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_imba_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    // <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-    //   num_kernels,
-    //   input_n.data<scalar_t_batch_norm>(),
-    //   input_height,
-    //   input_width,
-    //   kernel_height,
-    //   kernel_width,
-    //   pad_height,
-    //   pad_width,
-    //   stride_height,
-    //   stride_width,
-    //   dilation_height,
-    //   dilation_width,
-    //   output_height,
-    //   output_width,
-    //   output_n.data<scalar_t_batch_norm>(),
-    //   input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-    //   cudaDeviceSynchronize();
-    // im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_imba_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    // <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-    //   num_kernels,
-    //   input_n.data<scalar_t_batch_norm>(),
-    //   input_height,
-    //   input_width,
-    //   kernel_height,
-    //   kernel_width,
-    //   pad_height,
-    //   pad_width,
-    //   stride_height,
-    //   stride_width,
-    //   dilation_height,
-    //   dilation_width,
-    //   output_height,
-    //   output_width,
-    //   output_n.data<scalar_t_batch_norm>(),
-    //   input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
       cudaDeviceSynchronize();
-    im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-    im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-    im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-    im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512 + 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-    im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-    im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_idx_0<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>
-    <<<num_of_blocks, 512, 0, at::cuda::getCurrentCUDAStream()>>>(
-      num_kernels,
-      input_n.data<scalar_t_batch_norm>(),
-      input_height,
-      input_width,
-      kernel_height,
-      kernel_width,
-      pad_height,
-      pad_width,
-      stride_height,
-      stride_width,
-      dilation_height,
-      dilation_width,
-      output_height,
-      output_width,
-      output_n.data<scalar_t_batch_norm>(),
-      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
+    #define CALL(i, type,thread) im2col_kernel_batch_norm_collect_statistics_kernel_fused_kernel_##type##_idx_##i<scalar_t_batch_norm, InvStd, scalar_t_batch_norm, scalar_t_batch_norm, accscalar_t_batch_norm, index_t_batch_norm>\
+    <<<num_of_blocks, thread, 0, at::cuda::getCurrentCUDAStream()>>>(\
+      num_kernels,\
+      input_n.data<scalar_t_batch_norm>(),\
+      input_height,\
+      input_width,\
+      kernel_height,\
+      kernel_width,\
+      pad_height,\
+      pad_width,\
+      stride_height,\
+      stride_width,\
+      dilation_height,\
+      dilation_width,\
+      output_height,\
+      output_width,\
+      output_n.data<scalar_t_batch_norm>(),\
+      input_batch_norm, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);\
+      cudaDeviceSynchronize()
+    CALL(0, vfuse, 512);
+    CALL(0, vfuse_lb, 512);
+    CALL(0, hfuse, 1024);
+    CALL(0, hfuse_lb, 1024);
+    CALL(1, hfuse, 1024);
+    CALL(1, hfuse_lb, 1024);
+    CALL(2, hfuse, 1024);
+    CALL(2, hfuse_lb, 1024);
+    CALL(3, hfuse, 1024);
+    CALL(3, hfuse_lb, 1024);
+    CALL(4, hfuse, 1024);
+    CALL(4, hfuse_lb, 1024);
+    CALL(5, hfuse, 1024);
+    CALL(5, hfuse_lb, 1024);
+    CALL(6, hfuse, 1024);
+    CALL(6, hfuse_lb, 1024);
   cudaProfilerStop();
 
   AT_CUDA_CHECK(cudaGetLastError());

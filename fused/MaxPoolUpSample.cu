@@ -192,55 +192,26 @@ void max_pool2d_upsample_fused(
       // dim3 threads(1024, 2);
       cudaProfilerStart();
       cudaDeviceSynchronize();
-      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
-      <<<num_blocks, 512, 0, at::cuda::getCurrentCUDAStream()>>>
-      (
-        count, input_data,
-        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
-        num_kernels, rheight, rwidth, align_corners, idata, odata);
-
-      cudaDeviceSynchronize();
-      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_vfuse_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
-      <<<num_blocks, 512, 0, at::cuda::getCurrentCUDAStream()>>>
-      (
-        count, input_data,
-        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
-        num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
-      <<<num_blocks, num_threads_max_pool + num_threads_max_pool, 0, at::cuda::getCurrentCUDAStream()>>>
-      (
-        count, input_data,
-        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
-        num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
-      <<<num_blocks, num_threads_max_pool + num_threads_max_pool, 0, at::cuda::getCurrentCUDAStream()>>>
-      (
-        count, input_data,
-        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
-        num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_hfuse_imba_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
-      <<<num_blocks, num_threads_max_pool + num_threads_max_pool, 0, at::cuda::getCurrentCUDAStream()>>>
-      (
-        count, input_data,
-        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
-        num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
-      MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_imba_idx_0<scalar_t,scalar_t,scalar_t,accscalar_t>
-      <<<num_blocks, num_threads_max_pool + num_threads_max_pool, 0, at::cuda::getCurrentCUDAStream()>>>
-      (
-        count, input_data,
-        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,
-        num_kernels, rheight, rwidth, align_corners, idata, odata);
-      cudaDeviceSynchronize();
+      #define CALL(i, type, thread) MaxPoolForward_upsample_bilinear2d_out_frame_fused_kernel_##type##_idx_##i<scalar_t,scalar_t,scalar_t,accscalar_t>\
+      <<<num_blocks, thread, 0, at::cuda::getCurrentCUDAStream()>>>\
+      (\
+        count, input_data,\
+        nbatch_max_pool, nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,\
+        kH, kW, dH, dW, padH, padW, dilationH, dilationW, output_data, indices_data,\
+        num_kernels, rheight, rwidth, align_corners, idata, odata);\
+      cudaDeviceSynchronize()
+      CALL(0, vfuse, 512);
+      CALL(0, vfuse_lb, 512);
+      CALL(0, hfuse, 768);
+      CALL(0, hfuse_lb, 768);
+      CALL(1, hfuse, 768);
+      CALL(1, hfuse_lb, 768);
+      CALL(2, hfuse, 768);
+      CALL(2, hfuse_lb, 768);
+      CALL(3, hfuse, 768);
+      CALL(3, hfuse_lb, 768);
+      CALL(4, hfuse, 768);
+      CALL(4, hfuse_lb, 768);
       cudaProfilerStop();
     });
   AT_CUDA_CHECK(cudaGetLastError());
