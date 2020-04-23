@@ -531,56 +531,27 @@ std::tuple<Tensor, Tensor> upsample_batchnorm_fused(
         // cudaEventCreate(&stop);
         // cudaEventRecord(start);
         cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 512, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-        cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 512, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-        cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_imba_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_imba_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_bar_sync_imba_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
-        upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_bar_sync_imba_idx_0<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>
-            <<<blocks, 1024, 0, stream1>>>(
-              num_kernels, rheight, rwidth, align_corners, idata, odata,
-              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);
-      cudaDeviceSynchronize();
+        #define CALL(i,type,thread) upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_##type##_idx_##i<scalar_t, accscalar_t, InvStd, scalar_t_bn, scalar_t_bn, accscalar_t_bn, index_t_bn>\
+            <<<blocks, thread, 0, stream1>>>(\
+              num_kernels, rheight, rwidth, align_corners, idata, odata,\
+              input_bn, epsilon, 0.0, dummy_mean, dummy_invstd, mean, invstd);\
+              cudaDeviceSynchronize()
+      CALL(0, vfuse,512);
+      CALL(0, vfuse_lb,512);
+      CALL(0, hfuse,1024);
+      CALL(0, hfuse_lb,1024);
+      CALL(1, hfuse,1024);
+      CALL(1, hfuse_lb,1024);
+      CALL(2, hfuse,1024);
+      CALL(2, hfuse_lb,1024);
+      CALL(3, hfuse,1024);
+      CALL(3, hfuse_lb,1024);
+      CALL(4, hfuse,1024);
+      CALL(4, hfuse_lb,1024);
+      CALL(5, hfuse,1024);
+      CALL(5, hfuse_lb,1024);
+      CALL(6, hfuse,1024);
+      CALL(6, hfuse_lb,1024);
         cudaProfilerStop();
       });
 

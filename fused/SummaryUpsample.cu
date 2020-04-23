@@ -352,104 +352,32 @@ std::tuple<Tensor, Tensor> _histc_cuda_template(
           getStreamFromPool(true)>>>(
             aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp);
         cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
+        #define CALL(i,type,thread) kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_##type##_idx_##i<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>\
+        <<<grid,\
+          thread,\
+          sharedMem,\
+          getStreamFromPool(true)>>>(\
+            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,\
+                num_kernels, rheight, rwidth, align_corners, idata, odata\
+          );\
+        cudaDeviceSynchronize()
 
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_idx_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_idx_1<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_bar_sync_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_bar_sync_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_lb_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_vfuse_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_lb_bar_sync_imba_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
-        kernelHistogram1D_upsample_bilinear2d_out_frame_fused_kernel_hfuse_bar_sync_imba_idx_0<input_hist_t, input_hist_t, IndexType, 1, 2, -1, CUDAHistogramMemoryType::SHARED, decltype(getDummyOp), scalar_t, accscalar_t>
-        <<<grid,
-          block.x + 512,
-          sharedMem,
-          getStreamFromPool(true)>>>(
-            aInfo, pInfo, bInfo, nbins, minvalue, maxvalue, totalElements, getDummyOp,
-                num_kernels, rheight, rwidth, align_corners, idata, odata
-          );
-
-        cudaDeviceSynchronize();
+      CALL(0, vfuse,512);
+      CALL(0, vfuse_lb,512);
+      CALL(0, hfuse,1024);
+      CALL(0, hfuse_lb,1024);
+      CALL(1, hfuse,1024);
+      CALL(1, hfuse_lb,1024);
+      CALL(2, hfuse,1024);
+      CALL(2, hfuse_lb,1024);
+      CALL(3, hfuse,1024);
+      CALL(3, hfuse_lb,1024);
+      CALL(4, hfuse,1024);
+      CALL(4, hfuse_lb,1024);
+      CALL(5, hfuse,1024);
+      CALL(5, hfuse_lb,1024);
+      CALL(6, hfuse,1024);
+      CALL(6, hfuse_lb,1024);
         cudaProfilerStop();
       });
 
