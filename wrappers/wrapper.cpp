@@ -219,15 +219,15 @@ Tensor histc_upsample(Tensor hist_input, Tensor input_upsample)
  return torch::randn({100, 100});
 }
 
-Tensor max_hist_norm( Tensor
-) {
-  at::native::max_hist_norm(
-    hist_input, 20, 0.f, 0.f,
-    batch_norm_input,
-    input_max_pool, {5, 5}, {10, 10}, 2, 1, false
-    );
- return torch::randn({100, 100});
-}
+// Tensor max_hist_norm( Tensor
+// ) {
+  // at::native::max_hist_norm(
+    // hist_input, 20, 0.f, 0.f,
+    // batch_norm_input,
+    // input_max_pool, {5, 5}, {10, 10}, 2, 1, false
+    // );
+ // return torch::randn({100, 100});
+// }
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
 {
