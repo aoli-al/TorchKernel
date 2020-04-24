@@ -25,40 +25,40 @@ def run(idx):
             'device': device,
             'requires_grad': True}
   def batch_norm_input(): 
-    c = range(-64, 64, 4)
-    #  for x in c:
-      #  yield torch.randn(128, 10000, 100+x, **kwargs)
-    yield torch.randn(128, 10000, 96, **kwargs)
+    c = range(-64, 64)
+    for x in c:
+      yield torch.randn(128, 10000, 100+x, **kwargs)
+    # yield torch.randn(128, 10000, 100, **kwargs)
   def maxpool_input():
     c = range(-40, 40, 3)
-    #  for x in c:
-      #  yield torch.randn(1, 80 + x, 2560, 1000, **kwargs)
-    yield torch.randn(1, 80, 2560, 1000, **kwargs)
+    for x in c:
+      yield torch.randn(1, 80 + x, 2560, 1000, **kwargs)
+    # yield torch.randn(1, 80, 2560, 1000, **kwargs)
   def hist_input():
     c = range(-25, 50, 2)
-    #  for x in c:
-      #  yield torch.randn((50 + x)* 100000, **kwargs)
-    yield torch.randn((50)* 100000, **kwargs)
+    for x in c:
+      yield torch.randn((50 + x)* 100000, **kwargs)
+    # yield torch.randn((50)* 100000, **kwargs)
   def im2col_input():
     pass
   def upsample_input():
     c = range(12, 32)
-    #  for x in c:
-      #  yield torch.randn(1, x, 256, 100, **kwargs)
-    yield torch.randn(1, 20, 256, 100, **kwargs)
+    for x in c:
+      yield torch.randn(1, x, 256, 100, **kwargs)
+    # yield torch.randn(1, 20, 256, 100, **kwargs)
 
   input_batchnorm = torch.randn(128, 10000, 100, **kwargs)
   input_max_pool = torch.randn(1, 80, 2560, 1000, **kwargs)
   input_hist = torch.randn((50)* 100000, **kwargs)
   im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
   input_upsample = torch.randn(1, 20, 256, 100, **kwargs)
-  #  if idx == 0 or idx == 12 or idx == 11:
-   #  lstm = nn.LSTM(3, 3).cuda()
-   #  i = torch.randn(1, 3, **kwargs)
-   #  hidden = (torch.randn(1, 1, 3, **kwargs),
-             #  torch.randn(1, 1, 3, **kwargs))
-   #  for _ in range(10000):
-     #  out, hidden = lstm(i.view(1, 1, -1), hidden)
+  if idx == 0 or idx == 12 or idx == 11:
+   lstm = nn.LSTM(3, 3).cuda()
+   i = torch.randn(1, 3, **kwargs)
+   hidden = (torch.randn(1, 1, 3, **kwargs),
+             torch.randn(1, 1, 3, **kwargs))
+   for _ in range(10000):
+     out, hidden = lstm(i.view(1, 1, -1), hidden)
 
   def check(kernels):
     half = len(kernels) // 2
