@@ -35,41 +35,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -112,41 +111,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -189,41 +187,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 896 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 896;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -266,41 +263,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 768 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 768;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -343,41 +339,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 640 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 640;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -420,41 +415,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -497,41 +491,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 384 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 384;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -574,41 +567,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 256 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 256;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -651,41 +643,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 896) / 128 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 896) / 128;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -728,41 +719,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 896 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 896;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -805,41 +795,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 768 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 768;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -882,41 +871,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 640 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 640;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -959,41 +947,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 512;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -1036,41 +1023,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 384 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 384;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -1113,41 +1099,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 256 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 768) / 256;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }
@@ -1190,41 +1175,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 896) / 128 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 896) / 128;
-    int index35 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize36 = idata33.size(0);
-    const int channels37 = idata33.size(1);
-    const int height138 = idata33.size(2);
-    const int width139 = idata33.size(3);
-    const int height240 = odata34.size(2);
-    const int width241 = odata34.size(3);
-    if (index35 < ns29) {
-        const int w242 = index35 % width241;
-        const int h243 = index35 / width241;
-        if (height138 == height240 && width139 == width241) {
-            const int h154 = h243;
-            const int w155 = w242;
-            for (int n = 0; n < batchsize36; n++) {
-                for (int c = 0; c < channels37; ++c) {
-                    const scalar_t27 val56 = idata33[n][c][h154][w155];
-                    odata34[n][c][h243][w242] = val56;
+    const int batchsize35 = idata33.size(0);
+    const int channels36 = idata33.size(1);
+    const int height137 = idata33.size(2);
+    const int width138 = idata33.size(3);
+    const int height239 = odata34.size(2);
+    const int width240 = odata34.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns29); index += blockDim_x_1 * gridDim.x) {
+        const int w241 = index % width240;
+        const int h242 = index / width240;
+        if (height137 == height239 && width138 == width240) {
+            const int h153 = h242;
+            const int w154 = w241;
+            for (int n = 0; n < batchsize35; n++) {
+                for (int c = 0; c < channels36; ++c) {
+                    const scalar_t27 val55 = idata33[n][c][h153][w154];
+                    odata34[n][c][h242][w241] = val55;
                 }
             }
             return;
         }
-        const accscalar_t28 h1r44 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h243, align_corners32, false);
-        const int h145 = h1r44;
-        const int h1p46 = (h145 < height138 - 1) ? 1 : 0;
-        const accscalar_t28 h1lambda47 = h1r44 - h145;
-        const accscalar_t28 h0lambda48 = static_cast<accscalar_t28>(1) - h1lambda47;
-        const accscalar_t28 w1r49 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w242, align_corners32, false);
-        const int w150 = w1r49;
-        const int w1p51 = (w150 < width139 - 1) ? 1 : 0;
-        const accscalar_t28 w1lambda52 = w1r49 - w150;
-        const accscalar_t28 w0lambda53 = static_cast<accscalar_t28>(1) - w1lambda52;
-        for (int n = 0; n < batchsize36; n++) {
-            for (int c = 0; c < channels37; ++c) {
-                const accscalar_t28 val57 = h0lambda48 * (w0lambda53 * idata33[n][c][h145][w150] + w1lambda52 * idata33[n][c][h145][w150 + w1p51]) + h1lambda47 * (w0lambda53 * idata33[n][c][h145 + h1p46][w150] + w1lambda52 * idata33[n][c][h145 + h1p46][w150 + w1p51]);
-                odata34[n][c][h243][w242] = static_cast<scalar_t27>(val57);
+        const accscalar_t28 h1r43 = area_pixel_compute_source_index<accscalar_t28>(rheight30, h242, align_corners32, false);
+        const int h144 = h1r43;
+        const int h1p45 = (h144 < height137 - 1) ? 1 : 0;
+        const accscalar_t28 h1lambda46 = h1r43 - h144;
+        const accscalar_t28 h0lambda47 = static_cast<accscalar_t28>(1) - h1lambda46;
+        const accscalar_t28 w1r48 = area_pixel_compute_source_index<accscalar_t28>(rwidth31, w241, align_corners32, false);
+        const int w149 = w1r48;
+        const int w1p50 = (w149 < width138 - 1) ? 1 : 0;
+        const accscalar_t28 w1lambda51 = w1r48 - w149;
+        const accscalar_t28 w0lambda52 = static_cast<accscalar_t28>(1) - w1lambda51;
+        for (int n = 0; n < batchsize35; n++) {
+            for (int c = 0; c < channels36; ++c) {
+                const accscalar_t28 val56 = h0lambda47 * (w0lambda52 * idata33[n][c][h144][w149] + w1lambda51 * idata33[n][c][h144][w149 + w1p50]) + h1lambda46 * (w0lambda52 * idata33[n][c][h144 + h1p45][w149] + w1lambda51 * idata33[n][c][h144 + h1p45][w149 + w1p50]);
+                odata34[n][c][h242][w241] = static_cast<scalar_t27>(val56);
             }
         }
     }

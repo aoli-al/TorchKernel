@@ -1,5 +1,5 @@
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(512, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_idx_0(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(512, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_lb_idx_0(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
     unsigned int blockDim_x_1 = 512;
@@ -8,47 +8,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -125,7 +118,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(512, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_idx_0(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(512, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_vfuse_idx_0(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
     unsigned int blockDim_x_1 = 512;
@@ -134,47 +127,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -251,7 +237,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_0(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_0(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 128)){
     unsigned int blockDim_x_1 = 128;
@@ -260,47 +246,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -377,7 +356,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_1(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_1(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)){
     unsigned int blockDim_x_1 = 256;
@@ -386,47 +365,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -503,7 +475,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_2(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_2(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 384)){
     unsigned int blockDim_x_1 = 384;
@@ -512,47 +484,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -629,7 +594,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_3(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_3(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
     unsigned int blockDim_x_1 = 512;
@@ -638,47 +603,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -755,7 +713,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_4(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_4(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 640)){
     unsigned int blockDim_x_1 = 640;
@@ -764,47 +722,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -881,7 +832,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_5(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_5(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
     unsigned int blockDim_x_1 = 768;
@@ -890,47 +841,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 768 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 768;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1007,7 +951,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_6(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 0) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_idx_6(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 896)){
     unsigned int blockDim_x_1 = 896;
@@ -1016,47 +960,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 896 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 896;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1133,7 +1070,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_0(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_0(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 128)){
     unsigned int blockDim_x_1 = 128;
@@ -1142,47 +1079,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1259,7 +1189,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_1(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_1(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)){
     unsigned int blockDim_x_1 = 256;
@@ -1268,47 +1198,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1385,7 +1308,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_2(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_2(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 384)){
     unsigned int blockDim_x_1 = 384;
@@ -1394,47 +1317,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1511,7 +1427,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_3(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_3(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
     unsigned int blockDim_x_1 = 512;
@@ -1520,47 +1436,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1637,7 +1546,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_4(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 2) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_4(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 640)){
     unsigned int blockDim_x_1 = 640;
@@ -1646,47 +1555,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1763,7 +1665,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 1) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_5(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 1) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_5(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
     unsigned int blockDim_x_1 = 768;
@@ -1772,47 +1674,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 768 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 768;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
@@ -1889,7 +1784,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 }
 }
 template <typename scalar_t29, typename accscalar_t30, template <typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
- __global__ __launch_bounds__(1024, 1) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_6(const int n31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
+ __global__ __launch_bounds__(1024, 1) void upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_fused_kernel_hfuse_lb_idx_6(const int ns31, const accscalar_t30 rheight32, const accscalar_t30 rwidth33, const bool align_corners34, const PackedTensorAccessor<scalar_t29, 4> idata35, PackedTensorAccessor<scalar_t29, 4> odata36, const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5, const stat_accscalar_t3 epsilon6, const stat_accscalar_t3 momentum7, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8, PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10, PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11)
  {
 if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 896)){
     unsigned int blockDim_x_1 = 896;
@@ -1898,47 +1793,40 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 896 % 1;
     unsigned int blockDim_z_1 = 1;
     unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 896;
-    int index37 = threadIdx_x_1 + blockIdx.x * blockDim_x_1;
-    const int batchsize38 = idata35.size(0);
-    const int channels39 = idata35.size(1);
-    const int height140 = idata35.size(2);
-    const int width141 = idata35.size(3);
-    const int height242 = odata36.size(2);
-    const int width243 = odata36.size(3);
-    if (index37 < n31) {
-        const int w244 = index37 % width243;
-        const int h245 = index37 / width243;
-        if (height140 == height242 && width141 == width243) {
-            const int h156 = h245;
-            const int w157 = w244;
-            for (int n = 0; n < batchsize38; n++) {
-                for (int c = 0; c < channels39; ++c) {
-                    const scalar_t29 val58 = idata35[n][c][h156][w157];
-                    odata36[n][c][h245][w244] = val58;
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim_x_1 + threadIdx_x_1; index < (ns31); index += blockDim_x_1 * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
                 }
             }
             return;
         }
-        const accscalar_t30 h1r46 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h245, align_corners34, false);
-        const int h147 = h1r46;
-        const int h1p48 = (h147 < height140 - 1) ? 1 : 0;
-        const accscalar_t30 h1lambda49 = h1r46 - h147;
-        const accscalar_t30 h0lambda50 = static_cast<accscalar_t30>(1) - h1lambda49;
-        const accscalar_t30 w1r51 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w244, align_corners34, false);
-        const int w152 = w1r51;
-        const int w1p53 = (w152 < width141 - 1) ? 1 : 0;
-        const accscalar_t30 w1lambda54 = w1r51 - w152;
-        const accscalar_t30 w0lambda55 = static_cast<accscalar_t30>(1) - w1lambda54;
-        for (int n = 0; n < batchsize38 - 1; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val59 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val59);
-            }
-        }
-        for (int n = batchsize38 - 1; n < batchsize38; n++) {
-            for (int c = 0; c < channels39; ++c) {
-                const accscalar_t30 val60 = h0lambda50 * (w0lambda55 * idata35[n][c][h147][w152] + w1lambda54 * idata35[n][c][h147][w152 + w1p53]) + h1lambda49 * (w0lambda55 * idata35[n][c][h147 + h1p48][w152] + w1lambda54 * idata35[n][c][h147 + h1p48][w152 + w1p53]);
-                odata36[n][c][h245][w244] = static_cast<scalar_t29>(val60);
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
             }
         }
     }
