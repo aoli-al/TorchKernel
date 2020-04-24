@@ -16,7 +16,7 @@ __global__ void upsample_bilinear2d_out_frame(
   const int height2 = odata.size(2);
   const int width2 = odata.size(3);
 
-  CUDA_KERNEL_LOOP(index, n) {
+  CUDA_KERNEL_LOOP(index, ns) {
     const int w2 = index % width2; // 0:width2-1
     const int h2 = index / width2; // 0:height2-1
     // special case: just copy
