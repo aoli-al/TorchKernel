@@ -51,7 +51,7 @@ idx(const size_t nc,
   return (nc * height + y) * width + x;
 }
 
-#include "upsample.inc"
+#include "upsample.inc4"
 
 using namespace at::cuda;
 using namespace at::cuda::detail;

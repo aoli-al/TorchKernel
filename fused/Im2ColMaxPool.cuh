@@ -23,8 +23,8 @@ using namespace at::cuda::detail;
 static const int BACKWARD_THREADS = 256;
 // kernels borrowed from Caffe
 
-#include "maxpool.inc"
-#include "im2col.inc"
+#include "maxpool.inc1"
+#include "im2col.inc1"
 
 #include "im2col_kernel_MaxPoolForward_.inc"
 

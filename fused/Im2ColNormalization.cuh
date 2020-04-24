@@ -245,7 +245,7 @@ static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_o
 
 using namespace at::cuda::detail;
 
-#include "im2col.inc"
+#include "im2col.inc2"
 
 #include "im2col_kernel_batch_norm_collect_statistics_kernel_.inc"
 

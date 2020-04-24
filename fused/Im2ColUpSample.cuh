@@ -57,7 +57,7 @@ using namespace at::cuda::detail;
 // https://github.com/BVLC/caffe/blob/master/src/caffe/layers/conv_layer.cu)
 // CUDA_NUM_THREADS = 1024
 
-#include "im2col.inc"
+#include "im2col.inc3"
 
 __device__ __forceinline__ size_t
 idx(const size_t nc,
@@ -67,7 +67,7 @@ idx(const size_t nc,
     const size_t x) {
   return (nc * height + y) * width + x;
 }
-#include "upsample.inc"
+#include "upsample.inc1"
 
 #include "im2col_kernel_upsample_bilinear2d_out_frame_.inc"
 

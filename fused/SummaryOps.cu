@@ -35,7 +35,7 @@ namespace native {
 using namespace at::cuda;
 using namespace at::cuda::detail;
 
-#include "im2col.inc"
+#include "im2col.inc4"
 
 #define THRESH_NUMBER_BINS_FOR_MULTI_BLOCK_MEM 100
 #define THRESH_NUMBER_BINS_FOR_GLOBAL_MEM 1000

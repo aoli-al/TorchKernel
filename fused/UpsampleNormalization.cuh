@@ -241,7 +241,7 @@ idx(const size_t nc,
     const size_t x) {
   return (nc * height + y) * width + x;
 }
-#include "upsample.inc"
+#include "upsample.inc3"
 #include "upsample_bilinear2d_out_frame_batch_norm_collect_statistics_kernel_.inc"
 
 template<typename scalar_t_bn, typename index_t_bn>

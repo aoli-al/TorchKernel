@@ -58,7 +58,7 @@ namespace at {
 namespace native {
 
 
-#include "maxpool.inc"
+#include "maxpool.inc4"
 
 static const int BACKWARD_THREADS = 256;
 

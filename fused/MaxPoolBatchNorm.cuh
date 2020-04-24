@@ -249,7 +249,7 @@ __global__ void batch_norm_collect_statistics_kernel(
 
 }
 
-#include "maxpool.inc"
+#include "maxpool.inc2"
 
 #include "MaxPoolForward_batch_norm_collect_statistics_kernel_.inc"
 

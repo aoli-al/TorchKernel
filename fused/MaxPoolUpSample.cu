@@ -26,8 +26,8 @@ namespace {
   for (int i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=256 * gridDim.x, i=_i_n_d_e_x)
 static const int BACKWARD_THREADS = 256;
 
-#include "upsample.inc"
-#include "maxpool.inc"
+#include "upsample.inc2"
+#include "maxpool.inc3"
 
 
 #include "MaxPoolForward_upsample_bilinear2d_out_frame_.inc"
