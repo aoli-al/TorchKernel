@@ -11,6 +11,7 @@ setup(
     name='fusion_cuda',
     ext_modules=[
         CUDAExtension('fusion_cuda', [
+            'fused/MaxpoolingBackwardBatchnorm.cu',
             'fused/Im2ColNormalization.cu',
             'wrappers/wrapper.cpp',
             'fused/SummaryMaxpool.cu',
