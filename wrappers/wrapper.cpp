@@ -135,6 +135,19 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
   IntArrayRef output_size,
   bool align_corners,
   const Tensor& input_bn_, double epsilon);
+
+Tensor max_pool2d_with_indices_backward_cuda(
+  const Tensor& gradOutput_,
+  const Tensor& input,
+  IntArrayRef kernel_size,
+  IntArrayRef stride,
+  IntArrayRef padding,
+  IntArrayRef dilation,
+  bool ceil_mode,
+  const Tensor& indices,
+  const Tensor& grad_out, const Tensor& self, const Tensor& weight, const Tensor& running_mean, const Tensor& running_var,
+  const Tensor& save_mean, const Tensor& save_invstd, 
+  bool train, double epsilon, std::array<bool,3> grad_input_mask);
 } // namespace native
 } // namespace at
 
@@ -144,6 +157,21 @@ std::tuple<Tensor, Tensor, Tensor, Tensor> upsample_batchnorm(
 // static auto hist_input = torch::randn({122400000}, defaultOptions);
 // static auto im2col_input = torch::randn({1, 10, 2512, 2048}, defaultOptions);
 // static auto input_upsample = torch::randn({16, 16, 256, 100}, defaultOptions);
+
+Tensor call_batchnorm_maxpooling_backward(
+  Tensor gradOutput,
+  Tensor input,
+  Tensor indices,
+  Tensor grad_out, 
+  Tensor batch_in,
+  Tensor weight,
+  Tensor running_mean, 
+  Tensor running_var) {
+  return at::native::max_pool2d_with_indices_backward_cuda(
+    gradOutput, input, {5, 5}, {10, 10}, {2}, {1}, false, indices,
+    grad_out, batch_in, weight, running_mean, running_var,
+    running_mean, running_var, true, 0.1, std::array<bool, 3> {true, false, false});
+}
 
 std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused(Tensor input_max_pool, Tensor input_upsample)
 {
@@ -241,9 +269,7 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("hist_norm", &hist_norm, "LLTM forward (CUDA)");
   m.def("histc_maxpool", &histc_maxpool, "LLTM forward (CUDA)");
   m.def("histc_upsample", &histc_upsample, "LLTM forward (CUDA)");
-
-
-
+  m.def("batchnorm_maxpooling_backward", &call_batchnorm_maxpooling_backward, "LLTM forward (CUDA)");
   // m.def("max_hist_norm", &max_hist_norm, "LLTM forward (CUDA)");
   // m.def("im2col_maxpool_batchnorm", &im2col_maxpool_batchnorm, "LLTM forward (CUDA)");
 }

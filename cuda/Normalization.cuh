@@ -2,12 +2,6 @@
 
 #include <THC/THCDeviceUtils.cuh>
 #include <THC/THCGeneral.h>
-#include <ATen/ATen.h>
-#include <ATen/AccumulateType.h>
-#include <ATen/cuda/CUDAContext.h>
-#include <ATen/cuda/CUDAApplyUtils.cuh>
-#include "DeviceSqrt.cuh"
-#include "LaunchUtils.h"
 
 namespace at { namespace native {
 
@@ -587,52 +581,52 @@ std::tuple<Tensor, Tensor, Tensor> batch_norm_cuda_template(const Tensor& input_
   return std::make_tuple(output_reshaped.view(input_.sizes()), save_mean_, save_invstd_);
 }
 
-template<typename scalar_t, typename index_t>
-std::tuple<Tensor, Tensor, Tensor> batch_norm_backward_cuda_template(const Tensor& grad_out_, const Tensor& input_, const Tensor& weight_,
+template<typename sscalar_t, typename b_index_t>
+std::tuple<Tensor, Tensor, Tensor> batch_norm_backward_cuda_template(const Tensor& b_grad_out, const Tensor& b_input_b, const Tensor& weight_,
                                                                      const Tensor& running_mean_, const Tensor& running_var_, const Tensor& save_mean_, const Tensor& save_invstd_,
-                                                                     bool train, double epsilon, std::array<bool,3> grad_input_mask) {
+                                                                     bool train, double epsilon, std::array<bool,3> grad_b_input_bmask) {
 
-  using accscalar_t = at::acc_type<scalar_t, true>;
-  Tensor grad_input_;
-  Tensor grad_input_reshaped;
+  using accsscalar_t = at::acc_type<sscalar_t, true>;
+  Tensor grad_b_input_b;
+  Tensor grad_b_input_breshaped;
   Tensor grad_weight_;
   Tensor grad_bias_;
-  auto input_reshaped = input_.reshape({input_.size(0), input_.size(1), -1});
-  auto grad_output_reshaped = grad_out_.reshape(input_reshaped.sizes());
+  auto b_input_breshaped = b_input_b.reshape({b_input_b.size(0), b_input_b.size(1), -1});
+  auto grad_output_b_reshaped = b_grad_out.reshape(b_input_breshaped.sizes());
 
-  if (grad_input_mask[0]) {
-    grad_input_ = at::empty_like(input_);
-    grad_input_reshaped = grad_input_.view(input_reshaped.sizes());
+  if (grad_b_input_bmask[0]) {
+    grad_b_input_b = at::empty_like(b_input_b);
+    grad_b_input_breshaped = grad_b_input_b.view(b_input_breshaped.sizes());
   }
-  if (grad_input_mask[1]) {
+  if (grad_b_input_bmask[1]) {
     grad_weight_ = at::empty_like(weight_);
   }
-  if (grad_input_mask[2]) {
+  if (grad_b_input_bmask[2]) {
     grad_bias_ = at::empty_like(weight_);
   }
 
-  auto input = input_reshaped.packed_accessor<scalar_t, 3, DefaultPtrTraits, index_t>();
-  auto grad_output = grad_output_reshaped.packed_accessor<scalar_t, 3, DefaultPtrTraits, index_t>();
-  auto grad_input = packed_accessor_or_dummy<scalar_t, 3, DefaultPtrTraits, index_t>(grad_input_reshaped);
-  auto weight = packed_accessor_or_dummy<scalar_t, 1, DefaultPtrTraits, index_t>(weight_);
-  auto grad_weight = packed_accessor_or_dummy<scalar_t, 1, DefaultPtrTraits, index_t>(grad_weight_);
-  auto grad_bias = packed_accessor_or_dummy<scalar_t, 1, DefaultPtrTraits, index_t>(grad_bias_);
-  auto running_mean = packed_accessor_or_dummy<scalar_t, 1, DefaultPtrTraits, index_t>(running_mean_);
-  auto running_var = packed_accessor_or_dummy<scalar_t, 1, DefaultPtrTraits, index_t>(running_var_);
-  auto save_mean = packed_accessor_or_dummy<accscalar_t, 1, DefaultPtrTraits, index_t>(save_mean_);
-  auto save_invstd = packed_accessor_or_dummy<accscalar_t, 1, DefaultPtrTraits, index_t>(save_invstd_);
+  auto input_b = b_input_breshaped.packed_accessor<sscalar_t, 3, DefaultPtrTraits, b_index_t>();
+  auto grad_output_b = grad_output_b_reshaped.packed_accessor<sscalar_t, 3, DefaultPtrTraits, b_index_t>();
+  auto grad_input_b = packed_accessor_or_dummy<sscalar_t, 3, DefaultPtrTraits, b_index_t>(grad_b_input_breshaped);
+  auto weight = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(weight_);
+  auto grad_weight = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(grad_weight_);
+  auto grad_bias = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(grad_bias_);
+  auto running_mean = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(running_mean_);
+  auto running_var = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(running_var_);
+  auto save_mean = packed_accessor_or_dummy<accsscalar_t, 1, DefaultPtrTraits, b_index_t>(save_mean_);
+  auto save_invstd = packed_accessor_or_dummy<accsscalar_t, 1, DefaultPtrTraits, b_index_t>(save_invstd_);
 
   auto stream = at::cuda::getCurrentCUDAStream();
-  dim3 blocks(input.size(1));
-  int tf = getNumThreads(input.size(2));
-  dim3 threads(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
+  dim3 blocks_b(input_b.size(1));
+  int tf = getNumThreads(input_b.size(2));
+  dim3 threads_bs(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
 
-  batch_norm_backward_kernel<scalar_t,  accscalar_t, index_t> <<<blocks, threads, 0, stream>>>
-    (input, grad_output, grad_input, grad_weight, grad_bias, weight, running_mean, running_var,
+  batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, stream>>>
+    (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
      save_mean, save_invstd, train, epsilon);
   THCudaCheck(cudaGetLastError());
 
-  return std::make_tuple(grad_input_, grad_weight_, grad_bias_);
+  return std::make_tuple(grad_b_input_b, grad_weight_, grad_bias_);
 }
 
 template<typename scalar_t, typename index_t>

@@ -47,7 +47,7 @@ def run(idx):
       #  yield torch.randn(1, x, 256, 100, **kwargs)
     yield torch.randn(1, 20, 256, 100, **kwargs)
 
-  input_batchnorm = torch.randn(128, 10000, 100, **kwargs)
+  input_batchnorm = torch.randn(1, 128, 10000, 100, **kwargs)
   input_max_pool = torch.randn(1, 80, 2560, 1000, **kwargs)
   input_hist = torch.randn((50)* 100000, **kwargs)
   im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
@@ -104,6 +104,18 @@ def run(idx):
       print(fusion_cuda.im2col_maxpool_batchnorm()[0])
     if idx == 12:
       print(fusion_cuda.max_hist_norm()[0])
+    if idx == 13:
+      m = nn.BatchNorm2d(128)
+      m.to('cuda')
+      result = m(input_batchnorm)
+      mxp = nn.MaxPool2d((5, 5), (10, 10), 2, 1, True, False)
+      mxp.to('cuda')
+      r2 = mxp(input_max_pool)
+      fusion_cuda.batchnorm_maxpooling_backward(
+          torch.randn(1,80,256,100, **kwargs),
+          input_max_pool, r2[1],
+          torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
+          m.running_mean, m.running_var)
     torch.cuda.empty_cache()
     torch.cuda.synchronize(device=None)
 

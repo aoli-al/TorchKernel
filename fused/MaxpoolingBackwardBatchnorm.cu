@@ -10,68 +10,40 @@
 #include <THC/THCNumerics.cuh>
 #include <c10/macros/Macros.h>
 #include <ATen/cuda/CUDAApplyUtils.cuh>
+#include "../cuda/DeviceSqrt.cuh"
+#include "../cuda/LaunchUtils.h"
+#include <THC/THCDeviceUtils.cuh>
+#include <THC/THCGeneral.h>
 
 namespace at {
 namespace native {
 namespace {
 
-__device__ inline int min(int a, int b) {
-  return a <= b ? a : b;
-}
+#include "maxpool_backward.inc"
+#include "batchnorm_backward.inc"
 
-#define CUDA_MAX_THREADS 1024 // this is safe, in reality 256 is our limit
-
-#define BLOCK_STRIDE 2 // increasing block_stride to lower # of blocks launched
-
-static __device__ inline int p_start(int size, int pad, int kernel, int dilation, int stride) {
-  return (size + pad < ((kernel - 1) * dilation + 1)) ? 0 : (size + pad - ((kernel - 1) * dilation + 1)) / stride + 1;
-}
-
-static __device__ inline int p_end(int size, int pad, int pooled_size, int stride) {
-  return min((size + pad) / stride + 1, pooled_size);
-}
-
-static const int BLOCK_THREADS = 256;
-
-template <typename scalar_t, typename accscalar_t>
-#if defined (__HIP_PLATFORM_HCC__)
-C10_LAUNCH_BOUNDS_2(BLOCK_THREADS, 4)
-#else
-C10_LAUNCH_BOUNDS_2(BLOCK_THREADS, 8)
-#endif
-__global__ void max_pool_backward_nchw(const int nthreads, const scalar_t* top_diff,
-    const int64_t* top_mask, const int num, const int channels,
-    const int height, const int width, const int pooled_height,
-    const int pooled_width, const int kernel_h, const int kernel_w,
-    const int stride_h, const int stride_w, const int pad_h, const int pad_w,
-    const int dilation_h, const int dilation_w,
-    scalar_t* bottom_diff) {
-  CUDA_KERNEL_LOOP(index, height*width) {
-    int h = index / width;
-    int w = index - h * width;
-    int phstart = p_start(h, pad_h, kernel_h, dilation_h, stride_h);
-    int phend = p_end(h, pad_h, pooled_height, stride_h);
-    int pwstart = p_start(w, pad_w, kernel_w, dilation_w, stride_w);
-    int pwend = p_end(w, pad_w, pooled_width, stride_w);
-    for (int n = blockIdx.y; n < num; n += gridDim.y) {
-      for (int c = blockIdx.z; c < channels; c+= gridDim.z) {
-        accscalar_t gradient = accscalar_t(0);
-        int offset = (n * channels + c) * pooled_height * pooled_width;
-        for (int ph = phstart; ph < phend; ++ph) {
-          for (int pw = pwstart; pw < pwend; ++pw) {
-            if (top_mask[ph * pooled_width + pw + offset] == h * width + w) {
-              gradient += ScalarConvert<scalar_t, accscalar_t>::to(top_diff[ph * pooled_width + pw + offset]);
-            }
-          }
-        }
-        bottom_diff[(n*channels+c)*height*width+index] = ScalarConvert<accscalar_t, scalar_t>::to(gradient);
-      }
-    }
+template <typename scalar_t, int64_t dim, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
+static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_or_dummy(const Tensor& t) {
+  if (! t.defined()) {
+    const std::vector<index_t> zeros(dim);
+    return PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t>(nullptr, zeros.data(), zeros.data());
   }
+  return t.packed_accessor<scalar_t, dim, PtrTraits, index_t>();
 }
 
 
-void max_pool2d_with_indices_backward_out_cuda_template(
+template<typename sscalar_t, typename b_index_t>
+std::tuple<Tensor, Tensor, Tensor> batch_norm_backward_cuda_template(const Tensor& b_grad_out, const Tensor& b_input, const Tensor& weight_,
+                                                                     const Tensor& running_mean_, const Tensor& running_var_, const Tensor& save_mean_, const Tensor& save_invstd_,
+                                                                     bool train, double epsilon, std::array<bool,3> grad_b_inputmask) {
+
+
+}
+
+
+template<typename sscalar_t, typename b_index_t>
+std::tuple<Tensor, Tensor, Tensor> 
+max_pool2d_with_indices_backward_out_cuda_template(
            Tensor& gradInput,
            const Tensor& gradOutput_,
            const Tensor& input_,
@@ -80,8 +52,56 @@ void max_pool2d_with_indices_backward_out_cuda_template(
            IntArrayRef stride,
            IntArrayRef padding,
            IntArrayRef dilation,
-           bool ceil_mode)
-{
+           bool ceil_mode,
+            const Tensor& b_grad_out, const Tensor& b_input_b, const Tensor& weight_,
+            const Tensor& running_mean_, const Tensor& running_var_, const Tensor& save_mean_, const Tensor& save_invstd_,
+            bool train, double epsilon, std::array<bool,3> grad_b_input_bmask) {
+  using accsscalar_t = at::acc_type<sscalar_t, true>;
+  Tensor grad_b_input_b;
+  Tensor grad_b_input_breshaped;
+  Tensor grad_weight_;
+  Tensor grad_bias_;
+  auto b_input_breshaped = b_input_b.reshape({b_input_b.size(0), b_input_b.size(1), -1});
+  auto grad_output_b_reshaped = b_grad_out.reshape(b_input_breshaped.sizes());
+
+  if (grad_b_input_bmask[0]) {
+    grad_b_input_b = at::empty_like(b_input_b);
+    grad_b_input_breshaped = grad_b_input_b.view(b_input_breshaped.sizes());
+  }
+  if (grad_b_input_bmask[1]) {
+    grad_weight_ = at::empty_like(weight_);
+  }
+  if (grad_b_input_bmask[2]) {
+    grad_bias_ = at::empty_like(weight_);
+  }
+
+  printf("1\n");
+  auto input_b = b_input_breshaped.packed_accessor<sscalar_t, 3, DefaultPtrTraits, b_index_t>();
+  printf("a\n");
+  auto grad_output_b = grad_output_b_reshaped.packed_accessor<sscalar_t, 3, DefaultPtrTraits, b_index_t>();
+  printf("b\n");
+  auto grad_input_b = packed_accessor_or_dummy<sscalar_t, 3, DefaultPtrTraits, b_index_t>(grad_b_input_breshaped);
+  printf("c\n");
+  auto weight = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(weight_);
+  printf("d\n");
+  auto grad_weight = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(grad_weight_);
+  printf("e\n");
+  auto grad_bias = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(grad_bias_);
+  printf("f\n");
+  auto running_mean = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(running_mean_);
+  printf("g\n");
+  auto running_var = packed_accessor_or_dummy<sscalar_t, 1, DefaultPtrTraits, b_index_t>(running_var_);
+  printf("h\n");
+  auto save_mean = packed_accessor_or_dummy<accsscalar_t, 1, DefaultPtrTraits, b_index_t>(save_mean_);
+  printf("i\n");
+  auto save_invstd = packed_accessor_or_dummy<accsscalar_t, 1, DefaultPtrTraits, b_index_t>(save_invstd_);
+  printf("2\n");
+
+  auto stream = at::cuda::getCurrentCUDAStream();
+  dim3 blocks_b(input_b.size(1));
+  int tf = getNumThreads(input_b.size(2));
+  dim3 threads_bs(tf, std::max<int>(1, MAX_BLOCK_SIZE/tf));
+
   TensorArg gradInput_arg{ gradInput, "gradInput", 1 };
   TensorArg gradOutput_arg{ gradOutput_, "gradOutput_", 2 };
   TensorArg input_arg{ input_, "input_", 3 };
@@ -90,6 +110,7 @@ void max_pool2d_with_indices_backward_out_cuda_template(
   checkAllSameGPU("max_pool2d_with_indices_out_cuda",
                   {gradInput_arg, gradOutput_arg, input_arg, indices_arg});
 
+  printf("3\n");
   // #20866, #22032: Guarantee this for the official C++ API?
   TORCH_CHECK(kernel_size.size() == 1 || kernel_size.size() == 2,
     "max_pool2d: kernel_size must either be a single int, or a tuple of two ints")
@@ -137,6 +158,7 @@ void max_pool2d_with_indices_backward_out_cuda_template(
   const int64_t outputHeight = pooling_output_shape<int64_t>(inputHeight, kH, padH, dH, dilationH, ceil_mode);
   const int64_t outputWidth = pooling_output_shape<int64_t>(inputWidth, kW, padW, dW, dilationW, ceil_mode);
 
+  printf("4\n");
   max_pool2d_backward_shape_check(
     input_,
     gradOutput_,
@@ -148,6 +170,7 @@ void max_pool2d_with_indices_backward_out_cuda_template(
     outputHeight, outputWidth,
     /*cuda=*/ true);
 
+  printf("5\n");
   const Tensor gradOutput = gradOutput_.contiguous(memory_format);
 
   const int64_t out_stride_c = gradOutput.stride(-3);
@@ -191,6 +214,9 @@ void max_pool2d_with_indices_backward_out_cuda_template(
                     nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
                     kH, kW, dH, dW, padH, padW, dilationH, dilationW,
                     gradInput_data);
+            batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, stream>>>
+              (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
+              save_mean, save_invstd, train, epsilon);
             break;
           }
           default: TORCH_CHECK(false, "Unsupported memory format. Supports only ChannelsLast, Contiguous");
@@ -200,33 +226,10 @@ void max_pool2d_with_indices_backward_out_cuda_template(
   );
 
   AT_CUDA_CHECK(cudaGetLastError());
+  return std::make_tuple(grad_b_input_b, grad_weight_, grad_bias_);
 }
 
 } // namespace
-
-Tensor& max_pool2d_with_indices_backward_out_cuda(
-  Tensor& gradInput,
-  const Tensor& gradOutput_,
-  const Tensor& input,
-  IntArrayRef kernel_size,
-  IntArrayRef stride,
-  IntArrayRef padding,
-  IntArrayRef dilation,
-  bool ceil_mode,
-  const Tensor& indices)
-{
-  max_pool2d_with_indices_backward_out_cuda_template(
-    gradInput,
-    gradOutput_,
-    input,
-    indices,
-    kernel_size,
-    stride,
-    padding,
-    dilation,
-    ceil_mode);
-  return gradInput;
-}
 
 Tensor max_pool2d_with_indices_backward_cuda(
   const Tensor& gradOutput_,
@@ -236,20 +239,46 @@ Tensor max_pool2d_with_indices_backward_cuda(
   IntArrayRef padding,
   IntArrayRef dilation,
   bool ceil_mode,
-  const Tensor& indices)
-{
+  const Tensor& indices,
+  const Tensor& grad_out, const Tensor& self, const Tensor& weight, const Tensor& running_mean, const Tensor& running_var,
+  const Tensor& save_mean, const Tensor& save_invstd, bool train, double epsilon, std::array<bool,3> grad_input_mask) {
   auto gradInput = at::zeros_like(input, LEGACY_CONTIGUOUS_MEMORY_FORMAT);
-  max_pool2d_with_indices_backward_out_cuda_template(
-    gradInput,
-    gradOutput_,
-    input,
-    indices,
-    kernel_size,
-    stride,
-    padding,
-    dilation,
-    ceil_mode);
-  return gradInput;
+  return AT_DISPATCH_FLOATING_TYPES_AND_HALF(self.scalar_type(), "batch_norm_backward_cuda", [&] {
+      if (cuda::detail::canUse32BitIndexMath(self)) {
+        auto gradInput = at::zeros_like(input, LEGACY_CONTIGUOUS_MEMORY_FORMAT);
+        max_pool2d_with_indices_backward_out_cuda_template<scalar_t, int32_t>(
+          gradInput,
+          gradOutput_,
+          input,
+          indices,
+          kernel_size,
+          stride,
+          padding,
+          dilation,
+          ceil_mode,
+          grad_out, self, weight, running_mean, running_var, 
+          save_mean, save_invstd, train, epsilon, grad_input_mask);
+        return gradInput;
+        // return batch_norm_backward_cuda_template<scalar_t, int32_t>(
+
+      } else {
+        auto gradInput = at::zeros_like(input, LEGACY_CONTIGUOUS_MEMORY_FORMAT);
+        max_pool2d_with_indices_backward_out_cuda_template<scalar_t, int64_t>(
+          gradInput,
+          gradOutput_,
+          input,
+          indices,
+          kernel_size,
+          stride,
+          padding,
+          dilation,
+          ceil_mode,
+          grad_out, self, weight, running_mean, running_var, 
+          save_mean, save_invstd, train, epsilon, grad_input_mask);
+        return gradInput;
+
+      }
+    });
 }
 
 } // at::native
