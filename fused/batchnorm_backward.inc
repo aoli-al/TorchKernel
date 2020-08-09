@@ -95,51 +95,6 @@ static __device__ __forceinline__ Float2<scalar_t, accscalar_t> warpSum(Float2<s
   return value;
 }
 
-template<typename scalar_t, typename Op, typename PTA>
-__device__ scalar_t reduce(Op op, PTA tensor, int plane) {
-  // first the reductions each thread does separately
-  scalar_t sum = static_cast<scalar_t>(0);
-  for (int batch = threadIdx.y; batch < tensor.size(0); batch += blockDim.y) {
-    for (int x = threadIdx.x; x < tensor.size(2); x += blockDim.x) {
-      sum += op(batch, plane, x);
-    }
-  }
-
-  // first warpSum to get one value per thread to
-  // one value per warp
-  sum = warpSum(sum);
-
-  // this writes each warps  item into shared memory
-  // there are at most WARP_SIZE items left because
-  // there are at most WARP_SIZE**2 threads at the beginning
-  __shared__ scalar_t shared[WARP_SIZE];
-  __syncthreads();
-  int tid = threadIdx.x + threadIdx.y * blockDim.x;
-  if (tid % WARP_SIZE == 0) {
-    shared[tid / WARP_SIZE] = sum;
-  }
-  if (tid >= blockDim.x * blockDim.y / WARP_SIZE && tid < WARP_SIZE) {
-    // zero out the other entries in shared
-    shared[tid] = (scalar_t)0;
-  }
-  __syncthreads();
-  // now have a second warpSum to reduce the intermediate values
-  // from shared memory to a single number. The very first
-  // thread writes it to shared memory.
-
-  if (tid / WARP_SIZE == 0) {
-    sum = warpSum(shared[tid]);
-    if (tid == 0) {
-      shared[0] = sum;
-    }
-  }
-  __syncthreads();
-
-  // Everyone picks it up, should be broadcast into the whole grad_input
-  return shared[0];
-}
-
-
 template <typename scalar_t, typename accscalar_t, typename index_t>
 __global__ void batch_norm_backward_kernel(
     const PackedTensorAccessor<scalar_t, 3, DefaultPtrTraits, index_t> input,
@@ -177,45 +132,45 @@ __global__ void batch_norm_backward_kernel(
 
 
   // first the reductions each thread does separately
-struct at::native::(anonymous namespace)::Float2<double, double> sum = static_cast<struct at::native::(anonymous namespace)::Float2<double, double>>(0);
-for (int batch = threadIdx.y; batch < grad_output.size(0); batch += blockDim.y) {
-  for (int x = threadIdx.x; x < grad_output.size(2); x += blockDim.x) {
-    sum += g(batch, plane, x);
+  struct Float2<scalar_t, accscalar_t> sum = static_cast<struct Float2<scalar_t, accscalar_t>>(0);
+  for (int batch = threadIdx.y; batch < grad_output.size(0); batch += blockDim.y) {
+    for (int x = threadIdx.x; x < grad_output.size(2); x += blockDim.x) {
+      sum += g(batch, plane, x);
+    }
   }
-}
 
-// first warpSum to get one value per thread to
-// one value per warp
-sum = warpSum(sum);
+  // first warpSum to get one value per thread to
+  // one value per warp
+  sum = warpSum(sum);
 
-// this writes each warps  item into shared memory
-// there are at most WARP_SIZE items left because
-// there are at most WARP_SIZE**2 threads at the beginning
-__shared__ struct at::native::(anonymous namespace)::Float2<double, double> shared[WARP_SIZE];
-__syncthreads();
-int tid = threadIdx.x + threadIdx.y * blockDim.x;
-if (tid % WARP_SIZE == 0) {
-  shared[tid / WARP_SIZE] = sum;
-}
-if (tid >= blockDim.x * blockDim.y / WARP_SIZE && tid < WARP_SIZE) {
-  // zero out the other entries in shared
-  shared[tid] = (struct at::native::(anonymous namespace)::Float2<double, double>)0;
-}
-__syncthreads();
-// now have a second warpSum to reduce the intermediate values
-// from shared memory to a single number. The very first
-// thread writes it to shared memory.
-
-if (tid / WARP_SIZE == 0) {
-  sum = warpSum(shared[tid]);
-  if (tid == 0) {
-    shared[0] = sum;
+  // this writes each warps  item into shared memory
+  // there are at most WARP_SIZE items left because
+  // there are at most WARP_SIZE**2 threads at the beginning
+  __shared__ struct Float2<scalar_t, accscalar_t> shared[WARP_SIZE];
+  __syncthreads();
+  int tid = threadIdx.x + threadIdx.y * blockDim.x;
+  if (tid % WARP_SIZE == 0) {
+    shared[tid / WARP_SIZE] = sum;
   }
-}
-__syncthreads();
+  if (tid >= blockDim.x * blockDim.y / WARP_SIZE && tid < WARP_SIZE) {
+    // zero out the other entries in shared
+    shared[tid] = (struct Float2<scalar_t, accscalar_t>)0;
+  }
+  __syncthreads();
+  // now have a second warpSum to reduce the intermediate values
+  // from shared memory to a single number. The very first
+  // thread writes it to shared memory.
 
-// Everyone picks it up, should be broadcast into the whole grad_input
-at::native::Float2<double, double> res = shared[0];
+  if (tid / WARP_SIZE == 0) {
+    sum = warpSum(shared[tid]);
+    if (tid == 0) {
+      shared[0] = sum;
+    }
+  }
+  __syncthreads();
+
+  // Everyone picks it up, should be broadcast into the whole grad_input
+  at::native::Float2<scalar_t, accscalar_t> res = shared[0];
 
 
 
