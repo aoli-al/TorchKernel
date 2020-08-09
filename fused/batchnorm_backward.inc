@@ -174,8 +174,53 @@ __global__ void batch_norm_backward_kernel(
   // 1. Sum(grad_output)
   // 2. DotProduct(input - mean, grad_output)
   GradOp<scalar_t, accscalar_t, PackedTensorAccessor<scalar_t, 3, DefaultPtrTraits, index_t>> g(mean, input, grad_output);
-  Float2<scalar_t, accscalar_t> res = reduce<Float2<scalar_t, accscalar_t>, GradOp<scalar_t, accscalar_t,
-                                                                                   PackedTensorAccessor<scalar_t, 3, DefaultPtrTraits, index_t>>>(g, grad_output, plane);
+
+
+  // first the reductions each thread does separately
+struct at::native::(anonymous namespace)::Float2<double, double> sum = static_cast<struct at::native::(anonymous namespace)::Float2<double, double>>(0);
+for (int batch = threadIdx.y; batch < grad_output.size(0); batch += blockDim.y) {
+  for (int x = threadIdx.x; x < grad_output.size(2); x += blockDim.x) {
+    sum += g(batch, plane, x);
+  }
+}
+
+// first warpSum to get one value per thread to
+// one value per warp
+sum = warpSum(sum);
+
+// this writes each warps  item into shared memory
+// there are at most WARP_SIZE items left because
+// there are at most WARP_SIZE**2 threads at the beginning
+__shared__ struct at::native::(anonymous namespace)::Float2<double, double> shared[WARP_SIZE];
+__syncthreads();
+int tid = threadIdx.x + threadIdx.y * blockDim.x;
+if (tid % WARP_SIZE == 0) {
+  shared[tid / WARP_SIZE] = sum;
+}
+if (tid >= blockDim.x * blockDim.y / WARP_SIZE && tid < WARP_SIZE) {
+  // zero out the other entries in shared
+  shared[tid] = (struct at::native::(anonymous namespace)::Float2<double, double>)0;
+}
+__syncthreads();
+// now have a second warpSum to reduce the intermediate values
+// from shared memory to a single number. The very first
+// thread writes it to shared memory.
+
+if (tid / WARP_SIZE == 0) {
+  sum = warpSum(shared[tid]);
+  if (tid == 0) {
+    shared[0] = sum;
+  }
+}
+__syncthreads();
+
+// Everyone picks it up, should be broadcast into the whole grad_input
+at::native::Float2<double, double> res = shared[0];
+
+
+
+  //Float2<scalar_t, accscalar_t> res = reduce<Float2<scalar_t, accscalar_t>, GradOp<scalar_t, accscalar_t,
+  //                                                                                 PackedTensorAccessor<scalar_t, 3, DefaultPtrTraits, index_t>>>(g, grad_output, plane);
   accscalar_t grad_output_sum = res.v1;
   accscalar_t dot_p = res.v2;
 
