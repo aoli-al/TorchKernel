@@ -21,6 +21,7 @@ namespace {
 
 #include "maxpool_backward.inc"
 #include "batchnorm_backward.inc"
+#include "max_pool_backward_nchw_batch_norm_backward_kernel_.inc"
 
 template <typename scalar_t, int64_t dim, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
 static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_or_dummy(const Tensor& t) {
@@ -191,36 +192,57 @@ max_pool2d_with_indices_backward_out_cuda_template(
         scalar_t *gradOutput_data = gradOutput.data_ptr<scalar_t>();
         scalar_t *gradInput_data = gradInput.data_ptr<scalar_t>();
         int64_t *indices_data = indices.data_ptr<int64_t>();
+        printf("function called\n");\
+        int imgcount = inputWidth * inputHeight;
+        dim3 grid;
+        const int blocks = (imgcount + BLOCK_THREADS - 1) / BLOCK_THREADS;
+        grid.x = blocks;
+        grid.y = nbatch;
+        uint64_t maxGridY = at::cuda::getCurrentDeviceProperties()->maxGridSize[1];
+        if (maxGridY < grid.y) grid.y = maxGridY;
+        grid.z = nInputPlane;
+        uint64_t maxGridZ = at::cuda::getCurrentDeviceProperties()->maxGridSize[2];
+        if (maxGridZ < grid.z) grid.z = maxGridZ;
 
-        switch (memory_format) {
-          case MemoryFormat::Contiguous: {
-            int imgcount = inputWidth * inputHeight;
-            dim3 grid;
-            const int blocks = (imgcount + BLOCK_THREADS - 1) / BLOCK_THREADS;
-            grid.x = blocks;
-            grid.y = nbatch;
-            uint64_t maxGridY = at::cuda::getCurrentDeviceProperties()->maxGridSize[1];
-            if (maxGridY < grid.y) grid.y = maxGridY;
-            grid.z = nInputPlane;
-            uint64_t maxGridZ = at::cuda::getCurrentDeviceProperties()->maxGridSize[2];
-            if (maxGridZ < grid.z) grid.z = maxGridZ;
-
-            max_pool_backward_nchw<scalar_t, accscalar_t>
-            <<<grid, BLOCK_THREADS, 0, at::cuda::getCurrentCUDAStream()>>>(
-                count,
-                    gradOutput_data,
-                    indices_data,
-                    nbatch,
-                    nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
-                    kH, kW, dH, dW, padH, padW, dilationH, dilationW,
-                    gradInput_data);
-            batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, stream>>>
-              (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
-              save_mean, save_invstd, train, epsilon);
-            break;
-          }
-          default: TORCH_CHECK(false, "Unsupported memory format. Supports only ChannelsLast, Contiguous");
-        }
+        printf("function called\n");\
+        max_pool_backward_nchw<scalar_t, accscalar_t>
+        <<<grid, BLOCK_THREADS, 0, at::cuda::getStreamFromPool(true)>>>(
+            count,
+                gradOutput_data,
+                indices_data,
+                nbatch,
+                nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+                kH, kW, dH, dW, padH, padW, dilationH, dilationW,
+                gradInput_data);
+        batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, at::cuda::getStreamFromPool(true)>>>
+          (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
+          save_mean, save_invstd, train, epsilon);
+          cudaDeviceSynchronize();
+        #define CALL(i, type, thread) max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_##type##_idx_##i<scalar_t, accscalar_t,sscalar_t,  accsscalar_t, b_index_t>\
+          <<<blocks_b, thread, 0, stream>>>(\
+            count,\
+            gradOutput_data,\
+            indices_data,\
+            nbatch,\
+            nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,\
+            kH, kW, dH, dW, padH, padW, dilationH, dilationW,\
+            gradInput_data,\
+            input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,\
+            save_mean, save_invstd, train, epsilon);\
+          printf("function called\n");\
+          cudaDeviceSynchronize()
+          CALL(0, vfuse, 512);
+          CALL(0, vfuse_lb, 512);
+          CALL(0, hfuse, 768);
+          CALL(0, hfuse_lb, 768);
+          CALL(1, hfuse, 768);
+          CALL(1, hfuse_lb, 768);
+          CALL(2, hfuse, 768);
+          CALL(2, hfuse_lb, 768);
+          CALL(3, hfuse, 768);
+          CALL(3, hfuse_lb, 768);
+          CALL(4, hfuse, 768);
+          CALL(4, hfuse_lb, 768);
       });
     }
   );

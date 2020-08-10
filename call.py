@@ -47,7 +47,7 @@ def run(idx):
       #  yield torch.randn(1, x, 256, 100, **kwargs)
     yield torch.randn(1, 20, 256, 100, **kwargs)
 
-  input_batchnorm = torch.randn(1, 128, 10000, 100, **kwargs)
+  input_batchnorm = torch.randn(1, 10000, 100, 100, **kwargs)
   input_max_pool = torch.randn(1, 80, 2560, 1000, **kwargs)
   input_hist = torch.randn((50)* 100000, **kwargs)
   im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
@@ -105,7 +105,7 @@ def run(idx):
     if idx == 12:
       print(fusion_cuda.max_hist_norm()[0])
     if idx == 13:
-      m = nn.BatchNorm2d(128)
+      m = nn.BatchNorm2d(10000)
       m.to('cuda')
       result = m(input_batchnorm)
       mxp = nn.MaxPool2d((5, 5), (10, 10), 2, 1, True, False)
