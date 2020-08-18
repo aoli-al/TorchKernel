@@ -218,6 +218,7 @@ max_pool2d_with_indices_backward_out_cuda_template(
           (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
           save_mean, save_invstd, train, epsilon);
           cudaDeviceSynchronize();
+        printf("grid %d\n", grid.x);
         #define CALL(i, type, thread) max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_##type##_idx_##i<scalar_t, accscalar_t,sscalar_t,  accsscalar_t, b_index_t>\
           <<<blocks_b, thread, 0, stream>>>(\
             count,\
@@ -229,7 +230,6 @@ max_pool2d_with_indices_backward_out_cuda_template(
             gradInput_data,\
             input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,\
             save_mean, save_invstd, train, epsilon);\
-          printf("function called\n");\
           cudaDeviceSynchronize()
           CALL(0, vfuse, 512);
           CALL(0, vfuse_lb, 512);

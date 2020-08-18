@@ -168,7 +168,7 @@ Tensor call_batchnorm_maxpooling_backward(
   Tensor running_mean, 
   Tensor running_var) {
   return at::native::max_pool2d_with_indices_backward_cuda(
-    gradOutput, input, {5, 5}, {10, 10}, {2, 2}, {1, 1}, false, indices,
+    gradOutput, input, 3, 2, 1, 1, false, indices,
     grad_out, batch_in, weight, running_mean, running_var,
     running_mean, running_var, true, 0.1, std::array<bool, 3> {true, false, false});
 }
