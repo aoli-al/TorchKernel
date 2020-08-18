@@ -14,6 +14,8 @@ def run(idx):
   from torch.nn import functional as f
   from torch.nn.modules.utils import _pair
   torch.backends.cudnn.enabled = False
+  bn_ = 512
+  mp_ = 512 
 
   torch.manual_seed(42)
   print(idx, file=sys.stderr)
@@ -47,8 +49,8 @@ def run(idx):
       #  yield torch.randn(1, x, 256, 100, **kwargs)
     yield torch.randn(1, 20, 256, 100, **kwargs)
 
-  input_batchnorm = torch.randn(1, 10000, 100, 100, **kwargs)
-  input_max_pool = torch.randn(1, 80, 2560, 1000, **kwargs)
+  input_batchnorm = torch.randn(1, bn_, 16, 16, **kwargs)
+  input_max_pool = torch.randn(1, 1, 2560, 1000, **kwargs)
   input_hist = torch.randn((50)* 100000, **kwargs)
   im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
   input_upsample = torch.randn(1, 20, 256, 100, **kwargs)
@@ -105,14 +107,15 @@ def run(idx):
     if idx == 12:
       print(fusion_cuda.max_hist_norm()[0])
     if idx == 13:
-      m = nn.BatchNorm2d(10000)
+      input_max_pool = torch.randn(1, mp_, 16, 16, **kwargs)
+      m = nn.BatchNorm2d(bn_)
       m.to('cuda')
       result = m(input_batchnorm)
-      mxp = nn.MaxPool2d((5, 5), (10, 10), 2, 1, True, False)
+      mxp = nn.MaxPool2d(3, stride=2, padding=1, return_indices=True)
       mxp.to('cuda')
       r2 = mxp(input_max_pool)
-      (a, b) = fusion_cuda.batchnorm_maxpooling_backward(
-          torch.randn(1,80,256,100, **kwargs),
+      fusion_cuda.batchnorm_maxpooling_backward(
+          torch.randn(1,mp_,8,8, **kwargs),
           input_max_pool, r2[1],
           torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
           m.running_mean, m.running_var)
