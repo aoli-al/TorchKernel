@@ -148,6 +148,15 @@ Tensor max_pool2d_with_indices_backward_cuda(
   const Tensor& grad_out, const Tensor& self, const Tensor& weight, const Tensor& running_mean, const Tensor& running_var,
   const Tensor& save_mean, const Tensor& save_invstd, 
   bool train, double epsilon, std::array<bool,3> grad_input_mask);
+Tensor max_pool2d_with_indices_backward_cuda2(
+  const Tensor& gradOutput_,
+  const Tensor& input,
+  IntArrayRef kernel_size,
+  IntArrayRef stride,
+  IntArrayRef padding,
+  IntArrayRef dilation,
+  bool ceil_mode,
+  const Tensor& indices);
 } // namespace native
 } // namespace at
 
@@ -158,7 +167,7 @@ Tensor max_pool2d_with_indices_backward_cuda(
 // static auto im2col_input = torch::randn({1, 10, 2512, 2048}, defaultOptions);
 // static auto input_upsample = torch::randn({16, 16, 256, 100}, defaultOptions);
 
-Tensor call_batchnorm_maxpooling_backward(
+std::tuple<Tensor, Tensor> call_batchnorm_maxpooling_backward(
   Tensor gradOutput,
   Tensor input,
   Tensor indices,
@@ -167,10 +176,13 @@ Tensor call_batchnorm_maxpooling_backward(
   Tensor weight,
   Tensor running_mean, 
   Tensor running_var) {
-  return at::native::max_pool2d_with_indices_backward_cuda(
+  Tensor a = at::native::max_pool2d_with_indices_backward_cuda(
     gradOutput, input, {5, 5}, {10, 10}, {2, 2}, {1, 1}, false, indices,
     grad_out, batch_in, weight, running_mean, running_var,
     running_mean, running_var, true, 0.1, std::array<bool, 3> {true, false, false});
+  // Tensor b = at::native::max_pool2d_with_indices_backward_cuda2(
+  //   gradOutput, input, {5, 5}, {10, 10}, {2, 2}, {1, 1}, false, indices);
+  return std::make_tuple(a, a);
 }
 
 std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused(Tensor input_max_pool, Tensor input_upsample)

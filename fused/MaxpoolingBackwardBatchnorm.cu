@@ -205,8 +205,17 @@ max_pool2d_with_indices_backward_out_cuda_template(
         if (maxGridZ < grid.z) grid.z = maxGridZ;
 
         printf("function called\n");\
+        // max_pool_backward_nchw<scalar_t, accscalar_t>
+        // <<<grid, BLOCK_THREADS, 0, at::cuda::getStreamFromPool(true)>>>(
+        //     count,
+        //         gradOutput_data,
+        //         indices_data,
+        //         nbatch,
+        //         nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
+        //         kH, kW, dH, dW, padH, padW, dilationH, dilationW,
+        //         gradInput_data);
         max_pool_backward_nchw<scalar_t, accscalar_t>
-        <<<grid, BLOCK_THREADS, 0, at::cuda::getStreamFromPool(true)>>>(
+        <<<blocks_b, BLOCK_THREADS, 0, at::cuda::getStreamFromPool(true)>>>(
             count,
                 gradOutput_data,
                 indices_data,
@@ -214,7 +223,8 @@ max_pool2d_with_indices_backward_out_cuda_template(
                 nInputPlane, inputHeight, inputWidth, outputHeight, outputWidth,
                 kH, kW, dH, dW, padH, padW, dilationH, dilationW,
                 gradInput_data);
-        batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, at::cuda::getStreamFromPool(true)>>>
+        batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> 
+        <<<blocks_b, threads_bs, 0, at::cuda::getStreamFromPool(true)>>>
           (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
           save_mean, save_invstd, train, epsilon);
           cudaDeviceSynchronize();
@@ -229,7 +239,6 @@ max_pool2d_with_indices_backward_out_cuda_template(
             gradInput_data,\
             input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,\
             save_mean, save_invstd, train, epsilon);\
-          printf("function called\n");\
           cudaDeviceSynchronize()
           CALL(0, vfuse, 512);
           CALL(0, vfuse_lb, 512);

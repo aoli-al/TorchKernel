@@ -111,7 +111,7 @@ def run(idx):
       mxp = nn.MaxPool2d((5, 5), (10, 10), 2, 1, True, False)
       mxp.to('cuda')
       r2 = mxp(input_max_pool)
-      fusion_cuda.batchnorm_maxpooling_backward(
+      (a, b) = fusion_cuda.batchnorm_maxpooling_backward(
           torch.randn(1,80,256,100, **kwargs),
           input_max_pool, r2[1],
           torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
