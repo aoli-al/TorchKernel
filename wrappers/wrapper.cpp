@@ -176,13 +176,13 @@ std::tuple<Tensor, Tensor> call_batchnorm_maxpooling_backward(
   Tensor weight,
   Tensor running_mean, 
   Tensor running_var) {
-  return at::native::max_pool2d_with_indices_backward_cuda(
+  Tensor a = at::native::max_pool2d_with_indices_backward_cuda(
     gradOutput, input, 3, 2, 1, 1, false, indices,
     grad_out, batch_in, weight, running_mean, running_var,
     running_mean, running_var, true, 0.1, std::array<bool, 3> {true, false, false});
   // Tensor b = at::native::max_pool2d_with_indices_backward_cuda2(
   //   gradOutput, input, {5, 5}, {10, 10}, {2, 2}, {1, 1}, false, indices);
-  // return std::make_tuple(a, a);
+  return std::make_tuple(a, a);
 }
 
 std::tuple<Tensor, Tensor, Tensor> call_max_pool_upsample_fused(Tensor input_max_pool, Tensor input_upsample)
