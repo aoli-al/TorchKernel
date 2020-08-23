@@ -241,18 +241,18 @@ max_pool2d_with_indices_backward_out_cuda_template(
             input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,\
             save_mean, save_invstd, train, epsilon);\
           cudaDeviceSynchronize()
-          // CALL(0, vfuse, 512);
-          // CALL(0, vfuse_lb, 512);
-          // CALL(0, hfuse, 768);
-          // CALL(0, hfuse_lb, 768);
-          // CALL(1, hfuse, 768);
-          // CALL(1, hfuse_lb, 768);
-          // CALL(2, hfuse, 768);
-          // CALL(2, hfuse_lb, 768);
-          // CALL(3, hfuse, 768);
-          // CALL(3, hfuse_lb, 768);
-          // CALL(4, hfuse, 768);
-          // CALL(4, hfuse_lb, 768);
+          CALL(0, vfuse, 512);
+          CALL(0, vfuse_lb, 512);
+          CALL(0, hfuse, 768);
+          CALL(0, hfuse_lb, 768);
+          CALL(1, hfuse, 768);
+          CALL(1, hfuse_lb, 768);
+          CALL(2, hfuse, 768);
+          CALL(2, hfuse_lb, 768);
+          CALL(3, hfuse, 768);
+          CALL(3, hfuse_lb, 768);
+          CALL(4, hfuse, 768);
+          CALL(4, hfuse_lb, 768);
       });
     }
   );
