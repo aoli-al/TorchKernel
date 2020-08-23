@@ -16,6 +16,13 @@ static __device__ inline int p_end(int size, int pad, int pooled_size, int strid
 
 static const int BLOCK_THREADS = 256;
 
+#define CUDA_KERNEL_LOOP_TYPE(i, n, index_type)                         \
+  int64_t _i_n_d_e_x = blockIdx.z * blockDim.x + threadIdx.x;           \
+  for (index_type i=_i_n_d_e_x; _i_n_d_e_x < (n); _i_n_d_e_x+=blockDim.x * gridDim.z, i=_i_n_d_e_x)
+
+#define CUDA_KERNEL_LOOP(i, n) CUDA_KERNEL_LOOP_TYPE(i, n, int)
+
+
 template <typename scalar_t, typename accscalar_t>
 #if defined (__HIP_PLATFORM_HCC__)
 C10_LAUNCH_BOUNDS_2(BLOCK_THREADS, 4)
@@ -37,7 +44,7 @@ __global__ void max_pool_backward_nchw(const int nthreads, const scalar_t* top_d
     int pwstart = p_start(w, pad_w, kernel_w, dilation_w, stride_w);
     int pwend = p_end(w, pad_w, pooled_width, stride_w);
     for (int n = blockIdx.y; n < num; n += gridDim.y) {
-      for (int c = blockIdx.z; c < channels; c+= gridDim.z) {
+      for (int c = blockIdx.x; c < channels; c+= gridDim.x) {
         accscalar_t gradient = accscalar_t(0);
         int offset = (n * channels + c) * pooled_height * pooled_width;
         for (int ph = phstart; ph < phend; ++ph) {
