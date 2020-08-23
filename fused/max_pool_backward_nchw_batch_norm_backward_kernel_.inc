@@ -1,13 +1,13 @@
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(512, 2) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_vfuse_lb_idx_0(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)){
+if ((threadIdx.x>=0 && threadIdx.x < 256)){
     unsigned int blockDim_x_0 = 256;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 256;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 256;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -32,13 +32,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+if ((threadIdx.x>=0 && threadIdx.x < 512)){
     unsigned int blockDim_x_1 = 256;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 0) % 256;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 0) / 256 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 0) / 512;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -114,13 +114,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(512, 0) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_vfuse_idx_0(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)){
+if ((threadIdx.x>=0 && threadIdx.x < 256)){
     unsigned int blockDim_x_0 = 256;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 256;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 256;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -145,13 +145,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+if ((threadIdx.x>=0 && threadIdx.x < 512)){
     unsigned int blockDim_x_1 = 256;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 0) % 256;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 0) / 256 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 0) / 512;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -227,13 +227,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 0) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_idx_0(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 128)){
+if ((threadIdx.x>=0 && threadIdx.x < 128)){
     unsigned int blockDim_x_0 = 128;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 128;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 128;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 128 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 128;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -258,13 +258,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=128 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=128 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 320;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) % 320;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 128) % 320;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 320 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 128) / 320 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 640;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 128) / 640;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -340,13 +340,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 0) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_idx_1(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)){
+if ((threadIdx.x>=0 && threadIdx.x < 256)){
     unsigned int blockDim_x_0 = 256;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 256;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 256;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -371,13 +371,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=256 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=256 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 256;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) % 256;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 256) % 256;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 256 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 256) / 256 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 512;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 256) / 512;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -453,13 +453,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 0) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_idx_2(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 384)){
+if ((threadIdx.x>=0 && threadIdx.x < 384)){
     unsigned int blockDim_x_0 = 384;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 384;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 384;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 384 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 384;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -484,13 +484,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=384 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=384 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 192;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) % 192;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 384) % 192;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 192 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 384) / 192 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 384;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 384) / 384;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -566,13 +566,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 0) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_idx_3(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+if ((threadIdx.x>=0 && threadIdx.x < 512)){
     unsigned int blockDim_x_0 = 512;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 512;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 512 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 512;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -597,13 +597,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=512 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 128;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 128;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 512) % 128;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 128 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 512) / 128 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 512) / 256;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -679,13 +679,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 0) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_idx_4(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 640)){
+if ((threadIdx.x>=0 && threadIdx.x < 640)){
     unsigned int blockDim_x_0 = 640;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 640;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 640;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 640 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 640;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -710,13 +710,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=640 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=640 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 64;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) % 64;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 640) % 64;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 64 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 640) / 64 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 128;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 640) / 128;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -792,13 +792,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 2) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_lb_idx_0(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 128)){
+if ((threadIdx.x>=0 && threadIdx.x < 128)){
     unsigned int blockDim_x_0 = 128;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 128;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 128;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 128 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 128;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -823,13 +823,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=128 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=128 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 320;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) % 320;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 128) % 320;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 320 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 128) / 320 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 128) / 640;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 128) / 640;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -905,13 +905,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 2) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_lb_idx_1(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 256)){
+if ((threadIdx.x>=0 && threadIdx.x < 256)){
     unsigned int blockDim_x_0 = 256;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 256;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 256;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 256;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -936,13 +936,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=256 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=256 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 256;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) % 256;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 256) % 256;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 256 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 256) / 256 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 256) / 512;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 256) / 512;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -1018,13 +1018,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 2) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_lb_idx_2(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 384)){
+if ((threadIdx.x>=0 && threadIdx.x < 384)){
     unsigned int blockDim_x_0 = 384;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 384;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 384;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 384 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 384;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -1049,13 +1049,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=384 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=384 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 192;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) % 192;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 384) % 192;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 192 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 384) / 192 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 384) / 384;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 384) / 384;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -1131,13 +1131,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 2) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_lb_idx_3(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 512)){
+if ((threadIdx.x>=0 && threadIdx.x < 512)){
     unsigned int blockDim_x_0 = 512;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 512;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 512 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 512;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -1162,13 +1162,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=512 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=512 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 128;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) % 128;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 512) % 128;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 128 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 512) / 128 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 512) / 256;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 512) / 256;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
@@ -1244,13 +1244,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
 template <typename scalar_t0, typename accscalar_t1, typename scalar_t29, typename accscalar_t30, typename index_t31>
  __global__ __launch_bounds__(768, 2) void max_pool_backward_nchw_batch_norm_backward_kernel_fused_kernel_hfuse_lb_idx_4(const int nthreads2, const scalar_t0 *top_diff3, const int64_t *top_mask4, const int num5, const int channels6, const int height7, const int width8, const int pooled_height9, const int pooled_width10, const int kernel_h11, const int kernel_w12, const int stride_h13, const int stride_w14, const int pad_h15, const int pad_w16, const int dilation_h17, const int dilation_w18, scalar_t0 *bottom_diff19, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> input32, const PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_output33, PackedTensorAccessor<scalar_t29, 3, DefaultPtrTraits, index_t31> grad_input34, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_weight35, PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> grad_bias36, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> weight37, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_mean38, const PackedTensorAccessor<scalar_t29, 1, DefaultPtrTraits, index_t31> running_var39, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_mean40, const PackedTensorAccessor<accscalar_t30, 1, DefaultPtrTraits, index_t31> save_invstd41, bool train42, accscalar_t30 epsilon43)
  {
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=0 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 640)){
+if ((threadIdx.x>=0 && threadIdx.x < 640)){
     unsigned int blockDim_x_0 = 640;
-    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 640;
+    unsigned int threadIdx_x_0 = (threadIdx.x - 0) % 640;
     unsigned int blockDim_y_0 = 1;
-    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640 % 1;
+    unsigned int threadIdx_y_0 = (threadIdx.x - 0) / 640 % 1;
     unsigned int blockDim_z_0 = 1;
-    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640;
+    unsigned int threadIdx_z_0 = (threadIdx.x - 0) / 640;
     int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
     for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
@@ -1275,13 +1275,13 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         }
     }
 }
-if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y)>=640 && (threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) < 768)){
+if ((threadIdx.x>=640 && threadIdx.x < 768)){
     unsigned int blockDim_x_1 = 64;
-    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) % 64;
+    unsigned int threadIdx_x_1 = (threadIdx.x - 640) % 64;
     unsigned int blockDim_y_1 = 2;
-    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 64 % 2;
+    unsigned int threadIdx_y_1 = (threadIdx.x - 640) / 64 % 2;
     unsigned int blockDim_z_1 = 1;
-    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 640) / 128;
+    unsigned int threadIdx_z_1 = (threadIdx.x - 640) / 128;
     index_t31 plane44 = blockIdx.x;
     index_t31 N45 = grad_output33.size(0) * grad_output33.size(2);
     accscalar_t30 mean46, invstd47;
