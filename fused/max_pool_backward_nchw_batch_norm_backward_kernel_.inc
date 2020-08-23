@@ -8,8 +8,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -17,7 +17,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -121,8 +121,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -130,7 +130,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -234,8 +234,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -243,7 +243,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -347,8 +347,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -356,7 +356,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -460,8 +460,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -469,7 +469,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -573,8 +573,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -582,7 +582,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -686,8 +686,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -695,7 +695,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -799,8 +799,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 128;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -808,7 +808,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -912,8 +912,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 256;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -921,7 +921,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -1025,8 +1025,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 384;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -1034,7 +1034,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -1138,8 +1138,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -1147,7 +1147,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
@@ -1251,8 +1251,8 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
     unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640 % 1;
     unsigned int blockDim_z_0 = 1;
     unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 640;
-    int64_t _i_n_d_e_x20 = blockIdx.x * blockDim_x_0 + threadIdx_x_0;
-    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.x , index = _i_n_d_e_x20) {
+    int64_t _i_n_d_e_x20 = blockIdx.z * blockDim_x_0 + threadIdx_x_0;
+    for (int index = _i_n_d_e_x20; _i_n_d_e_x20 < (height7 * width8); _i_n_d_e_x20 += blockDim_x_0 * gridDim.z , index = _i_n_d_e_x20) {
         int h21 = index / width8;
         int w22 = index - h21 * width8;
         int phstart23 = p_start(h21, pad_h15, kernel_h11, dilation_h17, stride_h13);
@@ -1260,7 +1260,7 @@ if (((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockD
         int pwstart25 = p_start(w22, pad_w16, kernel_w12, dilation_w18, stride_w14);
         int pwend26 = p_end(w22, pad_w16, pooled_width10, stride_w14);
         for (int n = blockIdx.y; n < num5; n += gridDim.y) {
-            for (int c = blockIdx.z; c < channels6; c += gridDim.z) {
+            for (int c = blockIdx.x; c < channels6; c += gridDim.x) {
                 accscalar_t1 gradient27 = accscalar_t1(0);
                 int offset28 = (n * channels6 + c) * pooled_height9 * pooled_width10;
                 for (int ph = phstart23; ph < phend24; ++ph) {
