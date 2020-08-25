@@ -58,5 +58,10 @@
     "directory": "/u/leo/repos/HomemadeKernel/fused",
     "command": "/u/leo/scratch/llvm-project/build/bin/clang -I/u/leo/repos/HomemadeKernel/fused --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/repos/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c MaxpoolingBackwardBatchnorm.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++14",
     "file": "/u/leo/repos/HomemadeKernel/fused/MaxpoolingBackwardBatchnorm.cu"
+  },
+  {
+    "directory": "/u/leo/repos/HomemadeKernel/fused",
+    "command": "/u/leo/scratch/llvm-project/build/bin/clang -I/u/leo/repos/HomemadeKernel/fused --cuda-gpu-arch=sm_62 -fpermissive --cuda-device-only --cuda-path=/u/leo/scratch/cuda/  -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/repos/pytorch/aten/src -I/u/leo/.local/lib/python3.6/site-packages/torch/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/torch/csrc/api/include -I/u/leo/.local/lib/python3.6/site-packages/torch/include/TH -I/u/leo/.local/lib/python3.6/site-packages/torch/include/THC -I/u/leo/scratch/cuda/include -I/usr/include/python3.6m -c MaxpoolingBackwardBatchnorm.cu -o build/temp.linux-x86_64-3.6/fused/Im2ColMaxPool.o -D__CUDA_NO_HALF_OPERATORS__ -D__CUDA_NO_HALF_CONVERSIONS__ -D__CUDA_NO_HALF2_OPERATORS__  -fPIC -DTORCH_API_INCLUDE_EXTENSION_H -DTORCH_EXTENSION_NAME=fusion_cuda -D_GLIBCXX_USE_CXX11_ABI=0 -std=c++14",
+    "file": "/u/leo/repos/HomemadeKernel/fused/col2im_batchnorm_backward.cu"
   }
 ]
