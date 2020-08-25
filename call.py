@@ -119,6 +119,24 @@ def run(idx):
           input_max_pool, r2[1],
           torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
           m.running_mean, m.running_var)
+    if idx == 14:
+      m = nn.BatchNorm2d(bn_)
+      m.to('cuda')
+      result = m(input_batchnorm)
+      im2col_input = torch.randn(1, 512, 16, 16, **kwargs)
+      unfold = nn.Unfold(1, 1)
+      unfold.to('cuda')
+      col2im_input = unfold(im2col_input)
+      fold = nn.Fold((16, 16), 1, 1)
+      fold.to('cuda')
+      fold(col2im_input)
+      # exit(0)
+      print(im2col_input.shape)
+      fusion_cuda.call_col2im_batchnorm_backward(
+          col2im_input, 
+          torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
+          m.running_mean, m.running_var)
+
     torch.cuda.empty_cache()
     torch.cuda.synchronize(device=None)
 

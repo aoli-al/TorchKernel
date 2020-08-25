@@ -23,6 +23,7 @@ setup(
             'fused/UpsampleNormalization.cu',
             'fused/Im2ColUpSample.cu',
             'fused/MaxPoolBatchNorm.cu',
+            'fused/col2im_batchnorm_backward.cu',
             'cuda/DilatedMaxPool2d.cu',
         ],
         extra_compile_args={'cxx': [],
