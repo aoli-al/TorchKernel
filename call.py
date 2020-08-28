@@ -136,6 +136,20 @@ def run(idx):
           col2im_input, 
           torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
           m.running_mean, m.running_var)
+    if idx == 15:
+      input_max_pool = torch.randn(1, mp_, 16, 16, **kwargs)
+      m = nn.BatchNorm2d(bn_)
+      m.to('cuda')
+      result = m(input_batchnorm)
+      mxp = nn.MaxPool2d(3, stride=2, padding=1, return_indices=True)
+      mxp.to('cuda')
+      r2 = mxp(input_max_pool)
+      fusion_cuda.batchnorm_maxpooling_backward(
+          torch.randn(1,mp_,8,8, **kwargs),
+          input_max_pool, r2[1],
+          torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
+          m.running_mean, m.running_var)
+    if idx == 14:
 
     torch.cuda.empty_cache()
     torch.cuda.synchronize(device=None)
