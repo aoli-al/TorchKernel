@@ -24,7 +24,7 @@ setup(
             'fused/Im2ColUpSample.cu',
             'fused/MaxPoolBatchNorm.cu',
             'fused/col2im_batchnorm_backward.cu',
-            'cuda/DilatedMaxPool2d.cu',
+            'fused/col2im_maxpooling_backward.cu',
         ],
         extra_compile_args={'cxx': [],
                             'nvcc': nvcc_args

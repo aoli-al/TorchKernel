@@ -39,6 +39,7 @@ using namespace at::cuda::detail;
 
 #include "col2im.inc1"
 #include "batchnorm_backward.inc2"
+#include "col2im_kernel_batch_norm_backward_kernel_.inc"
 
 template <typename scalar_t, int64_t dim, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
 static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_or_dummy(const Tensor& t) {
@@ -188,14 +189,15 @@ Tensor col2im_batch_norm_backward(
             stride_width +
         1;
 
-    for (int64_t elt = 0; elt < batch_size; elt++) {
+      int64_t elt = 0;
       input_n = input.select(0, elt);
       output_n = output.select(0, elt);
       int64_t num_kernels = n_output_plane * output_height * output_width;
 
-      batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, stream>>>
-        (input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
-        save_mean, save_invstd, train, epsilon);
+      batch_norm_backward_kernel<sscalar_t,  accsscalar_t, b_index_t> <<<blocks_b, threads_bs, 0, stream>>> (
+        input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,
+        save_mean, save_invstd, train, epsilon
+      );
       THCudaCheck(cudaGetLastError());
       col2im_kernel<scalar_t, accscalar_t>
       <<<blocks_b, 512, 0, at::cuda::getCurrentCUDAStream()>>>
@@ -217,10 +219,56 @@ Tensor col2im_batch_norm_backward(
         width_col,
         output_n.data<scalar_t>()
       );
-    }
-    if (!batched_input) {
-      output.resize_({n_output_plane, output_height, output_width});
-    }
+
+      #define CALL(i, type, thread) col2im_kernel_batch_norm_backward_kernel_fused_kernel_##type##_idx_##i<scalar_t, accscalar_t,sscalar_t,  accsscalar_t, b_index_t>\
+      <<<blocks_b, thread, 0, stream>>>(\
+        num_kernels,\
+        input_n.data<scalar_t>(),\
+        output_height, \
+        output_width,\
+        n_output_plane,\
+        kernel_height,\
+        kernel_width,\
+        pad_height,\
+        pad_width,\
+        stride_height,\
+        stride_width,\
+        dilation_height,\
+        dilation_width,\
+        height_col,\
+        width_col,\
+        output_n.data<scalar_t>(), \
+        input_b, grad_output_b, grad_input_b, grad_weight, grad_bias, weight, running_mean, running_var,\
+        save_mean, save_invstd, train, epsilon\
+      );\
+      cudaDeviceSynchronize()
+      printf("1\n");
+      CALL(0, vfuse, 512);
+      printf("2\n");
+      CALL(0, vfuse_lb, 512);
+      printf("3\n");
+      CALL(0, hfuse, 1024);
+      printf("4\n");
+      CALL(0, hfuse_lb, 1024);
+      printf("5\n");
+      CALL(1, hfuse, 1024);
+      printf("6\n");
+      CALL(1, hfuse_lb, 1024);
+      printf("7\n");
+      CALL(2, hfuse_lb, 1024);
+      printf("8\n");
+      CALL(3, hfuse, 1024);
+      printf("9\n");
+      CALL(3, hfuse_lb, 1024);
+      printf("10\n");
+      CALL(4, hfuse, 1024);
+      printf("10\n");
+      CALL(4, hfuse_lb, 1024);
+      CALL(5, hfuse, 1024);
+      CALL(5, hfuse_lb, 1024);
+      CALL(6, hfuse, 1024);
+      CALL(6, hfuse_lb, 1024);
+      printf("10\n");
   });
   return output;
 }
