@@ -33,7 +33,7 @@ using namespace at::cuda::detail;
 
 #include "col2im.inc2"
 #include "maxpool_backward.inc"
-
+#include "col2im_kernel_max_pool_backward_nchw_.inc"
 
 Tensor col2im_batch_norm_backward(
     const Tensor& input_,
@@ -222,6 +222,20 @@ Tensor col2im_batch_norm_backward(
     output_n = output.select(0, elt);
     int64_t num_kernels = n_output_plane * output_height * output_width;
 
+    scalar_t *gradOutput_data = gradOutput.data_ptr<scalar_t>();
+    scalar_t *gradInput_data = gradInput.data_ptr<scalar_t>();
+    int64_t *indices_data = indices.data_ptr<int64_t>();
+    int imgcount = input_mWidth * input_mHeight;
+    dim3 grid;
+    const int blocks = (imgcount + BLOCK_THREADS - 1) / BLOCK_THREADS;
+    grid.x = blocks;
+    grid.y = nbatch;
+    uint64_t maxGridY = at::cuda::getCurrentDeviceProperties()->maxGridSize[1];
+    if (maxGridY < grid.y) grid.y = maxGridY;
+    grid.z = nInputPlane;
+    uint64_t maxGridZ = at::cuda::getCurrentDeviceProperties()->maxGridSize[2];
+    if (maxGridZ < grid.z) grid.z = maxGridZ;
+
     col2im_kernel<scalar_t, accscalar_t>
     <<<GET_BLOCKS(num_kernels), CUDA_NUM_THREADS, 0, at::cuda::getCurrentCUDAStream()>>>
     (
@@ -243,22 +257,8 @@ Tensor col2im_batch_norm_backward(
       output_n.data<scalar_t>()
     );
 
-    scalar_t *gradOutput_data = gradOutput.data_ptr<scalar_t>();
-    scalar_t *gradInput_data = gradInput.data_ptr<scalar_t>();
-    int64_t *indices_data = indices.data_ptr<int64_t>();
-    int imgcount = input_mWidth * input_mHeight;
-    dim3 grid;
-    const int blocks = (imgcount + BLOCK_THREADS - 1) / BLOCK_THREADS;
-    grid.x = blocks;
-    grid.y = nbatch;
-    uint64_t maxGridY = at::cuda::getCurrentDeviceProperties()->maxGridSize[1];
-    if (maxGridY < grid.y) grid.y = maxGridY;
-    grid.z = nInputPlane;
-    uint64_t maxGridZ = at::cuda::getCurrentDeviceProperties()->maxGridSize[2];
-    if (maxGridZ < grid.z) grid.z = maxGridZ;
-
     max_pool_backward_nchw<scalar_t, accscalar_t>
-    <<<grid, BLOCK_THREADS, 0, at::cuda::getCurrentCUDAStream()>>>(
+    <<<512, BLOCK_THREADS, 0, at::cuda::getCurrentCUDAStream()>>>(
         count,
             gradOutput_data,
             indices_data,
@@ -266,6 +266,45 @@ Tensor col2im_batch_norm_backward(
             nInputPlane, input_mHeight, input_mWidth, output_mHeight, output_mWidth,
             kH, kW, dH, dW, padH, padW, dilation_mH, dilation_mW,
             gradInput_data);
+    
+    #define CALL(i, type, thread) col2im_kernel_max_pool_backward_nchw_fused_kernel_##type##_idx_##i<scalar_t, accscalar_t, scalar_t, accscalar_t>\
+    <<<512, thread, 0, at::cuda::getCurrentCUDAStream()>>>(\
+      num_kernels,\
+      input_n.data<scalar_t>(),\
+      output_height,\
+      output_width,\
+      n_output_plane,\
+      kernel_height,\
+      kernel_width,\
+      pad_height,\
+      pad_width,\
+      stride_height,\
+      stride_width,\
+      dilation_height,\
+      dilation_width,\
+      height_col,\
+      width_col,\
+      output_n.data<scalar_t>(),\
+      count,\
+      gradOutput_data,\
+      indices_data,\
+      nbatch,\
+      nInputPlane, input_mHeight, input_mWidth, output_mHeight, output_mWidth,\
+      kH, kW, dH, dW, padH, padW, dilation_mH, dilation_mW,\
+      gradInput_data);\
+      cudaDeviceSynchronize()
+    CALL(0, vfuse, 512);
+    CALL(0, vfuse_lb, 512);
+    CALL(0, hfuse, 768);
+    CALL(0, hfuse_lb, 768);
+    CALL(1, hfuse, 768);
+    CALL(1, hfuse_lb, 768);
+    CALL(2, hfuse, 768);
+    CALL(2, hfuse_lb, 768);
+    CALL(3, hfuse, 768);
+    CALL(3, hfuse_lb, 768);
+    CALL(4, hfuse, 768);
+    CALL(4, hfuse_lb, 768);
     if (!batched_input) {
       output.resize_({n_output_plane, output_height, output_width});
     }

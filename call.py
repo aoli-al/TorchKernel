@@ -14,7 +14,7 @@ def run(idx):
   from torch.nn import functional as f
   from torch.nn.modules.utils import _pair
   torch.backends.cudnn.enabled = False
-  bn_ = 512
+  bn_ = 320
   mp_ = 512 
 
   torch.manual_seed(42)
@@ -49,7 +49,7 @@ def run(idx):
       #  yield torch.randn(1, x, 256, 100, **kwargs)
     yield torch.randn(1, 20, 256, 100, **kwargs)
 
-  input_batchnorm = torch.randn(1, bn_, 8, 8, **kwargs)
+  input_batchnorm = torch.randn(1, bn_, 16, 16, **kwargs)
   input_max_pool = torch.randn(1, 1, 2560, 1000, **kwargs)
   input_hist = torch.randn((50)* 100000, **kwargs)
   im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
@@ -90,8 +90,10 @@ def run(idx):
       for i in maxpool_input():
         print(fusion_cuda.im2col_maxpool(im2col_input, i)[0][0])
     if idx == 7:
-      for i in batch_norm_input():
-        check(fusion_cuda.max_pool_batch_norm(input_max_pool, i))
+      input_max_pool = torch.randn(1, 528, 16, 16, **kwargs)
+      fusion_cuda.max_pool_batch_norm(input_max_pool, input_batchnorm)
+      # for i in batch_norm_input():
+      #   check(fusion_cuda.max_pool_batch_norm(input_max_pool, i))
     if idx == 8:
       for i in upsample_input():
         print(fusion_cuda.im2col_upsample(im2col_input, i)[0][0])
@@ -137,19 +139,18 @@ def run(idx):
           torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
           m.running_mean, m.running_var)
     if idx == 15:
+      im2col_input = torch.randn(1, 256, 16, 16, **kwargs)
+      unfold = nn.Unfold(1, 1)
+      unfold.to('cuda')
+      col2im_input = unfold(im2col_input)
       input_max_pool = torch.randn(1, mp_, 16, 16, **kwargs)
-      m = nn.BatchNorm2d(bn_)
-      m.to('cuda')
-      result = m(input_batchnorm)
       mxp = nn.MaxPool2d(3, stride=2, padding=1, return_indices=True)
       mxp.to('cuda')
       r2 = mxp(input_max_pool)
-      fusion_cuda.batchnorm_maxpooling_backward(
+      fusion_cuda.call_col2im_maxpooling_backward(
+          col2im_input,
           torch.randn(1,mp_,8,8, **kwargs),
-          input_max_pool, r2[1],
-          torch.randn(input_batchnorm.shape, **kwargs), input_batchnorm, m.weight,
-          m.running_mean, m.running_var)
-    if idx == 14:
+          input_max_pool, r2[1])
 
     torch.cuda.empty_cache()
     torch.cuda.synchronize(device=None)

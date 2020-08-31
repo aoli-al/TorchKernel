@@ -201,14 +201,14 @@ Tensor call_col2im_maxpooling_backward(
     const Tensor& input_m_,
     const Tensor& indices
 ) {
-  return col2im_batch_norm_backward(
+  return at::native::col2im_batch_norm_backward(
     input_,
     {16, 16},
     {1,1},
     {1,1},
     {0,0},
     {1,1}, 
-    gradOutput, input, indices, 3, 2, 1, 1, false, 
+    gradOutput_, input_m_, indices, 3, 2, 1, 1, false
   );
 }
 
@@ -277,7 +277,7 @@ Tensor histc(Tensor im2col_input, Tensor hist_input)
 
 std::tuple<Tensor, Tensor, Tensor, Tensor, Tensor, Tensor> 
 max_pool_batch_norm(Tensor input_max_pool, Tensor batch_norm_input) {
-  return at::native::max_pool2d_batch_norm(input_max_pool, {5, 5}, {10, 10}, 2, 1, false,
+  return at::native::max_pool2d_batch_norm(input_max_pool, {3, 3}, {1, 1}, 0, 1, false,
     batch_norm_input, 0.1);
 }
 
