@@ -28,8 +28,8 @@ setup(
         extra_compile_args={'cxx': [],
                             'nvcc': nvcc_args
                                      },
-        include_dirs = ['/root/miniconda3/lib/python3.7/site-packages/torch/include', '/root/pytorch/aten/src'],
-        library_dirs = ['/root/miniconda3/lib/python3.7/site-packages/torch/lib'],
+        include_dirs = ['/root/miniconda3/lib/python3.6/site-packages/torch/include', '/home/hao01/pytorch/aten/src'],
+        library_dirs = ['/root/miniconda3/lib/python3.6/site-packages/torch/lib'],
         libraries = ["torch"]),
     ],
     cmdclass={

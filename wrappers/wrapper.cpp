@@ -343,9 +343,4 @@ PYBIND11_MODULE(TORCH_EXTENSION_NAME, m)
   m.def("hist_norm", &hist_norm, "LLTM forward (CUDA)");
   m.def("histc_maxpool", &histc_maxpool, "LLTM forward (CUDA)");
   m.def("histc_upsample", &histc_upsample, "LLTM forward (CUDA)");
-  m.def("batchnorm_maxpooling_backward", &call_batchnorm_maxpooling_backward, "LLTM forward (CUDA)");
-  m.def("call_col2im_batchnorm_backward", &call_col2im_batchnorm_backward, "LLTM forward (CUDA)");
-  m.def("call_col2im_maxpooling_backward", &call_col2im_maxpooling_backward, "LLTM forward (CUDA)");
-  // m.def("max_hist_norm", &max_hist_norm, "LLTM forward (CUDA)");
-  // m.def("im2col_maxpool_batchnorm", &im2col_maxpool_batchnorm, "LLTM forward (CUDA)");
 }
