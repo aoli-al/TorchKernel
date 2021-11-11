@@ -199,6 +199,7 @@ __global__ void batch_norm_collect_statistics_kernel(
 }
 
 
+
 template <typename scalar_t, int64_t dim, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
 static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_or_dummy(const Tensor& t) {
   if (! t.defined()) {

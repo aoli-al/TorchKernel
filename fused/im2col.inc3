@@ -38,3 +38,4 @@ __global__ void im2col_kernel(
     }
 }
 
+

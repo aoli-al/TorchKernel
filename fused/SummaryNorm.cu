@@ -339,6 +339,7 @@ __global__ void batch_norm_collect_statistics_kernel(
 
 
 
+
 #define THRESH_NUMBER_BINS_FOR_MULTI_BLOCK_MEM 100
 #define THRESH_NUMBER_BINS_FOR_GLOBAL_MEM 1000
 #define FOR_KERNEL_LOOP(i, lim)                                      \
@@ -414,6 +415,7 @@ __global__ void kernelHistogram1D(
         atomicAdd(& a37.data[aOffset50], smem46[i]);
     }
 }
+
 
 
 

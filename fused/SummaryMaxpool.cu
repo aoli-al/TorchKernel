@@ -114,39 +114,28 @@ __global__ void kernelHistogram1D(
     input_t maxvalue,
     IndexType totalElements,
     Op getOp) {
-  extern __shared__ unsigned char my_smem[];
-  output_t* smem = nullptr;
-
-    ////////////////////////// Shared memory //////////////////////////
-    // atomically add to block specific shared memory
-    // then atomically add to the global output tensor
-    smem = reinterpret_cast<output_t*>(my_smem);
+    extern unsigned char my_smem[] __attribute__((shared));
+    output_t *smem = nullptr;
+    smem = reinterpret_cast<output_t *>(my_smem);
     for (IndexType i = threadIdx.x; i < a.sizes[0]; i += blockDim.x) {
-      smem[i] = 0;
+        smem[i] = 0;
     }
     __syncthreads();
-    FOR_KERNEL_LOOP(linearIndex, totalElements) {
-      // Convert `linearIndex` into an offset of `b`
-      const IndexType bOffset =
-          IndexToOffset<input_t, IndexType, BDims>::get(linearIndex, b);
-      const input_t bVal = b.data[bOffset];
-      if (bVal >= minvalue && bVal <= maxvalue) {
-        // Use value at `b` as an offset of `smem`
-        const IndexType bin = getBin<input_t, IndexType>(bVal, minvalue, maxvalue, nbins);
-        atomicAdd(&smem[bin], getOp(linearIndex));
-      }
+    for (IndexType linearIndex = blockIdx.x * blockDim.x + threadIdx.x; linearIndex < totalElements; linearIndex += gridDim.x * blockDim.x) {
+        const IndexType bOffset = IndexToOffset<input_t, IndexType, BDims>::get(linearIndex, b);
+        const input_t bVal = b.data[bOffset];
+        if (bVal >= minvalue && bVal <= maxvalue) {
+            const IndexType bin = getBin<input_t, IndexType>(bVal, minvalue, maxvalue, nbins);
+            atomicAdd(& smem[bin], getOp(linearIndex));
+        }
     }
     __syncthreads();
-    // NOTE: atomically update output bin count.
-    //   Atomic update is imp since __syncthread() will only synchronize threads
-    //   in a given block, not across blocks.
     for (IndexType i = threadIdx.x; i < a.sizes[0]; i += blockDim.x) {
-      const IndexType aOffset =
-          IndexToOffset<output_t, IndexType, ADims>::get(i, a);
-      atomicAdd(&a.data[aOffset], smem[i]);
+        const IndexType aOffset = IndexToOffset<output_t, IndexType, ADims>::get(i, a);
+        atomicAdd(& a.data[aOffset], smem[i]);
     }
-
 }
+
 
 inline int64_t getFreeGlobalMemory() {
   // no need to use `cudaSetDevice`

@@ -42,3 +42,4 @@ __global__ void MaxPoolForward(const int nthreads, const scalar_t* bottom_data,
     }
 }
 
+
