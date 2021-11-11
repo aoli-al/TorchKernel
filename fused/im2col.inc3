@@ -1,46 +1,40 @@
-template <typename dt>
+template <typename dt0>
 C10_LAUNCH_BOUNDS_1(1024)
 __global__ void im2col_kernel(
-    const int64_t n,
-    const dt* data_im,
-    const int64_t height,
-    const int64_t width,
-    const int64_t kernel_height,
-    const int64_t kernel_width,
-    const int64_t pad_height,
-    const int64_t pad_width,
-    const int64_t stride_height,
-    const int64_t stride_width,
-    const int64_t dilation_height,
-    const int64_t dilation_width,
-    const int64_t height_col,
-    const int64_t width_col,
-    dt* data_col) {
-  CUDA_KERNEL_LOOP(index, n) {
-    int64_t w_out = index % width_col;
-
-    int idx = index / width_col;
-
-    int64_t h_out = idx % height_col;
-    int64_t channel_in = idx / height_col;
-    int64_t channel_out = channel_in * kernel_height * kernel_width;
-    int64_t h_in = h_out * stride_height - pad_height;
-    int64_t w_in = w_out * stride_width - pad_width;
-
-    // data_col += (channel_out * height_col + h_out) * width_col + w_out;
-    // data_im += (channel_in * height + h_in) * width + w_in;
-    dt* block_col = data_col + (channel_out * height_col + h_out) * width_col + w_out;
-    const dt* block_im = data_im + (channel_in * height + h_in) * width + w_in;
-
-    for (int64_t i = 0; i < kernel_height; ++i) {
-      for (int64_t j = 0; j < kernel_width; ++j) {
-        int64_t h = h_in + i * dilation_height;
-        int64_t w = w_in + j * dilation_width;
-        *block_col = (h >= 0 && w >= 0 && h < height && w < width)
-            ? block_im[i * dilation_height * width + j * dilation_width]
-            : ScalarConvert<int, dt>::to(0);
-        block_col += height_col * width_col;
-      }
+    const int64_t n1,
+    const dt0* data_im2,
+    const int64_t height3,
+    const int64_t width4,
+    const int64_t kernel_height5,
+    const int64_t kernel_width6,
+    const int64_t pad_height7,
+    const int64_t pad_width8,
+    const int64_t stride_height9,
+    const int64_t stride_width10,
+    const int64_t dilation_height11,
+    const int64_t dilation_width12,
+    const int64_t height_col13,
+    const int64_t width_col14,
+    dt0* data_col15) {
+    int64_t _i_n_d_e_x16 = blockIdx.x * blockDim.x + threadIdx.x;
+    for (int index = _i_n_d_e_x16; _i_n_d_e_x16 < (n1); _i_n_d_e_x16 += blockDim.x * gridDim.x , index = _i_n_d_e_x16) {
+        int64_t w_out17 = index % width_col14;
+        int idx18 = index / width_col14;
+        int64_t h_out19 = idx18 % height_col13;
+        int64_t channel_in20 = idx18 / height_col13;
+        int64_t channel_out21 = channel_in20 * kernel_height5 * kernel_width6;
+        int64_t h_in22 = h_out19 * stride_height9 - pad_height7;
+        int64_t w_in23 = w_out17 * stride_width10 - pad_width8;
+        dt0 *block_col24 = data_col15 + (channel_out21 * height_col13 + h_out19) * width_col14 + w_out17;
+        const dt0 *block_im25 = data_im2 + (channel_in20 * height3 + h_in22) * width4 + w_in23;
+        for (int64_t i = 0; i < kernel_height5; ++i) {
+            for (int64_t j = 0; j < kernel_width6; ++j) {
+                int64_t h26 = h_in22 + i * dilation_height11;
+                int64_t w27 = w_in23 + j * dilation_width12;
+                * block_col24 = (h26 >= 0 && w27 >= 0 && h26 < height3 && w27 < width4) ? block_im25[i * dilation_height11 * width4 + j * dilation_width12] : ScalarConvert<int, dt0>::to(0);
+                block_col24 += height_col13 * width_col14;
+            }
+        }
     }
-  }
 }
+

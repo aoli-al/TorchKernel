@@ -162,92 +162,68 @@ __global__ void batch_norm_collect_statistics_kernel(
     PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_var,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_mean,
     PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_transformed_var) {
-
-  __shared__ int shared_n[2 * 2 * WARP_SIZE + WARP_SIZE];
-
-  int plane = blockIdx.x;
-  int N = input.size(0) * input.size(2);
-  int tid = threadIdx.x + threadIdx.y * blockDim.x;
-
-  // Compute the mean and variance across (batch, x/y/z)
-  // this uses the Welford (in the for loop)/parallel algorithm (to sum across the block)
-  // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_Online_algorithm
-  // and the parallel algorithm on the same page.
-  // We use two shuffles to reduce across the entire block.
-  // https://devblogs.nvidia.com/faster-parallel-reductions-kepler/ has a description.
-  stat_accscalar_t* shared_avg_var = (stat_accscalar_t*) &shared_n[WARP_SIZE];
-
-  // first the reductions each thread does separately
-  stat_accscalar_t avg = 0;
-  stat_accscalar_t var_n = 0;
-  int n = 0;
-  for (int batch = threadIdx.y; batch < input.size(0); batch += blockDim.y) {
-    for (int x = threadIdx.x; x < input.size(2); x += blockDim.x) {
-      stat_accscalar_t v = input[batch][plane][x];
-      stat_accscalar_t d1 = v - avg;
-      n++;
-      avg += d1 / n;
-      var_n += d1 * (v - avg);
+    static int shared_n[160] __attribute__((shared));
+    int plane = blockIdx.x;
+    int N = input.size(0) * input.size(2);
+    int tid = threadIdx.x + threadIdx.y * blockDim.x;
+    stat_accscalar_t *shared_avg_var = (stat_accscalar_t *)&shared_n[WARP_SIZE];
+    stat_accscalar_t avg = 0;
+    stat_accscalar_t var_n = 0;
+    int n = 0;
+    for (int batch = threadIdx.y; batch < input.size(0); batch += blockDim.y) {
+        for (int x = threadIdx.x; x < input.size(2); x += blockDim.x) {
+            stat_accscalar_t v = input[batch][plane][x];
+            stat_accscalar_t d1 = v - avg;
+            n++;
+            avg += d1 / n;
+            var_n += d1 * (v - avg);
+        }
     }
-  }
-
-  // first warpSum to get one value per thread to
-  // one value per warp
-  for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
-    int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
-    stat_accscalar_t factor = 1.0 / fmaxf(1.0, n+o_n);
-    var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
-    avg = (n * avg + o_n * o_avg) * factor;
-    n += o_n;
-  }
-
-  // this writes each warps  item into shared memory
-  // there are at most WARP_SIZE items left because
-  // there are at most WARP_SIZE**2 threads at the beginning
-  __syncthreads();
-  if (tid % WARP_SIZE == 0) {
-    shared_n[tid / WARP_SIZE] = n;
-    shared_avg_var[tid / WARP_SIZE * 2] = avg;
-    shared_avg_var[tid / WARP_SIZE * 2 + 1] = var_n;
-  }
-  __syncthreads();
-  // now have a second warpSum to reduce the intermediate values
-  // from shared memory to a single number. The very first
-  // thread writes it to shared memory.
-
-  if (tid < WARP_SIZE) {
-    n = (tid < blockDim.x * blockDim.y / WARP_SIZE ? shared_n[tid] : 0);
-    avg = (tid < blockDim.x * blockDim.y  / WARP_SIZE ? shared_avg_var[2 * tid] : stat_accscalar_t(0));
-    var_n = (tid < blockDim.x * blockDim.y  / WARP_SIZE ? shared_avg_var[2 * tid + 1] : stat_accscalar_t(0));
-  }
-  for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
-    int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
-    stat_accscalar_t factor = 1.0 / fmaxf(1.0, n+o_n);
-    var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
-    avg = (n * avg + o_n * o_avg) * factor;
-    n += o_n;
-  }
-
-  // Save the mean, variance, and moving averages
-  if (tid == 0) {
-    if (save_mean.data() != NULL) {
-      save_mean[plane] = avg;
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
+        int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
+        stat_accscalar_t factor = 1. / fmaxf(1., n + o_n);
+        var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
+        avg = (n * avg + o_n * o_avg) * factor;
+        n += o_n;
     }
-    if (save_transformed_var.data() != NULL) {
-      save_transformed_var[plane] = VarTransform<stat_accscalar_t>{}(var_n / N, epsilon);
+    __syncthreads();
+    if (tid % WARP_SIZE == 0) {
+        shared_n[tid / WARP_SIZE] = n;
+        shared_avg_var[tid / WARP_SIZE * 2] = avg;
+        shared_avg_var[tid / WARP_SIZE * 2 + 1] = var_n;
     }
-    if (running_mean.data() != NULL) {
-      running_mean[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_mean[plane] + momentum * avg);
+    __syncthreads();
+    if (tid < WARP_SIZE) {
+        n = (tid < blockDim.x * blockDim.y / WARP_SIZE ? shared_n[tid] : 0);
+        avg = (tid < blockDim.x * blockDim.y / WARP_SIZE ? shared_avg_var[2 * tid] : stat_accscalar_t(0));
+        var_n = (tid < blockDim.x * blockDim.y / WARP_SIZE ? shared_avg_var[2 * tid + 1] : stat_accscalar_t(0));
     }
-    if (running_var.data() != NULL) {
-      stat_accscalar_t unbiasedVar = var_n / (N - 1);
-      running_var[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_var[plane] + momentum * unbiasedVar);
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
+        int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
+        stat_accscalar_t factor = 1. / fmaxf(1., n + o_n);
+        var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
+        avg = (n * avg + o_n * o_avg) * factor;
+        n += o_n;
     }
-  }
-
+    if (tid == 0) {
+        if (save_mean.data() != __null) {
+            save_mean[plane] = avg;
+        }
+        if (save_transformed_var.data() != __null) {
+            save_transformed_var[plane] = VarTransform<stat_accscalar_t>({})(var_n / N, epsilon);
+        }
+        if (running_mean.data() != __null) {
+            running_mean[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_mean[plane] + momentum * avg);
+        }
+        if (running_var.data() != __null) {
+            stat_accscalar_t unbiasedVar = var_n / (N - 1);
+            running_var[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_var[plane] + momentum * unbiasedVar);
+        }
+    }
 }
+
 
 #include "maxpool.inc2"
 

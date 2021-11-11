@@ -259,101 +259,84 @@ struct Var {
 
 
 
-template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
+template <template<typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
 __global__ void batch_norm_collect_statistics_kernel(
-    const PackedTensorAccessor<input_scalar_t, 3, RestrictPtrTraits, index_t> input,
-    const stat_accscalar_t epsilon,
-    const stat_accscalar_t momentum,
-    PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_mean,
-    PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_var,
-    PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_mean,
-    PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_transformed_var) {
-
-  __shared__ int shared_n[2 * 2 * WARP_SIZE + WARP_SIZE];
-
-  int plane = blockIdx.x;
-  int N = input.size(0) * input.size(2);
-  int tid = threadIdx.x + threadIdx.y * blockDim.x;
-
-  // Compute the mean and variance across (batch, x/y/z)
-  // this uses the Welford (in the for loop)/parallel algorithm (to sum across the block)
-  // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_Online_algorithm
-  // and the parallel algorithm on the same page.
-  // We use two shuffles to reduce across the entire block.
-  // https://devblogs.nvidia.com/faster-parallel-reductions-kepler/ has a description.
-  stat_accscalar_t* shared_avg_var = (stat_accscalar_t*) &shared_n[WARP_SIZE];
-
-  // first the reductions each thread does separately
-  stat_accscalar_t avg = 0;
-  stat_accscalar_t var_n = 0;
-  int n = 0;
-  for (int batch = threadIdx.y; batch < input.size(0); batch += blockDim.y) {
-    for (int x = threadIdx.x; x < input.size(2); x += blockDim.x) {
-      stat_accscalar_t v = input[batch][plane][x];
-      stat_accscalar_t d1 = v - avg;
-      n++;
-      avg += d1 / n;
-      var_n += d1 * (v - avg);
+    const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5,
+    const stat_accscalar_t3 epsilon6,
+    const stat_accscalar_t3 momentum7,
+    PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8,
+    PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9,
+    PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10,
+    PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) {
+    unsigned int blockDim_x_0 = 32;
+    unsigned int threadIdx_x_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 32;
+    unsigned int blockDim_y_0 = 16;
+    unsigned int threadIdx_y_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 32 % 16;
+    unsigned int blockDim_z_0 = 1;
+    unsigned int threadIdx_z_0 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    static int shared_n12[160] __attribute__((shared));
+    int plane13 = blockIdx.x;
+    int N14 = input5.size(0) * input5.size(2);
+    int tid15 = threadIdx_x_0 + threadIdx_y_0 * blockDim_x_0;
+    stat_accscalar_t3 *shared_avg_var16 = (stat_accscalar_t3 *)&shared_n12[WARP_SIZE];
+    stat_accscalar_t3 avg17 = 0;
+    stat_accscalar_t3 var_n18 = 0;
+    int n19 = 0;
+    for (int batch = threadIdx_y_0; batch < input5.size(0); batch += blockDim_y_0) {
+        for (int x = threadIdx_x_0; x < input5.size(2); x += blockDim_x_0) {
+            stat_accscalar_t3 v20 = input5[batch][plane13][x];
+            stat_accscalar_t3 d121 = v20 - avg17;
+            n19++;
+            avg17 += d121 / n19;
+            var_n18 += d121 * (v20 - avg17);
+        }
     }
-  }
-
-  // first warpSum to get one value per thread to
-  // one value per warp
-  for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
-    int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
-    stat_accscalar_t factor = 1.0 / fmaxf(1.0, n+o_n);
-    var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
-    avg = (n * avg + o_n * o_avg) * factor;
-    n += o_n;
-  }
-
-  // this writes each warps  item into shared memory
-  // there are at most WARP_SIZE items left because
-  // there are at most WARP_SIZE**2 threads at the beginning
-  __syncthreads();
-  if (tid % WARP_SIZE == 0) {
-    shared_n[tid / WARP_SIZE] = n;
-    shared_avg_var[tid / WARP_SIZE * 2] = avg;
-    shared_avg_var[tid / WARP_SIZE * 2 + 1] = var_n;
-  }
-  __syncthreads();
-  // now have a second warpSum to reduce the intermediate values
-  // from shared memory to a single number. The very first
-  // thread writes it to shared memory.
-
-  if (tid < WARP_SIZE) {
-    n = (tid < blockDim.x * blockDim.y / WARP_SIZE ? shared_n[tid] : 0);
-    avg = (tid < blockDim.x * blockDim.y  / WARP_SIZE ? shared_avg_var[2 * tid] : stat_accscalar_t(0));
-    var_n = (tid < blockDim.x * blockDim.y  / WARP_SIZE ? shared_avg_var[2 * tid + 1] : stat_accscalar_t(0));
-  }
-  for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
-    int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
-    stat_accscalar_t factor = 1.0 / fmaxf(1.0, n+o_n);
-    var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
-    avg = (n * avg + o_n * o_avg) * factor;
-    n += o_n;
-  }
-
-  // Save the mean, variance, and moving averages
-  if (tid == 0) {
-    if (save_mean.data() != NULL) {
-      save_mean[plane] = avg;
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t3 o_avg22 = WARP_SHFL_XOR(avg17, 1 << i, WARP_SIZE);
+        int o_n23 = WARP_SHFL_XOR(n19, 1 << i, WARP_SIZE);
+        stat_accscalar_t3 factor24 = 1. / fmaxf(1., n19 + o_n23);
+        var_n18 += WARP_SHFL_XOR(var_n18, 1 << i, WARP_SIZE) + (avg17 - o_avg22) * (avg17 - o_avg22) * n19 * o_n23 * factor24;
+        avg17 = (n19 * avg17 + o_n23 * o_avg22) * factor24;
+        n19 += o_n23;
     }
-    if (save_transformed_var.data() != NULL) {
-      save_transformed_var[plane] = VarTransform<stat_accscalar_t>{}(var_n / N, epsilon);
+    __syncthreads();
+    if (tid15 % WARP_SIZE == 0) {
+        shared_n12[tid15 / WARP_SIZE] = n19;
+        shared_avg_var16[tid15 / WARP_SIZE * 2] = avg17;
+        shared_avg_var16[tid15 / WARP_SIZE * 2 + 1] = var_n18;
     }
-    if (running_mean.data() != NULL) {
-      running_mean[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_mean[plane] + momentum * avg);
+    __syncthreads();
+    if (tid15 < WARP_SIZE) {
+        n19 = (tid15 < blockDim_x_0 * blockDim_y_0 / WARP_SIZE ? shared_n12[tid15] : 0);
+        avg17 = (tid15 < blockDim_x_0 * blockDim_y_0 / WARP_SIZE ? shared_avg_var16[2 * tid15] : stat_accscalar_t3(0));
+        var_n18 = (tid15 < blockDim_x_0 * blockDim_y_0 / WARP_SIZE ? shared_avg_var16[2 * tid15 + 1] : stat_accscalar_t3(0));
     }
-    if (running_var.data() != NULL) {
-      stat_accscalar_t unbiasedVar = var_n / (N - 1);
-      running_var[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_var[plane] + momentum * unbiasedVar);
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t3 o_avg25 = WARP_SHFL_XOR(avg17, 1 << i, WARP_SIZE);
+        int o_n26 = WARP_SHFL_XOR(n19, 1 << i, WARP_SIZE);
+        stat_accscalar_t3 factor27 = 1. / fmaxf(1., n19 + o_n26);
+        var_n18 += WARP_SHFL_XOR(var_n18, 1 << i, WARP_SIZE) + (avg17 - o_avg25) * (avg17 - o_avg25) * n19 * o_n26 * factor27;
+        avg17 = (n19 * avg17 + o_n26 * o_avg25) * factor27;
+        n19 += o_n26;
     }
-  }
-
+    if (tid15 == 0) {
+        if (save_mean10.data() != __null) {
+            save_mean10[plane13] = avg17;
+        }
+        if (save_transformed_var11.data() != __null) {
+            save_transformed_var11[plane13] = VarTransform0<stat_accscalar_t3>({})(var_n18 / N14, epsilon6);
+        }
+        if (running_mean8.data() != __null) {
+            running_mean8[plane13] = static_cast<stat_scalar_t2>((1 - momentum7) * running_mean8[plane13] + momentum7 * avg17);
+        }
+        if (running_var9.data() != __null) {
+            stat_accscalar_t3 unbiasedVar28 = var_n18 / (N14 - 1);
+            running_var9[plane13] = static_cast<stat_scalar_t2>((1 - momentum7) * running_var9[plane13] + momentum7 * unbiasedVar28);
+        }
+    }
 }
+
+
 
 
 #define THRESH_NUMBER_BINS_FOR_MULTI_BLOCK_MEM 100
@@ -384,59 +367,55 @@ namespace {
   Kernel for computing the histogram of the input.
  */
 template <
-    typename output_t,
-    typename input_t,
-    typename IndexType,
-    int ADims,
-    int PDims,
-    int BDims,
-    CUDAHistogramMemoryType MemoryType = CUDAHistogramMemoryType::MULTI_BLOCK,
-    typename Op>
+    typename output_t29,
+    typename input_t30,
+    typename IndexType31,
+    int ADims32,
+    int PDims33,
+    int BDims34,
+    CUDAHistogramMemoryType MemoryType35 = CUDAHistogramMemoryType::MULTI_BLOCK,
+    typename Op36>
 #ifdef __HIP_PLATFORM_HCC__
 C10_LAUNCH_BOUNDS_1(512)
 #endif
 __global__ void kernelHistogram1D(
-    TensorInfo<output_t, IndexType> a, /* output */
-    TensorInfo<output_t, IndexType> p, /* partial output */
-    TensorInfo<input_t, IndexType> b, /* input */
-    int nbins,
-    input_t minvalue,
-    input_t maxvalue,
-    IndexType totalElements,
-    Op getOp) {
-  extern __shared__ unsigned char my_smem[];
-  output_t* smem = nullptr;
-
-    ////////////////////////// Shared memory //////////////////////////
-    // atomically add to block specific shared memory
-    // then atomically add to the global output tensor
-    smem = reinterpret_cast<output_t*>(my_smem);
-    for (IndexType i = threadIdx.x; i < a.sizes[0]; i += blockDim.x) {
-      smem[i] = 0;
+    TensorInfo<output_t29, IndexType31> a37, /* output */
+    TensorInfo<output_t29, IndexType31> p38, /* partial output */
+    TensorInfo<input_t30, IndexType31> b39, /* input */
+    int nbins40,
+    input_t30 minvalue41,
+    input_t30 maxvalue42,
+    IndexType31 totalElements43,
+    Op36 getOp44) {
+    unsigned int blockDim_x_1 = 512;
+    unsigned int threadIdx_x_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) % 512;
+    unsigned int blockDim_y_1 = 1;
+    unsigned int threadIdx_y_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512 % 1;
+    unsigned int blockDim_z_1 = 1;
+    unsigned int threadIdx_z_1 = ((threadIdx.x + threadIdx.y * blockDim.x + threadIdx.z * blockDim.x * blockDim.y) - 0) / 512;
+    extern unsigned char my_smem45[] __attribute__((shared));
+    output_t29 *smem46 = nullptr;
+    smem46 = reinterpret_cast<output_t29 *>(my_smem45);
+    for (IndexType31 i = threadIdx_x_1; i < a37.sizes[0]; i += blockDim_x_1) {
+        smem46[i] = 0;
     }
     __syncthreads();
-    FOR_KERNEL_LOOP(linearIndex, totalElements) {
-      // Convert `linearIndex` into an offset of `b`
-      const IndexType bOffset =
-          IndexToOffset<input_t, IndexType, BDims>::get(linearIndex, b);
-      const input_t bVal = b.data[bOffset];
-      if (bVal >= minvalue && bVal <= maxvalue) {
-        // Use value at `b` as an offset of `smem`
-        const IndexType bin = getBin<input_t, IndexType>(bVal, minvalue, maxvalue, nbins);
-        atomicAdd(&smem[bin], getOp(linearIndex));
-      }
+    for (IndexType31 linearIndex = blockIdx.x * blockDim_x_1 + threadIdx_x_1; linearIndex < totalElements43; linearIndex += gridDim.x * blockDim_x_1) {
+        const IndexType31 bOffset47 = IndexToOffset<input_t30, IndexType31, BDims34>::get(linearIndex, b39);
+        const input_t30 bVal48 = b39.data[bOffset47];
+        if (bVal48 >= minvalue41 && bVal48 <= maxvalue42) {
+            const IndexType31 bin49 = getBin<input_t30, IndexType31>(bVal48, minvalue41, maxvalue42, nbins40);
+            atomicAdd(& smem46[bin49], getOp44(linearIndex));
+        }
     }
     __syncthreads();
-    // NOTE: atomically update output bin count.
-    //   Atomic update is imp since __syncthread() will only synchronize threads
-    //   in a given block, not across blocks.
-    for (IndexType i = threadIdx.x; i < a.sizes[0]; i += blockDim.x) {
-      const IndexType aOffset =
-          IndexToOffset<output_t, IndexType, ADims>::get(i, a);
-      atomicAdd(&a.data[aOffset], smem[i]);
+    for (IndexType31 i = threadIdx_x_1; i < a37.sizes[0]; i += blockDim_x_1) {
+        const IndexType31 aOffset50 = IndexToOffset<output_t29, IndexType31, ADims32>::get(i, a37);
+        atomicAdd(& a37.data[aOffset50], smem46[i]);
     }
-
 }
+
+
 
 #include "kernelHistogram1D_batch_norm_collect_statistics_kernel_.inc"
 

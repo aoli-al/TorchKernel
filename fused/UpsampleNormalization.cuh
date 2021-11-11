@@ -127,101 +127,77 @@ struct Var {
 };
 
 
-template <template<typename T> class VarTransform, typename input_scalar_t, typename stat_scalar_t, typename stat_accscalar_t, typename index_t>
+template <template<typename T> class VarTransform0, typename input_scalar_t1, typename stat_scalar_t2, typename stat_accscalar_t3, typename index_t4>
 __global__ void batch_norm_collect_statistics_kernel(
-    const PackedTensorAccessor<input_scalar_t, 3, RestrictPtrTraits, index_t> input,
-    const stat_accscalar_t epsilon,
-    const stat_accscalar_t momentum,
-    PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_mean,
-    PackedTensorAccessor<stat_scalar_t, 1, RestrictPtrTraits, index_t> running_var,
-    PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_mean,
-    PackedTensorAccessor<stat_accscalar_t, 1, RestrictPtrTraits, index_t> save_transformed_var) {
-
-  __shared__ int shared_n[2 * 2 * WARP_SIZE + WARP_SIZE];
-
-  int plane = blockIdx.x;
-  int N = input.size(0) * input.size(2);
-  int tid = threadIdx.x + threadIdx.y * blockDim.x;
-
-  // Compute the mean and variance across (batch, x/y/z)
-  // this uses the Welford (in the for loop)/parallel algorithm (to sum across the block)
-  // https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford's_Online_algorithm
-  // and the parallel algorithm on the same page.
-  // We use two shuffles to reduce across the entire block.
-  // https://devblogs.nvidia.com/faster-parallel-reductions-kepler/ has a description.
-  stat_accscalar_t* shared_avg_var = (stat_accscalar_t*) &shared_n[WARP_SIZE];
-
-  // first the reductions each thread does separately
-  stat_accscalar_t avg = 0;
-  stat_accscalar_t var_n = 0;
-  int n = 0;
-  for (int batch = threadIdx.y; batch < input.size(0); batch += blockDim.y) {
-    for (int x = threadIdx.x; x < input.size(2); x += blockDim.x) {
-      stat_accscalar_t v = input[batch][plane][x];
-      stat_accscalar_t d1 = v - avg;
-      n++;
-      avg += d1 / n;
-      var_n += d1 * (v - avg);
+    const PackedTensorAccessor<input_scalar_t1, 3, RestrictPtrTraits, index_t4> input5,
+    const stat_accscalar_t3 epsilon6,
+    const stat_accscalar_t3 momentum7,
+    PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_mean8,
+    PackedTensorAccessor<stat_scalar_t2, 1, RestrictPtrTraits, index_t4> running_var9,
+    PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_mean10,
+    PackedTensorAccessor<stat_accscalar_t3, 1, RestrictPtrTraits, index_t4> save_transformed_var11) {
+    static int shared_n12[160] __attribute__((shared));
+    int plane13 = blockIdx.x;
+    int N14 = input5.size(0) * input5.size(2);
+    int tid15 = threadIdx.x + threadIdx.y * blockDim.x;
+    stat_accscalar_t3 *shared_avg_var16 = (stat_accscalar_t3 *)&shared_n12[WARP_SIZE];
+    stat_accscalar_t3 avg17 = 0;
+    stat_accscalar_t3 var_n18 = 0;
+    int n19 = 0;
+    for (int batch = threadIdx.y; batch < input5.size(0); batch += blockDim.y) {
+        for (int x = threadIdx.x; x < input5.size(2); x += blockDim.x) {
+            stat_accscalar_t3 v20 = input5[batch][plane13][x];
+            stat_accscalar_t3 d121 = v20 - avg17;
+            n19++;
+            avg17 += d121 / n19;
+            var_n18 += d121 * (v20 - avg17);
+        }
     }
-  }
-
-  // first warpSum to get one value per thread to
-  // one value per warp
-  for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
-    int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
-    stat_accscalar_t factor = 1.0 / fmaxf(1.0, n+o_n);
-    var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
-    avg = (n * avg + o_n * o_avg) * factor;
-    n += o_n;
-  }
-
-  // this writes each warps  item into shared memory
-  // there are at most WARP_SIZE items left because
-  // there are at most WARP_SIZE**2 threads at the beginning
-  __syncthreads();
-  if (tid % WARP_SIZE == 0) {
-    shared_n[tid / WARP_SIZE] = n;
-    shared_avg_var[tid / WARP_SIZE * 2] = avg;
-    shared_avg_var[tid / WARP_SIZE * 2 + 1] = var_n;
-  }
-  __syncthreads();
-  // now have a second warpSum to reduce the intermediate values
-  // from shared memory to a single number. The very first
-  // thread writes it to shared memory.
-
-  if (tid < WARP_SIZE) {
-    n = (tid < blockDim.x * blockDim.y / WARP_SIZE ? shared_n[tid] : 0);
-    avg = (tid < blockDim.x * blockDim.y  / WARP_SIZE ? shared_avg_var[2 * tid] : stat_accscalar_t(0));
-    var_n = (tid < blockDim.x * blockDim.y  / WARP_SIZE ? shared_avg_var[2 * tid + 1] : stat_accscalar_t(0));
-  }
-  for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
-    stat_accscalar_t o_avg = WARP_SHFL_XOR(avg, 1 << i, WARP_SIZE);
-    int o_n = WARP_SHFL_XOR(n, 1 << i, WARP_SIZE);
-    stat_accscalar_t factor = 1.0 / fmaxf(1.0, n+o_n);
-    var_n += WARP_SHFL_XOR(var_n, 1 << i, WARP_SIZE) + (avg - o_avg) * (avg - o_avg) * n * o_n * factor;
-    avg = (n * avg + o_n * o_avg) * factor;
-    n += o_n;
-  }
-
-  // Save the mean, variance, and moving averages
-  if (tid == 0) {
-    if (save_mean.data() != NULL) {
-      save_mean[plane] = avg;
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t3 o_avg22 = WARP_SHFL_XOR(avg17, 1 << i, WARP_SIZE);
+        int o_n23 = WARP_SHFL_XOR(n19, 1 << i, WARP_SIZE);
+        stat_accscalar_t3 factor24 = 1. / fmaxf(1., n19 + o_n23);
+        var_n18 += WARP_SHFL_XOR(var_n18, 1 << i, WARP_SIZE) + (avg17 - o_avg22) * (avg17 - o_avg22) * n19 * o_n23 * factor24;
+        avg17 = (n19 * avg17 + o_n23 * o_avg22) * factor24;
+        n19 += o_n23;
     }
-    if (save_transformed_var.data() != NULL) {
-      save_transformed_var[plane] = VarTransform<stat_accscalar_t>{}(var_n / N, epsilon);
+    __syncthreads();
+    if (tid15 % WARP_SIZE == 0) {
+        shared_n12[tid15 / WARP_SIZE] = n19;
+        shared_avg_var16[tid15 / WARP_SIZE * 2] = avg17;
+        shared_avg_var16[tid15 / WARP_SIZE * 2 + 1] = var_n18;
     }
-    if (running_mean.data() != NULL) {
-      running_mean[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_mean[plane] + momentum * avg);
+    __syncthreads();
+    if (tid15 < WARP_SIZE) {
+        n19 = (tid15 < blockDim.x * blockDim.y / WARP_SIZE ? shared_n12[tid15] : 0);
+        avg17 = (tid15 < blockDim.x * blockDim.y / WARP_SIZE ? shared_avg_var16[2 * tid15] : stat_accscalar_t3(0));
+        var_n18 = (tid15 < blockDim.x * blockDim.y / WARP_SIZE ? shared_avg_var16[2 * tid15 + 1] : stat_accscalar_t3(0));
     }
-    if (running_var.data() != NULL) {
-      stat_accscalar_t unbiasedVar = var_n / (N - 1);
-      running_var[plane] = static_cast<stat_scalar_t>((1 - momentum) * running_var[plane] + momentum * unbiasedVar);
+    for (int i = 0; i < getMSB(WARP_SIZE); ++i) {
+        stat_accscalar_t3 o_avg25 = WARP_SHFL_XOR(avg17, 1 << i, WARP_SIZE);
+        int o_n26 = WARP_SHFL_XOR(n19, 1 << i, WARP_SIZE);
+        stat_accscalar_t3 factor27 = 1. / fmaxf(1., n19 + o_n26);
+        var_n18 += WARP_SHFL_XOR(var_n18, 1 << i, WARP_SIZE) + (avg17 - o_avg25) * (avg17 - o_avg25) * n19 * o_n26 * factor27;
+        avg17 = (n19 * avg17 + o_n26 * o_avg25) * factor27;
+        n19 += o_n26;
     }
-  }
-
+    if (tid15 == 0) {
+        if (save_mean10.data() != __null) {
+            save_mean10[plane13] = avg17;
+        }
+        if (save_transformed_var11.data() != __null) {
+            save_transformed_var11[plane13] = VarTransform0<stat_accscalar_t3>({})(var_n18 / N14, epsilon6);
+        }
+        if (running_mean8.data() != __null) {
+            running_mean8[plane13] = static_cast<stat_scalar_t2>((1 - momentum7) * running_mean8[plane13] + momentum7 * avg17);
+        }
+        if (running_var9.data() != __null) {
+            stat_accscalar_t3 unbiasedVar28 = var_n18 / (N14 - 1);
+            running_var9[plane13] = static_cast<stat_scalar_t2>((1 - momentum7) * running_var9[plane13] + momentum7 * unbiasedVar28);
+        }
+    }
 }
+
 
 template <typename scalar_t, int64_t dim, template <typename U> class PtrTraits = DefaultPtrTraits, typename index_t = int64_t>
 static PackedTensorAccessor<scalar_t, dim, PtrTraits, index_t> packed_accessor_or_dummy(const Tensor& t) {

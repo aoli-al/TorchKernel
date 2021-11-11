@@ -4,65 +4,52 @@
        i += blockDim.x * gridDim.x)
 
 
-template <typename scalar_t, typename accscalar_t>
+template <typename scalar_t29, typename accscalar_t30>
 C10_LAUNCH_BOUNDS_1(1024)
 __global__ void upsample_bilinear2d_out_frame(
-    const int ns,
-    const accscalar_t rheight,
-    const accscalar_t rwidth,
-    const bool align_corners,
-    const PackedTensorAccessor<scalar_t, 4> idata,
-    PackedTensorAccessor<scalar_t, 4> odata) {
-  // int index = threadIdx.x + blockIdx.x * blockDim.x;
-
-  const int batchsize = idata.size(0);
-  const int channels = idata.size(1);
-  const int height1 = idata.size(2);
-  const int width1 = idata.size(3);
-  const int height2 = odata.size(2);
-  const int width2 = odata.size(3);
-
-  CUDA_KERNEL_LOOP(index, ns) {
-    const int w2 = index % width2; // 0:width2-1
-    const int h2 = index / width2; // 0:height2-1
-    // special case: just copy
-    if (height1 == height2 && width1 == width2) {
-      const int h1 = h2;
-      const int w1 = w2;
-      for (int n = 0; n < batchsize; n++) {
-        for (int c = 0; c < channels; ++c) {
-          const scalar_t val = idata[n][c][h1][w1];
-          odata[n][c][h2][w2] = val;
+    const int ns31,
+    const accscalar_t30 rheight32,
+    const accscalar_t30 rwidth33,
+    const bool align_corners34,
+    const PackedTensorAccessor<scalar_t29, 4> idata35,
+    PackedTensorAccessor<scalar_t29, 4> odata36) {
+    const int batchsize37 = idata35.size(0);
+    const int channels38 = idata35.size(1);
+    const int height139 = idata35.size(2);
+    const int width140 = idata35.size(3);
+    const int height241 = odata36.size(2);
+    const int width242 = odata36.size(3);
+    for (int index = blockIdx.x * blockDim.x + threadIdx.x; index < (ns31); index += blockDim.x * gridDim.x) {
+        const int w243 = index % width242;
+        const int h244 = index / width242;
+        if (height139 == height241 && width140 == width242) {
+            const int h155 = h244;
+            const int w156 = w243;
+            for (int n = 0; n < batchsize37; n++) {
+                for (int c = 0; c < channels38; ++c) {
+                    const scalar_t29 val57 = idata35[n][c][h155][w156];
+                    odata36[n][c][h244][w243] = val57;
+                }
+            }
+            return;
         }
-      }
-      return;
+        const accscalar_t30 h1r45 = area_pixel_compute_source_index<accscalar_t30>(rheight32, h244, align_corners34, false);
+        const int h146 = h1r45;
+        const int h1p47 = (h146 < height139 - 1) ? 1 : 0;
+        const accscalar_t30 h1lambda48 = h1r45 - h146;
+        const accscalar_t30 h0lambda49 = static_cast<accscalar_t30>(1) - h1lambda48;
+        const accscalar_t30 w1r50 = area_pixel_compute_source_index<accscalar_t30>(rwidth33, w243, align_corners34, false);
+        const int w151 = w1r50;
+        const int w1p52 = (w151 < width140 - 1) ? 1 : 0;
+        const accscalar_t30 w1lambda53 = w1r50 - w151;
+        const accscalar_t30 w0lambda54 = static_cast<accscalar_t30>(1) - w1lambda53;
+        for (int n = 0; n < batchsize37; n++) {
+            for (int c = 0; c < channels38; ++c) {
+                const accscalar_t30 val58 = h0lambda49 * (w0lambda54 * idata35[n][c][h146][w151] + w1lambda53 * idata35[n][c][h146][w151 + w1p52]) + h1lambda48 * (w0lambda54 * idata35[n][c][h146 + h1p47][w151] + w1lambda53 * idata35[n][c][h146 + h1p47][w151 + w1p52]);
+                odata36[n][c][h244][w243] = static_cast<scalar_t29>(val58);
+            }
+        }
     }
-    //
-    const accscalar_t h1r = area_pixel_compute_source_index<accscalar_t>(
-        rheight, h2, align_corners, /*cubic=*/false);
-    const int h1 = h1r;
-    const int h1p = (h1 < height1 - 1) ? 1 : 0;
-    const accscalar_t h1lambda = h1r - h1;
-    const accscalar_t h0lambda = static_cast<accscalar_t>(1) - h1lambda;
-    //
-    const accscalar_t w1r = area_pixel_compute_source_index<accscalar_t>(
-        rwidth, w2, align_corners, /*cubic=*/false);
-    const int w1 = w1r;
-    const int w1p = (w1 < width1 - 1) ? 1 : 0;
-    const accscalar_t w1lambda = w1r - w1;
-    const accscalar_t w0lambda = static_cast<accscalar_t>(1) - w1lambda;
-    //
-    for (int n = 0; n < batchsize; n++) {
-      for (int c = 0; c < channels; ++c) {
-        const accscalar_t val = h0lambda *
-                (w0lambda * idata[n][c][h1][w1] +
-                 w1lambda * idata[n][c][h1][w1 + w1p]) +
-            h1lambda *
-                (w0lambda * idata[n][c][h1 + h1p][w1] +
-                 w1lambda * idata[n][c][h1 + h1p][w1 + w1p]);
-        odata[n][c][h2][w2] = static_cast<scalar_t>(val);
-      }
-    }
-  }
 }
+
 
