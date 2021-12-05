@@ -28,26 +28,22 @@ def run(idx):
             'requires_grad': True}
   def batch_norm_input(): 
     c = range(-64, 64, 4)
-    #  for x in c:
-      #  yield torch.randn(128, 10000, 100+x, **kwargs)
-    yield torch.randn(128, 10000, 96, **kwargs)
+    for x in c:
+      yield torch.randn(128, 10000, 100+x, **kwargs)
   def maxpool_input():
     c = range(-40, 40, 3)
-    #  for x in c:
-      #  yield torch.randn(1, 80 + x, 2560, 1000, **kwargs)
-    yield torch.randn(1, 80, 2560, 1000, **kwargs)
+    for x in c:
+      yield torch.randn(1, 80 + x, 2560, 1000, **kwargs)
   def hist_input():
     c = range(-25, 50, 2)
-    #  for x in c:
-      #  yield torch.randn((50 + x)* 100000, **kwargs)
-    yield torch.randn((50)* 100000, **kwargs)
+    for x in c:
+      yield torch.randn((50 + x)* 100000, **kwargs)
   def im2col_input():
     pass
   def upsample_input():
     c = range(12, 32)
-    #  for x in c:
-      #  yield torch.randn(1, x, 256, 100, **kwargs)
-    yield torch.randn(1, 20, 256, 100, **kwargs)
+    for x in c:
+      yield torch.randn(1, x, 256, 100, **kwargs)
 
   input_batchnorm = torch.randn(1, bn_, 16, 16, **kwargs)
   input_max_pool = torch.randn(1, 1, 2560, 1000, **kwargs)
