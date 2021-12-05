@@ -86,10 +86,10 @@ def run(idx):
       for i in maxpool_input():
         print(fusion_cuda.im2col_maxpool(im2col_input, i)[0][0])
     if idx == 7:
-      input_max_pool = torch.randn(1, 528, 16, 16, **kwargs)
-      fusion_cuda.max_pool_batch_norm(input_max_pool, input_batchnorm)
-      # for i in batch_norm_input():
-      #   check(fusion_cuda.max_pool_batch_norm(input_max_pool, i))
+      #  input_max_pool = torch.randn(1, 528, 16, 16, **kwargs)
+      #  fusion_cuda.max_pool_batch_norm(input_max_pool, input_batchnorm)
+      for i in batch_norm_input():
+       check(fusion_cuda.max_pool_batch_norm(input_max_pool, i))
     if idx == 8:
       for i in upsample_input():
         print(fusion_cuda.im2col_upsample(im2col_input, i)[0][0])
