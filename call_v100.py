@@ -35,7 +35,7 @@ def run(idx):
     for x in c:
       yield torch.randn(1, 220 + x, 2560, 1000, **kwargs)
   def hist_input():
-    c = range(-256, 50, 16)
+    c = range(-100, 50, 16)
     for x in c:
       yield torch.randn((512 - 32 + x)* 100000, **kwargs)
   def im2col_input():
