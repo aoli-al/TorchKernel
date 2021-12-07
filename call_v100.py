@@ -30,24 +30,20 @@ def run(idx):
     c = range(-128, 128, 16)
     for x in c:
       yield torch.randn(128, 10000, 256+x, **kwargs)
-      break
   def maxpool_input():
     c = range(-100, 100, 10)
     for x in c:
       yield torch.randn(1, 220 + x, 2560, 1000, **kwargs)
-      break
   def hist_input():
     c = range(-256, 50, 16)
     for x in c:
       yield torch.randn((512 - 32 + x)* 100000, **kwargs)
-      break
   def im2col_input():
     pass
   def upsample_input():
     c = range(32, 96, 2)
     for x in c:
       yield torch.randn(1, x, 256, 100, **kwargs)
-      break
 
   input_batchnorm = torch.randn(128, 10000, 256 - 128, **kwargs)
   input_max_pool = torch.randn(1, 220, 2560, 1000, **kwargs)
