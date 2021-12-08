@@ -88,13 +88,18 @@ def run(idx):
       # print(fusion_cuda.histc_upsample(input_hist, input_upsample)[0][0])
     if idx == 5:
       # print(fusion_cuda.im2col_batchnorm(im2col_input, batch_norm_input)[0][0])
-      for i in batch_norm_input():
+
+      c = range(-120, 128, 16)
+      for x in c:
+        i = torch.randn(128, 10000, 128+x, **kwargs)
         result = fusion_cuda.im2col_batchnorm(im2col_input, i)
         del result
         del i
     if idx == 6:
       # print(fusion_cuda.im2col_maxpool(im2col_input, input_max_pool)[0][0])
-      for i in maxpool_input():
+      c = range(-100, 100, 10)
+      for x in c:
+        i = torch.randn(1, 120 + x, 2560, 1000, **kwargs)
         result = fusion_cuda.im2col_maxpool(im2col_input, i)
         del result
         del i
@@ -116,7 +121,9 @@ def run(idx):
         del i 
         del result
     if idx == 0:
-      for i in hist_input():
+      c = range(-100, 50, 16)
+      for x in c:
+        i = torch.randn((128 + x)* 100000, **kwargs)
         result = fusion_cuda.histc(im2col_input, i)
         del i 
         del result
