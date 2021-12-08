@@ -106,7 +106,7 @@ def run(idx):
     if idx == 7:
       #  input_max_pool = torch.randn(1, 528, 16, 16, **kwargs)
       #  fusion_cuda.max_pool_batch_norm(input_max_pool, input_batchnorm)
-      c = range(-128, 128, 4)
+      c = range(-64, 128, 4)
       input_max_pool = torch.randn(1, 1, 2560, 1000, **kwargs)
       for x in c:
         i = torch.randn(128, 10000, 100+x, **kwargs)
