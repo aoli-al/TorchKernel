@@ -48,7 +48,7 @@ def run(idx):
   input_batchnorm = torch.randn(128, 10000, 256 - 128, **kwargs)
   input_max_pool = torch.randn(1, 100, 2560, 1000, **kwargs)
   input_hist = torch.randn((512 - 32)* 100000, **kwargs)
-  im2col_input = torch.randn(1, 2, 2512, 2048, **kwargs)
+  im2col_input = torch.randn(1, 1, 2512, 2048, **kwargs)
   input_upsample = torch.randn(1, 64, 256, 100, **kwargs)
   #  if idx == 0 or idx == 12 or idx == 11:
    #  lstm = nn.LSTM(3, 3).cuda()
