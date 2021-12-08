@@ -111,7 +111,9 @@ def run(idx):
        del i 
        del result
     if idx == 8:
-      for i in upsample_input():
+      c = range(8, 64, 2)
+      for x in c:
+        i = torch.randn(1, x, 256, 100, **kwargs)
         result = fusion_cuda.im2col_upsample(im2col_input, i)
         del i
         del result
